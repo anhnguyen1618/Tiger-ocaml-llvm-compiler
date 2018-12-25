@@ -23,7 +23,7 @@ and exp = VarExp of var
         | LetExp of {decs: dec list; body: exp; pos: pos}
         | ArrayExp of {typ: symbol; size: exp; init: exp; pos: pos}
 
-and typeDec = {name: symbol; ty: ty; pos: pos}
+and typeDec = Type of {name: symbol; ty: ty; pos: pos}
 
 and dec = FunctionDec of fundec list
         | VarDec of {name: symbol;
@@ -40,10 +40,10 @@ and ty = NameTy of symbol * pos
 and oper = PlusOp | MinusOp | TimesOp | DivideOp
            | EqOp | NeqOp | LtOp | LeOp | GtOp | GeOp
 
-and field = {name: symbol; escape: bool ref; 
+and field = Field of {name: symbol; escape: bool ref; 
 	     typ: symbol; pos: pos}
           
-and fundec = {name: symbol;
+and fundec = Func of {name: symbol;
 	      params: field list;
 	      result: (symbol * pos) option;
 	      body: exp;

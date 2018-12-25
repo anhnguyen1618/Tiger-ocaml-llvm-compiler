@@ -1,0 +1,19 @@
+### Starting build.
+# Target: src/absyn.ml.depends, tags: { extension:ml, file:src/absyn.ml, ocaml, ocamldep, quiet }
+/usr/bin/ocamldep.opt -modules src/absyn.ml > src/absyn.ml.depends
+# Target: src/symbol.mli.depends, tags: { extension:mli, file:src/symbol.mli, ocaml, ocamldep, quiet }
+/usr/bin/ocamldep.opt -modules src/symbol.mli > src/symbol.mli.depends # cached
+# Target: src/symbol.cmi, tags: { byte, compile, extension:mli, file:src/symbol.mli, interf, ocaml, quiet }
+/usr/bin/ocamlc.opt -c -I src -o src/symbol.cmi src/symbol.mli # cached
+# Target: src/absyn.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:src/absyn.cmo, file:src/absyn.ml, implem, ocaml, quiet }
+/usr/bin/ocamlc.opt -c -I src -o src/absyn.cmo src/absyn.ml
++ /usr/bin/ocamlc.opt -c -I src -o src/absyn.cmo src/absyn.ml
+File "src/absyn.ml", line 43, characters 13-26:
+Warning 30: the label name is defined in both types typeDec and field.
+File "src/absyn.ml", line 44, characters 19-27:
+Warning 30: the label pos is defined in both types typeDec and field.
+File "src/absyn.ml", line 46, characters 14-27:
+Warning 30: the label name is defined in both types typeDec and fundec.
+File "src/absyn.ml", line 50, characters 7-15:
+Warning 30: the label pos is defined in both types typeDec and fundec.
+# Compilation successful.

@@ -1,0 +1,6 @@
+PRJ compiler
+S src
+
+PKG ounit
+
+B _build/src

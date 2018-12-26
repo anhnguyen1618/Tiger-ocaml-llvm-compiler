@@ -6,7 +6,6 @@ pwd && \
 
 make -f Makefile parse && \
 
-echo $1
 ./bin/parse test/$1
 
 exit 0

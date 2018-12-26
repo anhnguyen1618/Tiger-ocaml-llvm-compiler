@@ -29,7 +29,7 @@ let eq (a,b) = a = b
 
 type 'a table= 'a Table.t
 let empty = Table.empty
-let enter = Table.add
-let look = Table.find
+let enter (t, k, v) = Table.add k v t
+let look (t, k) = Table.find_opt k t
          
 

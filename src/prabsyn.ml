@@ -1,7 +1,12 @@
 open Printf
 open Absyn
 
-let expr_to_string = function
+module S = Symbol
+
+let join sep f xs =
+  String.concat sep (List.map f xs)
+
+let rec expr_to_string = function
   | VarExp v ->
      var_to_string v
 
@@ -15,24 +20,24 @@ let expr_to_string = function
      sprintf "\"%s\"" (String.escaped s)
 
   | CallExp { func; args; pos } ->
-     sprintf "%s(%s)"
-       (S.name call_func)
-       (Utils.join ", " expr_to_string args)
+     sprintf "%sls(%s)"
+       (S.name func)
+       (join ", " expr_to_string args)
 
   | OpExp { left; right; oper; _ } ->
-     sprintf "(%s %s %s)" (expr_to_string eft) (op_to_string oper) (expr_to_string right)
+     sprintf "(%s %s %s)" (expr_to_string left) (op_to_string oper) (expr_to_string right)
 
   | RecordExp { typ; fields; _ } ->
      sprintf "%s{ %s }"
        (S.name typ)
-       (Utils.join
+       (join
           ", "
           (fun (k, v, _) ->
             sprintf "%s=%s" (S.name k) (expr_to_string v))
           fields)
 
   | SeqExp exps ->
-     sprintf "(%s)" (Utils.join "; " expr_to_string exps)
+     sprintf "(%s)" (join "; " (fun (x, _) -> expr_to_string x) exps)
 
   | AssignExp { var; exp; _ } ->
      sprintf "%s := %s" (var_to_string var) (expr_to_string exp)
@@ -43,24 +48,24 @@ let expr_to_string = function
        | Some expr -> " else " ^ expr_to_string expr
        | None      -> ""
        ) in
-     sprintf "if (%s) then %s%s" (expr_to_string test) (expr_to_string then') else_str
+     sprintf "if %s\n then %s \n%s" (expr_to_string test) (expr_to_string then') else_str
 
   | WhileExp { test; body; _ } ->
-     sprintf "while %s do %s" (expr_to_string test) (expr_to_string body)
+     sprintf "while %s \n do %s" (expr_to_string test) (expr_to_string body)
 
   | ForExp { var; lo; hi; body; _ } ->
-     sprintf "for %s := %s to %s do %s"
+     sprintf "for %s := %s to %s do\n %s"
        (S.name var)
        (expr_to_string lo)
        (expr_to_string hi)
        (expr_to_string body)
 
-  | BreakExp ->
+  | BreakExp _ ->
      "break"
 
   | LetExp { decs; body; _ } ->
-     sprintf "let %s in %s end"
-       (Utils.join " " let_decl_to_string decs)
+     sprintf "let\n  %s \nin\n  %s \nend"
+       (join " " let_decl_to_string decs)
        (expr_to_string body)
 
   | ArrayExp { typ; size; init; _ } ->
@@ -76,51 +81,49 @@ and var_to_string = function
   | SubscriptVar (var, expr, _) -> sprintf "%s[%s]" (var_to_string var) (expr_to_string expr)
 
 and let_decl_to_string = function
-  | VarDecl var_decl ->
-     var_decl_to_string var_decl
-  | FunDecl fun_decls ->
-     Utils.join " " fun_decl_to_string fun_decls
-  | TypeDecl type_decls ->
-     Utils.join " " type_decl_to_string type_decls
+  | VarDec { name; typ; init; _ } ->
+     sprintf "var %s%s := %s"
+       (S.name name)
+       (match typ with
+        | Some (t, _) -> ": " ^ S.name t
+        | None -> "")
+       (expr_to_string init)
 
-and var_decl_to_string { name; typ; var; _ } =
-  sprintf "var %s%s := %s"
-    (S.name name)
-    (match typ with
-    | Some t -> ": " ^ S.name t
-    | None -> "")
-    (expr_to_string var)
+  | FunctionDec fun_decls ->
+     join " " fun_decl_to_string fun_decls
+  | TypeDec type_decls ->
+     join " " type_decl_to_string type_decls
 
-and fun_decl_to_string { name; params; body; typ; _ } =
+
+and fun_decl_to_string (Func { name; params; body; result; _ }) =
   sprintf "function %s(%s)%s = %s"
     (S.name name)
-    (Utils.join ", " field_to_string params)
-    (match type with
-    | Some t -> ": " ^ S.name t
-    | None -> "")
+    (join ", " field_to_string params)
+    (match result with
+     | Some (t, _) -> ": " ^ S.name t
+     | None -> "")
     (expr_to_string body)
 
-and type_decl_to_string { name; ty; _ } =
+and type_decl_to_string (Type { name; ty; _ }) =
   sprintf "type %s = %s"
     (S.name name)
     (type_to_string ty)
 
-and field_to_string { name; typ; _ } =
+and field_to_string (Field { name; typ; _ }) =
   sprintf "%s: %s"
     (S.name name)
     (S.name typ)
 
 and type_to_string = function
-  | NameType (name, _) -> S.name name
-  | RecordType fields -> sprintf "{ %s }" (Utils.join ", " field_to_string fields)
-  | ArrayType (base_type, _) -> sprintf "array of %s" (S.name base_type)
+  | NameTy (name, _) -> S.name name
+  | RecordTy fields -> sprintf "{ %s }" (join ", " field_to_string fields)
+  | ArrayTy (base_type, _) -> sprintf "array of %s" (S.name base_type)
 
 and op_to_string = function
   | PlusOp   -> "+"
   | MinusOp  -> "-"
   | TimesOp  -> "*"
   | DivideOp -> "/"
-  | ModuloOp -> "%"
   | EqOp     -> "="
   | NeqOp    -> "<>"
   | LtOp     -> "<"

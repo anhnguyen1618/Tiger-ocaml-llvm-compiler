@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd ../ && \
+
+pwd && \
+
+make -f Makefile parse && \
+    
+./bin/parse test/$1
+
+exit 2

@@ -1,21 +1,21 @@
 {
 open Error
-
-module P = struct
-  type token = [%import: Parser.token] [@@deriving show]
-end
+module P = Parser
 
 exception Eof
 
 let incr_linenum lexbuf =
   let pos = lexbuf.Lexing.lex_curr_p in
+    Error.line_num := !Error.line_num + 1;
+    Error.line_pos := lexbuf.Lexing.lex_start_pos :: (!(Error.line_pos));
     lexbuf.Lexing.lex_curr_p <- { pos with
 				    Lexing.pos_lnum = pos.Lexing.pos_lnum + 1;
 				    Lexing.pos_bol = pos.Lexing.pos_cnum - 1;
 				}
 
 let str_incr_linenum str lexbuf =
-  String.iter (function '\n' -> incr_linenum lexbuf | _ -> ()) str
+  String.iter (function '\n' -> incr_linenum lexbuf
+  	      		| _ -> ()) str
 
 let append_char str ch =
   str ^ (String.make 1 (Char.chr ch))
@@ -28,6 +28,7 @@ let id = alpha+ (alpha|digit|'_')*
 
 rule comment level = parse
     "*/" { match level with
+    	   | [] -> token lexbuf
 	   | [_] -> token lexbuf
 	   | _::level' -> comment level' lexbuf
 	 }
@@ -36,7 +37,7 @@ rule comment level = parse
            comment level lexbuf
          }
   | _    { comment level lexbuf }
-  | eof  { error {loc_start=List.hd level; loc_end=lexbuf.Lexing.lex_start_p} Unterminated_comment;
+  | eof  { Error.error lexbuf.Lexing.lex_start_pos "Unterminated comment";
            token lexbuf
          }
 
@@ -54,13 +55,13 @@ and string pos buf = parse
   | "\\" ([' ' '\t' '\n']+ as x) "\\" { str_incr_linenum x lexbuf;
                                         string pos buf lexbuf
                                       }
-  | "\\" _ as x                       { error {loc_start=lexbuf.Lexing.lex_start_p; loc_end=lexbuf.Lexing.lex_curr_p} (Illegal_escape x);
+  | "\\" 			      { Error.error lexbuf.Lexing.lex_start_pos "Illegal_escape";
                                         string pos buf lexbuf
                                       }
   | [^ '\\' '"']+ as x                { str_incr_linenum x lexbuf;
                                         string pos (buf ^ x) lexbuf
                                       }
-  | eof                               { error {loc_start=pos; loc_end=lexbuf.Lexing.lex_start_p} Unterminated_string;
+  | eof                               { Error.error lexbuf.Lexing.lex_start_pos "Unterminated string";
                                         token lexbuf
                                       }
 
@@ -92,7 +93,7 @@ and token = parse
   | '|'		  { P.OR }
   | '&'		  { P.AND }
   | '='		  { P.EQ }
-  | "<>"	  { P.NE }
+  | "<>"	  { P.NEQ }
   | '<'		  { P.LT }
   | "<="	  { P.LE }
   | '>'		  { P.GT }
@@ -100,7 +101,7 @@ and token = parse
   | '+'		  { P.PLUS }
   | '-'		  { P.MINUS }
   | '*'		  { P.TIMES }
-  | '/'		  { P.DIV }
+  | '/'		  { P.DIVIDE }
   | '('		  { P.LPAREN }
   | ')'		  { P.RPAREN }
   | '['		  { P.LBRACK }
@@ -112,7 +113,10 @@ and token = parse
   | ','		  { P.COMMA }
   | ';'		  { P.SEMI }
   | eof		  { P.EOF }
-  | _             { error {loc_start=lexbuf.Lexing.lex_start_p; loc_end=lexbuf.Lexing.lex_curr_p} (Error.Illegal_character (Lexing.lexeme_char lexbuf 0));
+  | _	  { 
+    		    print_string "Special charactor is \n";
+		        print_string (Printf.sprintf "%C\n" (Lexing.lexeme_char lexbuf 0));
+		        Error.error lexbuf.Lexing.lex_start_pos ("Illegal_charac");
                     token lexbuf
                   }
 
@@ -153,7 +157,7 @@ let string_of_token = function
   | P.OR       -> "OR"
   | P.AND      -> "AND"
   | P.EQ       -> "EQ"
-  | P.NE       -> "NE"
+  | P.NEQ      -> "NE"
   | P.LT       -> "LT"
   | P.LE       -> "LE"
   | P.GT       -> "GT"
@@ -161,7 +165,7 @@ let string_of_token = function
   | P.PLUS     -> "PLUS"
   | P.MINUS    -> "MINUS"
   | P.TIMES    -> "TIMES"
-  | P.DIV      -> "DIV"
+  | P.DIVIDE   -> "DIV"
   | P.UMINUS   -> "UMINUS"
   | P.EOF      -> "EOF"
 

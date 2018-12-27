@@ -6,7 +6,7 @@ val makestring: temp -> string
 
 type label = Symbol.symbol
 
-val newlabel: string -> label
+val newlabel: unit -> label
 
 val eq: temp * temp -> bool
 

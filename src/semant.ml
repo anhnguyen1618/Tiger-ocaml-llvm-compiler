@@ -41,13 +41,14 @@ let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
   in
   trans_ty ty
 
-let transDec (
-        (v_env: venv),
-        (t_env: tenv),
-        (level: Translate.level),
-        (exps: Absyn.dec list),
-        break
-      ): decty =
+let rec trans_dec (
+            (v_env: venv),
+            (t_env: tenv),
+            (level: Translate.level),
+            (exps: Absyn.dec list),
+            break
+          ): decty =
+ 
   let check_var_dec (
           (v_env: venv),
           (t_env: tenv),
@@ -199,13 +200,13 @@ let transDec (
     {v_env = newv_env; t_env = t_env; expList = expList}
   in
 
-  let trDec = function
+  let tr_dec = function
     | (v_env, t_env, (A.VarDec _ as e), expList) -> check_var_dec (v_env, t_env, e, expList)
     | (v_env, t_env, A.TypeDec(e), expList) -> check_type_dec (v_env, t_env, e, expList)
     | (v_env, t_env, A.FunctionDec(e), expList) -> check_func_dec (v_env, t_env, e, expList)
   in
 						       
-  let helper = fun {v_env = v_env; t_env = t_env; expList} dec -> trDec(v_env, t_env, dec, expList) in
+  let helper = fun {v_env = v_env; t_env = t_env; expList} dec -> tr_dec(v_env, t_env, dec, expList) in
   let result = List.fold_left helper {v_env = v_env; t_env = t_env; expList = []} exps in
   result
 
@@ -252,7 +253,7 @@ let transDec (
       let typeWithArr = actual_ty ty in
       match typeWithArr with
       | T.ARRAY (ty, _) ->
-	 let  {exp = sizeIrExp; ty = sizety} = transExp(v_env, t_env, level, sizeExp, break) in
+	 let  {exp = sizeIrExp; ty = sizety} = trans_exp(v_env, t_env, level, sizeExp, break) in
          if T.eq(sizety, T.INT)
          then {exp = () (*Translate.subscriptVar(arrayExp, sizeIrExp)*); ty = ty}
          else (Err.error pos "index with array is not int"; {exp = ()(*Translate.intExp(0)*); ty = T.NIL})
@@ -273,7 +274,7 @@ let transDec (
        (exp: Absyn.exp),
        (break: Temp.label))(*: expty *) =
     let actual_ty = U.actual_ty t_env in
-    let actual_ty_exp x = x.ty |> actual_ty in
+    let actual_ty_exp (x: expty) = x.ty |> actual_ty in
 
     let rec checkTypeOp (A.OpExp{left; oper; right; pos}) =
       let (leftResult, rightResult) = (tr_exp left, tr_exp right) in
@@ -286,7 +287,7 @@ let transDec (
 
     and checkFnCallExp (A.CallExp {func; args; pos}) =
       let check_param acc (exp, ty): Translate.exp list =
-	let {exp = argIr; ty = arg_type } = trExp exp in
+	let {exp = argIr; ty = arg_type } = tr_exp exp in
         let actualArgType = actual_ty arg_type in
         let msg = Printf.sprintf "Mismatched types with function args.
                                   Expect: '%s'. Received: '%s'"
@@ -354,12 +355,12 @@ let transDec (
          then {exp = (); ty = T.NIL}
          else
            let typ = List.nth results (List.length(results) -1) in
-	   {exp = ()(*Translate.seqExp(irExps)*); ty = typ}
+	   {exp = ()(*Translate.seqExp(irExps)*); ty = typ.ty}
 
 
     and checkAssignExp (A.AssignExp{var; exp; pos}) =
       let {ty = typeLeft; exp = leftExp} = trans_var (v_env, t_env, level, var, break) in 
-      let {ty = typeRight; exp = rightExp} = trExp exp in 
+      let {ty = typeRight; exp = rightExp} = tr_exp exp in 
       let msg = "Can't assign type " ^ T.name(typeRight) ^ " to type " ^ T.name(typeLeft) in
       U.assert_type_eq (typeLeft, typeRight, pos, msg);
       {exp=(*Translate.assignStm(leftExp, rightExp)*)(); ty=T.UNIT }
@@ -367,13 +368,13 @@ let transDec (
 
     and checkIfExp (A.IfExp {test = testExp; then' = thenExp; else' = elseOption; pos})  =
       let {exp = testIr; ty = testTy} = tr_exp testExp in
-      let {exp = thenIr; ty = thenTy} = trExp thenExp in
+      let {exp = thenIr; ty = thenTy} = tr_exp thenExp in
       U.assert_type_eq (actual_ty testTy, T.INT, pos,
                           "if test clause does not have type int");
       match elseOption with
       | None -> {exp = () (*Translate.ifExp(testIr, thenIr, NONE)*); ty= thenTy}
       | Some elseExp ->
-	 let {exp = elseIr; ty = elseTy} = trExp elseExp in
+	 let {exp = elseIr; ty = elseTy} = tr_exp elseExp in
 	 U.assert_type_eq (actual_ty thenTy,
 			   actual_ty elseTy,
 			   pos,
@@ -383,9 +384,9 @@ let transDec (
 
     and checkWhileExp (A.WhileExp{test; body; pos}) =
       let _ = increase_nested_Level() in
-      let {exp = testExp; ty = testTy} = trExp test in
+      let {exp = testExp; ty = testTy} = tr_exp test in
       let doneLabel = Temp.newlabel() in
-      let {exp = bodyExp; ty = _} = transExp (v_env, t_env, level, body, doneLabel) in
+      let {exp = bodyExp; ty = _} = trans_exp (v_env, t_env, level, body, doneLabel) in
       let _ = decrease_nested_level()  in
       U.assert_type_eq (actual_ty testTy, T.INT, pos, "while test clause does not have type int");		      
       { exp = () (*Translate.whileExp(testExp, bodyExp, doneLabel)*); ty = T.UNIT }
@@ -393,59 +394,66 @@ let transDec (
       
     and checkForExp (e) =
 
-      let whileAST = A.rewriteForExp(e)
-      (* let loTy = (actual_ty_exp o trExp o #lo) e
-		    let hiTy = (actual_ty_exp o trExp o #hi) e
+      (*let whileAST = A.rewriteForExp(e)
+      (* let loTy = (actual_ty_exp o tr_exp o #lo) e
+		    let hiTy = (actual_ty_exp o tr_exp o #hi) e
 		    let _ = checkTypeEq (loTy, T.INT, pos, "from-for clause does not have type int")
 		    let _ = checkTypeEq (hiTy, T.INT, pos, "to-for clause does not have type int") *)
-      in
-      trExp whileAST
+      in*)
+    (*tr_exp whileAST*) {exp = (); ty = T.UNIT }
 		    
     and checkLetExp (A.LetExp{decs; body; pos}) =
 
-      let {v_env; t_env; expList} = transDec(v_env, t_env, level, decs, break) in
-      let {exp = body; ty} = transExp (v_env, t_env, level, body, break) in 
+      let {v_env; t_env; expList} = trans_dec(v_env, t_env, level, decs, break) in
+      let {exp = body; ty} = trans_exp (v_env, t_env, level, body, break) in 
       let newBody = () (*Translate.concatExpList(expList, body)*) in
       {exp = newBody; ty= ty}
 
 
-	    and checkArrayExp ({typ, size, init, pos}) =
-		match S.look(t_env, typ) with
-		    Some (T.ARRAY(ty, unique)) ->
-		    let
-			let sizeResult = trExp size
-			let initResult = trExp init
-		    in
-			(checkTypeEq (actual_ty_exp sizeResult, T.INT, pos, "Size with array must have type " ^ T.name(T.INT));
-			 checkTypeEq (actual_ty_exp initResult, ty, pos, "Initialize letue with array does not have type " ^ T.name(ty));
-			 {exp = Translate.arrayDec(#exp sizeResult, #exp initResult), ty = T.ARRAY(ty, unique)})
-		    end
-			
-		  | Some _ -> (Err.error pos (S.name(typ) ^ " does not exist"); {exp = Translate.unitExp(), ty = T.ARRAY(T.NIL, ref ())})
-		  | NONE -> (Err.error pos ("Type " ^ S.name(typ) ^ " could not be found"); {exp = Translate.unitExp(), ty = T.ARRAY(T.NIL, ref ())})
+    and checkArrayExp (A.ArrayExp {typ; size; init; pos}) =
+      match S.look(t_env, typ) with
+	Some (T.ARRAY(ty, unique)) ->
+         let sizeResult = tr_exp size in
+         let initResult = tr_exp init in
+         U.assert_type_eq (
+             actual_ty_exp sizeResult,
+             T.INT, pos,
+             "Size with array must have type " ^ T.name(T.INT));
+         U.assert_type_eq (
+             actual_ty_exp initResult,
+             ty,
+             pos,
+             "Initialize letue with array does not have type " ^ T.name(ty));
+         {exp = ()(*Translate.arrayDec(sizeResult.exp, initResult.exp)*); ty = T.ARRAY(ty, unique)}
+     
+      | Some _ ->
+         Err.error pos (S.name(typ) ^ " does not exist");
+         { exp = ()(*Translate.unitExp()*); ty = T.ARRAY(T.NIL, ref ())}
+      | None ->
+         Err.error pos ("Type " ^ S.name(typ) ^ " could not be found");
+         {exp = ()(*Translate.unitExp()*); ty = T.ARRAY(T.NIL, ref ())}
 		
 		    
-							
-	    and trExp (A.VarExp(var)) = transVar(v_env, t_env, level, var, break)
-	      | trExp (A.NilExp) = {exp = Translate.nilExp(), ty = T.NIL}
-	      | trExp (A.IntExp e) = {exp = Translate.intExp(e), ty = T.INT}
-	      | trExp (A.StringExp (str, _)) = {exp = Translate.stringExp(str), ty = T.STRING}
-	      | trExp (A.CallExp e) = checkFnCallExp e
-	      | trExp (A.OpExp e) = checkTypeOp e
-	      | trExp (A.RecordExp e) = checkRecordExp e
-	      | trExp (A.SeqExp e) = checkSeqExp e
-	      | trExp (A.AssignExp e) = checkAssignExp e
-	      | trExp (A.IfExp e) = checkIfExp e
-	      | trExp (A.WhileExp e) = checkWhileExp e
-	      | trExp (A.ForExp e) = checkForExp e
-	      | trExp (A.BreakExp pos) = (if getNestedLoopLevel() > 0 then () else Err.error pos "Break exp is not nested inside loop";
-					  {exp = Translate.breakExp(break), ty = T.STRING})
-	      | trExp (A.LetExp e) = checkLetExp e
-	      | trExp (A.ArrayExp e) = checkArrayExp e
-	in	    
-	    trExp exp
-	end
-
+    and tr_exp: A.exp -> expty  = function
+      | A.VarExp(var) -> trans_var(v_env, t_env, level, var, break)
+      | A.NilExp -> {exp = (*Translate.nilExp()*)(); ty = T.NIL}
+      | A.IntExp e -> {exp = ()(*Translate.intExp(e)*); ty = T.INT}
+      | A.StringExp (str, _) -> {exp = () (*Translate.stringExp(str)*); ty = T.STRING}
+      | (A.CallExp _ as e) -> checkFnCallExp e
+      | (A.OpExp _ as e) -> checkTypeOp e
+      | (A.RecordExp _ as e) -> checkRecordExp e
+      | A.SeqExp e -> checkSeqExp e
+      | (A.AssignExp _ as e) -> checkAssignExp e
+      | (A.IfExp _ as e) -> checkIfExp e
+      | (A.WhileExp _ as e) -> checkWhileExp e
+      | (A.ForExp _ as e) -> checkForExp e
+      | A.BreakExp pos -> (if get_nested_level() > 0 then () else Err.error pos "Break exp is not nested inside loop";
+			   {exp = ()(*Translate.breakExp(break) *); ty = T.STRING})
+      | (A.LetExp _ as e) -> checkLetExp e
+      | (A.ArrayExp _ as e) -> checkArrayExp e
+    in	    
+    tr_exp exp
+(*
     let transProg (my_exp : A.exp): F.frag list = 
 	let
 	    let mainlabel = Temp.newlabel()
@@ -466,7 +474,7 @@ let transDec (
     let testIR (name: string) =
 	transProg(Parse.parse name)
    
-    
+ *)  
     
 
 

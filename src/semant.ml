@@ -219,18 +219,20 @@ let rec trans_dec (
       ): expty =
 
     let actual_ty = U.actual_ty t_env in
-    let check_simple_var ((s: S.symbol), (pos: int)) =
+    let check_simple_var ((s: S.symbol), (pos: int)): expty =
       match S.look(v_env, s) with
-        Some(E.VarEntry({ty; access})) -> {exp = (*Translate.simpleVar(access, level)*) (); ty = actual_ty ty}
-      | Some _ -> {exp = (*Translate.intExp(0)*) (); ty = T.NIL}
-      | None -> (Err.error pos ("variable '" ^ S.name(s) ^"' has not been declared\n");
-	         {exp = (*Translate.intExp(0)*) (); ty = T.NIL})
+        Some (E.VarEntry({ty; access})) ->
+         {exp = (*Translate.simpleVar(access, level)*) (); ty = actual_ty ty}
+      | Some _ ->
+         {exp = (*Translate.intExp(0)*) (); ty = T.NIL}
+      | None ->
+         Err.error pos ("variable '" ^ S.name(s) ^"' has not been declared\n");
+	 {exp = (*Translate.intExp(0)*) (); ty = T.NIL}
     in
     
-    let rec check_field_var (obj, s, pos) =
-      let {exp = recExp; ty = ty } = tr_var obj in
-      let typeWithObj = actual_ty ty
-      in
+    let rec check_field_var (obj, s, pos): expty =
+      let { exp = recExp; ty = ty } = tr_var obj in
+      let typeWithObj = actual_ty ty in
       match typeWithObj with
       | T.RECORD (tys, _) ->
 	 let index = ref (-1) in
@@ -244,23 +246,29 @@ let rec trans_dec (
                        (S.name s) (T.name typeWithObj) in
            Err.error pos msg;
 	   {exp = () (*Translate.intExp(0)*); ty = T.NIL}))
-      | _ -> (Err.error pos ("Can't access property '"
-			     ^ S.name(s) ^ "' with type '"
-			     ^ T.name(typeWithObj) ^ "'");
-	      {exp = () (*Translate.intExp(0)*); ty = T.NIL})
-    and check_array_var (var, sizeExp, pos) =
-      let {exp = arrayExp; ty = ty} = tr_var var in
-      let typeWithArr = actual_ty ty in
-      match typeWithArr with
+      | _ ->
+         Err.error pos ("Can't access property '"
+			^ S.name(s) ^ "' with type '"
+			^ T.name(typeWithObj) ^ "'");
+	 {exp = () (*Translate.intExp(0)*); ty = T.NIL}
+           
+    and check_array_var ((var: A.var), (size_exp: A.exp), (pos: int)): expty =
+      let { exp = arrayExp; ty = ty } = tr_var var in
+      let array_type = actual_ty ty in
+      match array_type with
       | T.ARRAY (ty, _) ->
-	 let  {exp = sizeIrExp; ty = sizety} = trans_exp(v_env, t_env, level, sizeExp, break) in
-         if T.eq(sizety, T.INT)
+	 let  {exp = sizeIrExp; ty = size_type} = trans_exp(v_env, t_env, level, size_exp, break) in
+         if T.eq(size_type, T.INT)
          then {exp = () (*Translate.subscriptVar(arrayExp, sizeIrExp)*); ty = ty}
-         else (Err.error pos "index with array is not int"; {exp = ()(*Translate.intExp(0)*); ty = T.NIL})
+         else (
+           Err.error pos "index with array is not int";
+           {exp = ()(*Translate.intExp(0)*); ty = T.NIL}
+         )
       | _ -> (
         Err.error pos ("Can't access member with non-array type");
-        {exp = () (*Translate.intExp(0)*); ty = T.NIL})		    
-    and tr_var = function
+        {exp = () (*Translate.intExp(0)*); ty = T.NIL})
+
+    and tr_var: A.var -> expty = function
       | A.SimpleVar (s, p) -> check_simple_var (s, p)
       | A.FieldVar (var, e, p) -> check_field_var (var, e, p)
       | A.SubscriptVar (var, e, p) -> check_array_var (var, e, p)
@@ -272,101 +280,108 @@ let rec trans_dec (
        (t_env: tenv),
        (level: Translate.level),
        (exp: Absyn.exp),
-       (break: Temp.label))(*: expty *) =
+       (break: Temp.label)): expty  =
     let actual_ty = U.actual_ty t_env in
     let actual_ty_exp (x: expty) = x.ty |> actual_ty in
 
-    let rec checkTypeOp (A.OpExp{left; oper; right; pos}) =
-      let (leftResult, rightResult) = (tr_exp left, tr_exp right) in
-      let {exp = leftIr; ty = leftTy} = leftResult in
-      let {exp = rightIr; ty = rightTy} = rightResult in
+    let rec check_type_op (A.OpExp{left; oper; right; pos}): expty =
+      let ( left_result, right_result ) = (tr_exp left, tr_exp right) in
+      let { exp = leftIr; ty = left_type } = left_result in
+      let { exp = rightIr; ty = right_type } = right_result in
 
-      U.assert_type_eq (actual_ty leftTy, T.INT, pos, "Interger is require");
-      U.assert_type_eq (actual_ty rightTy, T.INT, pos, "Interger is require");
+      U.assert_type_eq (actual_ty left_type, T.INT, pos, "Interger is require");
+      U.assert_type_eq (actual_ty right_type, T.INT, pos, "Interger is require");
       {exp = ()(*Translate.opExp(leftIr, oper, rightIr)*); ty = T.INT}
 
-    and checkFnCallExp (A.CallExp {func; args; pos}) =
+    and check_func_call_exp (A.CallExp {func; args; pos}): expty =
       let check_param acc (exp, ty): Translate.exp list =
 	let {exp = argIr; ty = arg_type } = tr_exp exp in
-        let actualArgType = actual_ty arg_type in
+        let real_arg_type = actual_ty arg_type in
         let msg = Printf.sprintf "Mismatched types with function args.
                                   Expect: '%s'. Received: '%s'"
-                    (T.name ty) (T.name actualArgType) in
-	U.assert_type_eq (ty, actualArgType, pos, msg);
+                    (T.name ty) (T.name real_arg_type) in
+	U.assert_type_eq (ty, real_arg_type, pos, msg);
         argIr :: acc
-
       in
       match S.look(v_env, func) with
-      | Some (E.FunEntry({formals; result; label; level = decLevel})) ->
+      | Some ( E.FunEntry {formals; result; label; level = decLevel} ) ->
          let arg_formal_pairs = List.map2 (fun a b -> (a, b)) args formals in
 	 let argIrs = List.fold_left check_param [] arg_formal_pairs in
 	 {exp = (*Translate.letCallExp(decLevel, level, label, argIrs)*)(); ty = result}
 
       | Some _ ->
-         Err.error pos (S.name(func) ^ " does not have type letction");
+         Err.error pos (S.name(func) ^ " does not have type function");
 	 {exp = (*Translate.nilExp()*)(); ty = T.UNIT}
       | None ->
          Err.error pos ("Function '" ^ S.name(func) ^ "' can't be found");
 	 { exp = (*Translate.nilExp()*) (); ty = T.UNIT}
 
-    and checkRecordExp (A.RecordExp {fields; typ; pos}) =
-      let preFields = List.map (fun (symbol, exp, pos) -> (symbol, tr_exp(exp), pos)) fields in
-      let fieldLetsIR = List.map (fun (_, { exp; _ }, _) -> exp) preFields in
-      let fieldExps = List.map (fun (symbol, exp, pos) -> (symbol, actual_ty_exp exp, pos)) preFields in
+    and check_record_exp (A.RecordExp {fields; typ; pos}) =
+      let fields_with_name_types = List.map
+                                     (fun (symbol, exp, pos) -> (symbol, tr_exp(exp), pos))
+                                     fields in
+      let fieldLetsIR = List.map
+                          (fun (_, { exp; _ }, _) -> exp)
+                          fields_with_name_types in
+      let field_exps = List.map
+                        (fun (symbol, exp, pos) -> (symbol, actual_ty_exp exp, pos))
+                        fields_with_name_types in
+      
       match S.look(t_env, typ) with
 	Some (T.RECORD (types, refer)) ->
-	 let rec checkFields = function
+	 let rec check_fields = function
            | [] -> []
 	   | (s, t, p) :: tl ->
-              let matchedField = List.find_opt (fun (symbol, _) -> S.eq(s, symbol)) types
+              let matched_field = List.find_opt (fun (symbol, _) -> S.eq(s, symbol)) types
               in
-              (match matchedField with
-               | Some(symbol, typeExp) ->
+              (match matched_field with
+               | Some(symbol, type_exp) ->
                   let msg = Printf.sprintf
                               "Mismatched types with fields property: '%s'.
                                Expect: '%s'. Received: '%s'"
-                              (S.name s) (T.name typeExp) (T.name t) in
-                  U.assert_type_eq (t, actual_ty(typeExp), p,msg);
-                  (symbol,typeExp) :: checkFields(tl)
+                              (S.name s) (T.name type_exp) (T.name t) in
+                  U.assert_type_eq (t, actual_ty(type_exp), p, msg);
+                  (symbol, type_exp) :: check_fields(tl)
                | None  ->
                   Err.error pos ("Field '" ^ S.name(s) ^ "' is unknown in type " ^ S.name(typ));
-                  checkFields(tl))
+                  check_fields(tl))
 
 	     in
-	     if List.length fieldExps <> List.length types
+	     if List.length field_exps <> List.length types
 	     then (Err.error pos ("RecordExp and record type '" ^ S.name(typ) ^ "' doesn't match");
 		   {exp = (*Translate.recordDec(fieldLetsIR)*) (); ty = T.RECORD (types, refer)})
 	     else
-	       let typesInCreateOrder = checkFields fieldExps in
+	       let typesInCreateOrder = check_fields field_exps in
 	       {exp = (*Translate.recordDec(fieldLetsIR)*)(); ty = T.RECORD (typesInCreateOrder, refer)}
 			    
-      | Some _ -> (Err.error pos (S.name(typ) ^ " does not have type record");
-		   {exp = (*Translate.intExp(0)*)(); ty = T.RECORD ([], ref ())})
-      | None -> (Err.error pos ("type " ^ S.name(typ)  ^ " can't be found");
-		 {exp = (*Translate.intExp(0)*)(); ty = T.RECORD ([], ref ())})
+      | Some _ ->
+         Err.error pos (S.name(typ) ^ " does not have type record");
+	 {exp = (*Translate.intExp(0)*)(); ty = T.RECORD ([], ref ())}
+      | None ->
+         Err.error pos ("type " ^ S.name(typ)  ^ " can't be found");
+	 {exp = (*Translate.intExp(0)*)(); ty = T.RECORD ([], ref ())}
 
-    and checkSeqExp (xs) =
-      match List.length xs with
+    and check_seq_exp (exp_pos: (A.exp * int) list): expty =
+      match List.length exp_pos with
 	0 -> {exp = ()(*Translate.nilExp()*); ty=T.UNIT}
       | _ -> 
-	 let results = List.map (fun (exp, _) -> tr_exp exp) xs in
+	 let results = List.map (fun (exp, _) -> tr_exp exp) exp_pos in
          let irExps = List.map (fun x -> x.exp) results in
          if (List.length results) = 0
-         then {exp = (); ty = T.NIL}
+         then { exp = (); ty = T.NIL }
          else
            let typ = List.nth results (List.length(results) -1) in
 	   {exp = ()(*Translate.seqExp(irExps)*); ty = typ.ty}
 
 
-    and checkAssignExp (A.AssignExp{var; exp; pos}) =
-      let {ty = typeLeft; exp = leftExp} = trans_var (v_env, t_env, level, var, break) in 
-      let {ty = typeRight; exp = rightExp} = tr_exp exp in 
-      let msg = "Can't assign type " ^ T.name(typeRight) ^ " to type " ^ T.name(typeLeft) in
-      U.assert_type_eq (typeLeft, typeRight, pos, msg);
-      {exp=(*Translate.assignStm(leftExp, rightExp)*)(); ty=T.UNIT }
+    and check_assign_exp (A.AssignExp{var; exp; pos}): expty =
+      let {ty = left_type; exp = leftExp} = trans_var (v_env, t_env, level, var, break) in 
+      let {ty = right_type; exp = rightExp} = tr_exp exp in 
+      let msg = "Can't assign type " ^ T.name(right_type) ^ " to type " ^ T.name(left_type) in
+      U.assert_type_eq (left_type, right_type, pos, msg);
+      { exp=(*Translate.assignStm(leftExp, rightExp)*)(); ty=T.UNIT }
 
-
-    and checkIfExp (A.IfExp {test = testExp; then' = thenExp; else' = elseOption; pos})  =
+    and check_if_exp (A.IfExp {test = testExp; then' = thenExp; else' = elseOption; pos}): expty  =
       let {exp = testIr; ty = testTy} = tr_exp testExp in
       let {exp = thenIr; ty = thenTy} = tr_exp thenExp in
       U.assert_type_eq (actual_ty testTy, T.INT, pos,
@@ -382,7 +397,7 @@ let rec trans_dec (
 	 {exp = (*Translate.ifExp(testIr, thenIr, Some(elseIr))*)(); ty = elseTy}
 
 
-    and checkWhileExp (A.WhileExp{test; body; pos}) =
+    and check_while_exp (A.WhileExp{test; body; pos}) =
       let _ = increase_nested_Level() in
       let {exp = testExp; ty = testTy} = tr_exp test in
       let doneLabel = Temp.newlabel() in
@@ -392,7 +407,7 @@ let rec trans_dec (
       { exp = () (*Translate.whileExp(testExp, bodyExp, doneLabel)*); ty = T.UNIT }
 
       
-    and checkForExp (e) =
+    and check_for_exp (e) =
 
       (*let whileAST = A.rewriteForExp(e)
       (* let loTy = (actual_ty_exp o tr_exp o #lo) e
@@ -402,7 +417,7 @@ let rec trans_dec (
       in*)
     (*tr_exp whileAST*) {exp = (); ty = T.UNIT }
 		    
-    and checkLetExp (A.LetExp{decs; body; pos}) =
+    and check_let_exp (A.LetExp{decs; body; pos}) =
 
       let {v_env; t_env; expList} = trans_dec(v_env, t_env, level, decs, break) in
       let {exp = body; ty} = trans_exp (v_env, t_env, level, body, break) in 
@@ -410,21 +425,21 @@ let rec trans_dec (
       {exp = newBody; ty= ty}
 
 
-    and checkArrayExp (A.ArrayExp {typ; size; init; pos}) =
+    and check_array_exp (A.ArrayExp {typ; size; init; pos}) =
       match S.look(t_env, typ) with
-	Some (T.ARRAY(ty, unique)) ->
-         let sizeResult = tr_exp size in
-         let initResult = tr_exp init in
+	Some (T.ARRAY(array_type, unique)) ->
+         let size_result = tr_exp size in
+         let init_result = tr_exp init in
          U.assert_type_eq (
-             actual_ty_exp sizeResult,
+             actual_ty_exp size_result,
              T.INT, pos,
              "Size with array must have type " ^ T.name(T.INT));
          U.assert_type_eq (
-             actual_ty_exp initResult,
-             ty,
+             actual_ty_exp init_result,
+             array_type,
              pos,
-             "Initialize letue with array does not have type " ^ T.name(ty));
-         {exp = ()(*Translate.arrayDec(sizeResult.exp, initResult.exp)*); ty = T.ARRAY(ty, unique)}
+             "Initialize letue with array does not have type " ^ T.name(array_type));
+         {exp = ()(*Translate.arrayDec(sizeResult.exp, initResult.exp)*); ty = T.ARRAY(array_type, unique)}
      
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not exist");
@@ -439,18 +454,18 @@ let rec trans_dec (
       | A.NilExp -> {exp = (*Translate.nilExp()*)(); ty = T.NIL}
       | A.IntExp e -> {exp = ()(*Translate.intExp(e)*); ty = T.INT}
       | A.StringExp (str, _) -> {exp = () (*Translate.stringExp(str)*); ty = T.STRING}
-      | (A.CallExp _ as e) -> checkFnCallExp e
-      | (A.OpExp _ as e) -> checkTypeOp e
-      | (A.RecordExp _ as e) -> checkRecordExp e
-      | A.SeqExp e -> checkSeqExp e
-      | (A.AssignExp _ as e) -> checkAssignExp e
-      | (A.IfExp _ as e) -> checkIfExp e
-      | (A.WhileExp _ as e) -> checkWhileExp e
-      | (A.ForExp _ as e) -> checkForExp e
+      | (A.CallExp _ as e) -> check_func_call_exp e
+      | (A.OpExp _ as e) -> check_type_op e
+      | (A.RecordExp _ as e) -> check_record_exp e
+      | A.SeqExp e -> check_seq_exp e
+      | (A.AssignExp _ as e) -> check_assign_exp e
+      | (A.IfExp _ as e) -> check_if_exp e
+      | (A.WhileExp _ as e) -> check_while_exp e
+      | (A.ForExp _ as e) -> check_for_exp e
       | A.BreakExp pos -> (if get_nested_level() > 0 then () else Err.error pos "Break exp is not nested inside loop";
 			   {exp = ()(*Translate.breakExp(break) *); ty = T.STRING})
-      | (A.LetExp _ as e) -> checkLetExp e
-      | (A.ArrayExp _ as e) -> checkArrayExp e
+      | (A.LetExp _ as e) -> check_let_exp e
+      | (A.ArrayExp _ as e) -> check_array_exp e
     in	    
     tr_exp exp
 (*

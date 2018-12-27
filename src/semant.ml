@@ -224,6 +224,7 @@ let rec trans_dec (
         Some (E.VarEntry({ty; access})) ->
          {exp = (*Translate.simpleVar(access, level)*) (); ty = actual_ty ty}
       | Some _ ->
+         Err.error pos ("Tiger does not support function closure yet!\n");
          {exp = (*Translate.intExp(0)*) (); ty = T.NIL}
       | None ->
          Err.error pos ("variable '" ^ S.name(s) ^"' has not been declared\n");

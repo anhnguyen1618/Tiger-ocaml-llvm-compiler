@@ -4,4 +4,6 @@ FLG -w -30
 
 PKG ounit
 
+PKG llvm
+
 B _build/src

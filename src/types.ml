@@ -60,3 +60,5 @@ let rec name = function
   | ARRAY(arrTy, _) -> "array: " ^ name(arrTy)
   | NAME(sym, _) -> Symbol.name sym
   | UNIT -> "unit"
+
+    

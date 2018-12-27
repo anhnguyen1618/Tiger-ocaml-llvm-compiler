@@ -10,7 +10,7 @@ type tenv = T.ty Symbol.table
 type expty = {exp: Translate.exp; ty: T.ty}
 type decty =  {v_env : venv; t_env: tenv; expList: Translate.exp list}
 
-type type_map = {name: S.symbol; ty: T.ty}
+type arg_name_type_map = { name: S.symbol; ty: T.ty }
 
 let nested_loop_level = ref 0
 let change_nested_loop_level oper = nested_loop_level := oper !nested_loop_level 1
@@ -19,25 +19,23 @@ let decrease_nested_level () = change_nested_loop_level (-)
 let get_nested_level () = !nested_loop_level
 
 
-
-
 let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
 
-  let look_up_type (s, p) =
+  let look_up_type ((s: S.symbol), (p: int)): T.ty =
     match S.look(t_env, s) with
       Some t -> t
-    | None -> (Err.error p ("Type " ^ S.name(s) ^ " has not been declared"); T.NIL) in
+    | None -> (Err.error p ("Type " ^ S.name(s) ^ " has not been declared\n"); T.NIL) in
 
-  let map_field_to_record (A.Field {name; typ; pos; escape = _}) = (name, look_up_type(typ, pos)) in
+  let map_field_to_record (A.Field {name; typ; pos; escape = _}): S.symbol * T.ty =
+    (name, look_up_type(typ, pos)) in
 		    
-  let check_record fields = T.RECORD (List.map map_field_to_record fields, ref ()) in
-
-  let check_name_type = look_up_type in
+  let check_record (fields: A.field list): T.ty =
+    T.RECORD (List.map map_field_to_record fields, ref ()) in
 
   let check_array_type e = T.ARRAY(look_up_type e, ref()) in
 			 
-  let trans_ty = function
-    | A.NameTy (s, p) -> check_name_type (s, p)
+  let trans_ty: A.ty -> T.ty = function
+    | A.NameTy (s, p) -> look_up_type (s, p)
     | A.RecordTy e -> check_record e
     | A.ArrayTy (s, p) -> check_array_type (s, p)
   in
@@ -138,7 +136,7 @@ let transDec (
       | None -> T.UNIT
     in
    
-    let get_type (A.Field {name; escape = _; typ; pos}): type_map =
+    let get_type (A.Field {name; escape = _; typ; pos}): arg_name_type_map =
       {name = name; ty = look_type_up (typ, pos)}
     in
 
@@ -160,7 +158,7 @@ let transDec (
     in
 						
     let add_new_func_entry (cur_v_env: venv) (A.Func {name; params; result; body; pos}) = 
-      let types: type_map list = List.map get_type params in
+      let types: arg_name_type_map list = List.map get_type params in
       let result_type = get_type_for_result result in
       let escapes = List.map (fun (A.Field x) -> !(x.escape)) params in
       let label = match S.look(cur_v_env, name) with
@@ -173,7 +171,7 @@ let transDec (
 
       let param_accessed = [](*Translate.formals func_level*) in
 							      
-      let add_params_to_body (temp, i) ({name; ty}: type_map) =
+      let add_params_to_body (temp, i) ({name; ty}: arg_name_type_map) =
         let mapping = S.enter(
               temp,
               name,

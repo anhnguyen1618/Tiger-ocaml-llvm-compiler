@@ -8,7 +8,7 @@ module U = Util
 type venv = E.enventry Symbol.table
 type tenv = T.ty Symbol.table
 type expty = {exp: Translate.exp; ty: T.ty}
-type decty =  {v_env : venv; t_env: tenv; expList: Translate.exp list}
+type decty =  { v_env : venv; t_env: tenv }
 
 type arg_name_type_map = { name: S.symbol; ty: T.ty }
 
@@ -52,28 +52,24 @@ let rec trans_dec (
   let check_var_dec (
           (v_env: venv),
           (t_env: tenv),
-          A.VarDec { name; typ; init; pos; escape },
-          expList
+          A.VarDec { name; typ; init; pos; escape }
         ) =
-    let {exp = initueIrExp; ty = rhs_type} = {exp = (); ty = T.UNIT}(*transExp (v_env, t_env, level, init, break) *)
+    let {exp = initial_value; ty = rhs_type} = trans_exp (v_env, t_env, level, init, break)
     in
     
-    let create_assign_stm access =
-      expList (* @ [Translate.assignStm(Translate.simpleVar(access, level), initueIrExp)] *)
-    in
     match typ with
       Some (s, p) ->
        (match S.look(t_env, s) with
 	  Some lhs_type ->
            if T.eq(lhs_type, rhs_type)
 	   then (
-	     let access = () in(*Translate.allocLocal(level)(!escape)*)
+	     let access = Translate.alloc_local level !escape (S.name(name)) lhs_type  in
              let new_entry = E.VarEntry{ty = lhs_type; access = access} in
 	     let new_v_env = S.enter(v_env, name, new_entry) in
+             Translate.assign_stm access initial_value;
 	     {
                v_env = new_v_env;
 	       t_env = t_env;
-	       expList = create_assign_stm (access)
 	     }
            )
 	   else (
@@ -81,23 +77,22 @@ let rec trans_dec (
                          "Can't assign exp type '%s' to type '%s'"
                          (T.name(rhs_type)) (S.name(s)) in 
              Err.error p msg;
-	     {v_env = v_env; t_env = t_env; expList = expList}
+	     {v_env = v_env; t_env = t_env}
            )
 	| None -> (
           let msg = Printf.sprintf
                       "Type '%s' has not been declared"
                       (S.name(s)) in
           Err.error pos msg;
-	  {v_env = v_env; t_env = t_env; expList = expList})
+	  {v_env = v_env; t_env = t_env })
        )
     | None -> ( if T.eq(rhs_type, T.NIL) (* case  var a := nil *)
 		then (Err.error pos ("Can't assign Nil to non-record type variable"));		
-		let access = () (*Translate.allocLocal(level)(!escape)*) in
+		let access = Translate.alloc_local level !escape (S.name name) T.NIL in
                 let new_entry = E.VarEntry{ty = rhs_type; access = access} in
 		{
 		  v_env = S.enter(v_env, name, new_entry);
-		  t_env = t_env;
-		  expList = create_assign_stm (access)
+		  t_env = t_env
 		}
 	      )
   in
@@ -106,26 +101,24 @@ let rec trans_dec (
   let check_type_dec (
           (v_env: venv),
           (t_env: tenv),
-          (types: A.typeDec list),
-          expList
+          (types: A.typeDec list)
         ) =
     let add_dump_type t_env (A.Type {name; _}) =
       S.enter(t_env, name, T.NAME(name, ref None)) in
     
     let dumb_t_env = List.fold_left add_dump_type t_env types in
     
-    let f { v_env; t_env; expList } (A.Type {name; ty; pos}) =
-      {t_env = S.enter(t_env, name, trans_type(t_env, ty)); v_env = v_env; expList = expList}
+    let f { v_env; t_env } (A.Type {name; ty; pos}) =
+      {t_env = S.enter(t_env, name, trans_type(t_env, ty)); v_env = v_env }
     in
     U.check_circular types;
-    List.fold_left f {v_env = v_env; t_env = dumb_t_env; expList = expList} types
+    List.fold_left f {v_env = v_env; t_env = dumb_t_env } types
   in
 
   let check_func_dec (
           (v_env: venv),
           (t_env: tenv),
-          (fs: A.fundec list),
-          expList) =
+          (fs: A.fundec list)) =
     let look_type_up (s, p): T.ty =
       match S.look(t_env, s) with
 	Some t -> t
@@ -197,17 +190,17 @@ let rec trans_dec (
 
     let base_env = List.fold_left add_func_header v_env fs in
     let newv_env = List.fold_left add_new_func_entry base_env fs in
-    {v_env = newv_env; t_env = t_env; expList = expList}
+    {v_env = newv_env; t_env = t_env}
   in
 
   let tr_dec = function
-    | (v_env, t_env, (A.VarDec _ as e), expList) -> check_var_dec (v_env, t_env, e, expList)
-    | (v_env, t_env, A.TypeDec(e), expList) -> check_type_dec (v_env, t_env, e, expList)
-    | (v_env, t_env, A.FunctionDec(e), expList) -> check_func_dec (v_env, t_env, e, expList)
+    | (v_env, t_env, (A.VarDec _ as e)) -> check_var_dec (v_env, t_env, e)
+    | (v_env, t_env, A.TypeDec(e)) -> check_type_dec (v_env, t_env, e)
+    | (v_env, t_env, A.FunctionDec(e)) -> check_func_dec (v_env, t_env, e)
   in
 						       
-  let helper = fun {v_env = v_env; t_env = t_env; expList} dec -> tr_dec(v_env, t_env, dec, expList) in
-  let result = List.fold_left helper {v_env = v_env; t_env = t_env; expList = []} exps in
+  let helper = fun {v_env = v_env; t_env = t_env } dec -> tr_dec(v_env, t_env, dec) in
+  let result = List.fold_left helper {v_env = v_env; t_env = t_env } exps in
   result
 
   and trans_var (
@@ -222,13 +215,13 @@ let rec trans_dec (
     let check_simple_var ((s: S.symbol), (pos: int)): expty =
       match S.look(v_env, s) with
         Some (E.VarEntry({ty; access})) ->
-         {exp = (*Translate.simpleVar(access, level)*) (); ty = actual_ty ty}
+         {exp = Translate.simple_var access (S.name s); ty = actual_ty ty}
       | Some _ ->
          Err.error pos ("Tiger does not support function closure yet!\n");
-         {exp = (*Translate.intExp(0)*) (); ty = T.NIL}
+         {exp = Translate.int_exp 0; ty = T.NIL}
       | None ->
          Err.error pos ("variable '" ^ S.name(s) ^"' has not been declared\n");
-	 {exp = (*Translate.intExp(0)*) (); ty = T.NIL}
+	 {exp = Translate.int_exp 0; ty = T.NIL}
     in
     
     let rec check_field_var (obj, s, pos): expty =
@@ -287,12 +280,12 @@ let rec trans_dec (
 
     let rec check_type_op (A.OpExp{left; oper; right; pos}): expty =
       let ( left_result, right_result ) = (tr_exp left, tr_exp right) in
-      let { exp = leftIr; ty = left_type } = left_result in
-      let { exp = rightIr; ty = right_type } = right_result in
+      let { exp = left_val; ty = left_type } = left_result in
+      let { exp = right_val; ty = right_type } = right_result in
 
       U.assert_type_eq (actual_ty left_type, T.INT, pos, "Interger is require");
       U.assert_type_eq (actual_ty right_type, T.INT, pos, "Interger is require");
-      {exp = ()(*Translate.opExp(leftIr, oper, rightIr)*); ty = T.INT}
+      {exp = Translate.op_exp left_val oper right_val; ty = T.INT}
 
     and check_func_call_exp (A.CallExp {func; args; pos}): expty =
       let check_param acc (exp, ty): Translate.exp list =
@@ -302,20 +295,20 @@ let rec trans_dec (
                                   Expect: '%s'. Received: '%s'"
                     (T.name ty) (T.name real_arg_type) in
 	U.assert_type_eq (ty, real_arg_type, pos, msg);
-        argIr :: acc
+        acc @ [argIr]
       in
       match S.look(v_env, func) with
       | Some ( E.FunEntry {formals; result; label; level = decLevel} ) ->
          let arg_formal_pairs = List.map2 (fun a b -> (a, b)) args formals in
-	 let argIrs = List.fold_left check_param [] arg_formal_pairs in
-	 {exp = (*Translate.letCallExp(decLevel, level, label, argIrs)*)(); ty = result}
+	 let args = List.fold_left check_param [] arg_formal_pairs in
+	 {exp = Translate.func_call_exp (S.name label) args; ty = result}
 
       | Some _ ->
          Err.error pos (S.name(func) ^ " does not have type function");
-	 {exp = (*Translate.nilExp()*)(); ty = T.UNIT}
+	 {exp = Translate.nil_exp; ty = T.UNIT}
       | None ->
          Err.error pos ("Function '" ^ S.name(func) ^ "' can't be found");
-	 { exp = (*Translate.nilExp()*) (); ty = T.UNIT}
+	 { exp = Translate.nil_exp; ty = T.UNIT}
 
     and check_record_exp (A.RecordExp {fields; typ; pos}) =
       let fields_with_name_types = List.map
@@ -357,30 +350,29 @@ let rec trans_dec (
 			    
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not have type record");
-	 {exp = (*Translate.intExp(0)*)(); ty = T.RECORD ([], ref ())}
+	 {exp = Translate.nil_exp; ty = T.RECORD ([], ref ())}
       | None ->
          Err.error pos ("type " ^ S.name(typ)  ^ " can't be found");
-	 {exp = (*Translate.intExp(0)*)(); ty = T.RECORD ([], ref ())}
+	 {exp = Translate.nil_exp; ty = T.RECORD ([], ref ())}
 
     and check_seq_exp (exp_pos: (A.exp * int) list): expty =
       match List.length exp_pos with
-	0 -> {exp = ()(*Translate.nilExp()*); ty=T.UNIT}
+	0 -> {exp = Translate.nil_exp; ty=T.UNIT}
       | _ -> 
 	 let results = List.map (fun (exp, _) -> tr_exp exp) exp_pos in
-         let irExps = List.map (fun x -> x.exp) results in
          if (List.length results) = 0
-         then { exp = (); ty = T.NIL }
+         then { exp = Translate.nil_exp; ty = T.NIL }
          else
-           let typ = List.nth results (List.length(results) -1) in
-	   {exp = ()(*Translate.seqExp(irExps)*); ty = typ.ty}
+           let result = List.nth results (List.length(results) -1) in
+           result
 
 
     and check_assign_exp (A.AssignExp{var; exp; pos}): expty =
-      let {ty = left_type; exp = leftExp} = trans_var (v_env, t_env, level, var, break) in 
-      let {ty = right_type; exp = rightExp} = tr_exp exp in 
+      let {ty = left_type; exp = left_exp} = trans_var (v_env, t_env, level, var, break) in 
+      let {ty = right_type; exp = right_exp} = tr_exp exp in 
       let msg = "Can't assign type " ^ T.name(right_type) ^ " to type " ^ T.name(left_type) in
       U.assert_type_eq (left_type, right_type, pos, msg);
-      { exp=(*Translate.assignStm(leftExp, rightExp)*)(); ty=T.UNIT }
+      { exp = (Translate.assign_stm left_exp right_exp; Translate.nil_exp); ty=T.UNIT }
 
     and check_if_exp (A.IfExp {test = testExp; then' = thenExp; else' = elseOption; pos}): expty  =
       let {exp = testIr; ty = testTy} = tr_exp testExp in
@@ -419,11 +411,9 @@ let rec trans_dec (
     (*tr_exp whileAST*) {exp = (); ty = T.UNIT }
 		    
     and check_let_exp (A.LetExp{decs; body; pos}) =
-
-      let {v_env; t_env; expList} = trans_dec(v_env, t_env, level, decs, break) in
+      let { v_env; t_env } = trans_dec(v_env, t_env, level, decs, break) in
       let {exp = body; ty} = trans_exp (v_env, t_env, level, body, break) in 
-      let newBody = () (*Translate.concatExpList(expList, body)*) in
-      {exp = newBody; ty= ty}
+      { exp = body; ty= ty }
 
 
     and check_array_exp (A.ArrayExp {typ; size; init; pos}) =
@@ -440,21 +430,21 @@ let rec trans_dec (
              array_type,
              pos,
              "Initialize letue with array does not have type " ^ T.name(array_type));
-         {exp = ()(*Translate.arrayDec(sizeResult.exp, initResult.exp)*); ty = T.ARRAY(array_type, unique)}
+         { exp = Translate.array_exp size_result.exp init_result.exp; ty = T.ARRAY(array_type, unique) }
      
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not exist");
-         { exp = ()(*Translate.unitExp()*); ty = T.ARRAY(T.NIL, ref ())}
+         { exp = Translate.nil_exp ; ty = T.ARRAY(T.NIL, ref ())}
       | None ->
          Err.error pos ("Type " ^ S.name(typ) ^ " could not be found");
-         {exp = ()(*Translate.unitExp()*); ty = T.ARRAY(T.NIL, ref ())}
+         {exp = Translate.nil_exp ; ty = T.ARRAY(T.NIL, ref ())}
 		
 		    
     and tr_exp: A.exp -> expty  = function
       | A.VarExp(var) -> trans_var(v_env, t_env, level, var, break)
-      | A.NilExp -> {exp = (*Translate.nilExp()*)(); ty = T.NIL}
-      | A.IntExp e -> {exp = ()(*Translate.intExp(e)*); ty = T.INT}
-      | A.StringExp (str, _) -> {exp = () (*Translate.stringExp(str)*); ty = T.STRING}
+      | A.NilExp -> {exp = Translate.nil_exp; ty = T.NIL}
+      | A.IntExp e -> {exp = Translate.int_exp e; ty = T.INT}
+      | A.StringExp (str, _) -> {exp = Translate.string_exp str; ty = T.STRING}
       | (A.CallExp _ as e) -> check_func_call_exp e
       | (A.OpExp _ as e) -> check_type_op e
       | (A.RecordExp _ as e) -> check_record_exp e
@@ -464,7 +454,7 @@ let rec trans_dec (
       | (A.WhileExp _ as e) -> check_while_exp e
       | (A.ForExp _ as e) -> check_for_exp e
       | A.BreakExp pos -> (if get_nested_level() > 0 then () else Err.error pos "Break exp is not nested inside loop";
-			   {exp = ()(*Translate.breakExp(break) *); ty = T.STRING})
+			   {exp = Translate.break_exp break; ty = T.STRING})
       | (A.LetExp _ as e) -> check_let_exp e
       | (A.ArrayExp _ as e) -> check_array_exp e
     in	    

@@ -23,11 +23,11 @@ and traverseExp = function
   | (env, d, A.IntExp(int)) ->  ()
   | (env, d, A.StringExp(str, pos)) -> ()
   | (env, d, A.CallExp{func; args; pos}) ->
-     ignore(List.map(fun x -> traverseExp(env,d,x)) args)
+     List.iter(fun x -> traverseExp(env,d,x)) args
   | (env, d, A.RecordExp{fields = args; typ = typ; pos = pos}) ->
-     ignore(List.map (fun (_,x,_) -> traverseExp(env,d,x)) args)
+     List.iter (fun (_,x,_) -> traverseExp(env,d,x)) args
   | (env, d, A.SeqExp(exps)) ->
-     ignore(List.map(fun (x,_) -> traverseExp(env,d,x))(exps))
+     List.iter(fun (x,_) -> traverseExp(env,d,x))(exps)
   | (env, d, A.AssignExp{var; exp; pos}) ->
     traverseExp(env, d, exp);
     traverseVar(env, d, var)

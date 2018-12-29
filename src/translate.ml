@@ -170,8 +170,6 @@ let func_dec
   (* Validate the generated code, checking for consistency. *)
   Llvm_analysis.assert_valid_function func_block;
   
-
-  
                     
     
                       

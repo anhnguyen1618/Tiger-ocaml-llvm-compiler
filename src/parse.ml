@@ -10,8 +10,9 @@ let print_position lexbuf =
 
 let display_ast lexbuf =
   try
-      let ast = Parser.prog Lexer.token lexbuf in
-      print_endline (expr_to_string ast)
+    let ast = Parser.prog Lexer.token lexbuf in
+    Semant.trans_prog(ast);
+    print_endline (expr_to_string ast)
   with e ->
      print_position lexbuf;
      exit (-1)

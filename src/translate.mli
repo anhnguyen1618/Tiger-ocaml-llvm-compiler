@@ -1,7 +1,6 @@
 type level
 type exp
 
-
 type access = exp
 
 type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty }

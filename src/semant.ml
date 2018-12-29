@@ -479,6 +479,9 @@ let rec trans_dec (
       | (A.ArrayExp _ as e) -> check_array_exp e
     in	    
     tr_exp exp
+
+let trans_prog (my_exp: A.exp) =
+  trans_exp (Env.base_venv, Env.base_tenv, Translate.outermost, my_exp, Temp.newlabel())
 (*
     let transProg (my_exp : A.exp): F.frag list = 
 	let

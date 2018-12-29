@@ -1,3 +1,4 @@
+open Translate
 module E = Env
 module T = Types
 module A = Absyn
@@ -9,8 +10,6 @@ type venv = E.enventry Symbol.table
 type tenv = T.ty Symbol.table
 type expty = {exp: Translate.exp; ty: T.ty}
 type decty =  { v_env : venv; t_env: tenv }
-
-type arg_name_type_map = Translate.arg_name_type_map
 
 let nested_loop_level = ref 0
 let change_nested_loop_level oper = nested_loop_level := oper !nested_loop_level 1
@@ -143,13 +142,14 @@ let rec trans_dec (
       let f param = get_type param |> (fun x -> x.ty) |> (U.actual_ty t_env) in
       let type_list = List.map f params in
       let result_type = get_type_for_result result in
-      let label = Temp.newlabel in
+      let label = Temp.newlabel in (* add label here later to avoid duplicate name*)
       S.enter(acc, name, E.FunEntry{
                              formals = type_list;
                              result = result_type;
                              label = name;
                              level = level})
     in
+    
 						
     let add_new_func_entry (cur_v_env: venv) (A.Func {name; params; result; body; pos}) = 
       let types: arg_name_type_map list = List.map get_type params in
@@ -237,7 +237,7 @@ let rec trans_dec (
                               (fun (symbol, _) -> (index := !index + 1; S.eq(s, symbol))) tys
          in
          (match matchedField with
-         | Some (_, ty) -> {exp = ()(*Translate.fieldVar(recExp, !index)*); ty = ty}
+         | Some (_, ty) -> {exp = Translate.nil_exp(*Translate.fieldVar(recExp, !index)*); ty = ty}
          | None -> (
            let msg = Printf.sprintf "Property '%s' does not exist on type '%s'\n"
                        (S.name s) (T.name typeWithObj) in
@@ -256,7 +256,7 @@ let rec trans_dec (
       | T.ARRAY (ty, _) ->
 	 let  {exp = sizeIrExp; ty = size_type} = trans_exp(v_env, t_env, level, size_exp, break) in
          if T.eq(size_type, T.INT)
-         then {exp = () (*Translate.subscriptVar(arrayExp, sizeIrExp)*); ty = ty}
+         then {exp = Translate.nil_exp (*Translate.subscriptVar(arrayExp, sizeIrExp)*); ty = ty}
          else (
            Err.error pos "index with array is not int";
            {exp = Translate.nil_exp; ty = T.NIL}

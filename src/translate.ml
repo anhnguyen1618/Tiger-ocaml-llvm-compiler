@@ -146,8 +146,7 @@ let func_dec
       (name: string)
       (typ: T.ty)
       (args: arg_name_type_map list)
-      (add_arg_bindings: access list -> unit)
-      (gen_body: unit -> exp): unit =
+      (add_arg_bindings: access list -> unit -> exp) =
   let arr_types = (List.map (fun (e: arg_name_type_map) -> get_llvm_type e.ty) args) |> Array.of_list in
   let func_type = L.function_type (get_llvm_type typ) arr_types in
   let func_block =
@@ -164,7 +163,7 @@ let func_dec
     address
   in
   let addresses = List.map2 assign_val args (L.params func_block |> Array.to_list) in
-  add_arg_bindings addresses;
+  let gen_body = add_arg_bindings addresses in
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;
   ignore(L.build_ret (gen_body()) builder);
@@ -178,8 +177,7 @@ let func_dec
                       
   
                   
-                
- 
+                 
 
   
 

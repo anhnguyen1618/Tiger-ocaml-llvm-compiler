@@ -62,7 +62,7 @@ let rec trans_dec (
 	  Some lhs_type ->
            if T.eq(lhs_type, rhs_type)
 	   then (
-	     let access = Translate.alloc_local level !escape (S.name(name)) lhs_type  in
+	     let access = Translate.alloc_local !escape (S.name name) lhs_type  in
              let new_entry = E.VarEntry{ty = lhs_type; access = access} in
 	     let new_v_env = S.enter(v_env, name, new_entry) in
              Translate.assign_stm access initial_value;
@@ -87,7 +87,7 @@ let rec trans_dec (
        )
     | None -> ( if T.eq(rhs_type, T.NIL) (* case  var a := nil *)
 		then (Err.error pos ("Can't assign Nil to non-record type variable"));		
-		let access = Translate.alloc_local level !escape (S.name name) T.NIL in
+		let access = Translate.alloc_local !escape (S.name name) T.NIL in
                 let new_entry = E.VarEntry{ty = rhs_type; access = access} in
 		{
 		  v_env = S.enter(v_env, name, new_entry);
@@ -159,7 +159,7 @@ let rec trans_dec (
 	| Some(E.FunEntry {label; _}) -> label
 	| _ -> Temp.newlabel() in
 					       
-      let func_level = Translate.new_level level (S.name name) in
+      let func_level = Translate.new_level level in
 
       let body_type = ref T.UNIT in
 
@@ -450,7 +450,7 @@ let rec trans_dec (
              array_type,
              pos,
              "Initialize letue with array does not have type " ^ T.name(array_type));
-         { exp = Translate.array_exp size_result.exp init_result.exp; ty = T.ARRAY(array_type, unique) }
+         { exp = Translate.array_exp size_result.exp init_result.exp (actual_ty_exp init_result); ty = T.ARRAY(array_type, unique) }
      
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not exist");

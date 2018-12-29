@@ -7,11 +7,11 @@ type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty }
             
 val outermost: level
 
-val new_level: level -> string -> level
+val new_level: level -> level
 
 val nil_exp: exp
 
-val alloc_local: level -> bool -> string -> Types.ty -> access
+val alloc_local: bool -> string -> Types.ty -> access
 
 val assign_stm: (*access*) exp -> exp -> unit
 
@@ -23,7 +23,7 @@ val string_exp: string -> exp
 
 val break_exp: 'a -> exp
 
-val array_exp: exp -> exp -> exp
+val array_exp: exp -> exp -> Types.ty -> exp
 
 val func_call_exp: string -> exp list -> exp
       

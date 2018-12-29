@@ -10,7 +10,7 @@ type tenv = T.ty Symbol.table
 type expty = {exp: Translate.exp; ty: T.ty}
 type decty =  { v_env : venv; t_env: tenv }
 
-type arg_name_type_map = { name: S.symbol; ty: T.ty }
+type arg_name_type_map = Translate.arg_name_type_map
 
 let nested_loop_level = ref 0
 let change_nested_loop_level oper = nested_loop_level := oper !nested_loop_level 1
@@ -159,31 +159,34 @@ let rec trans_dec (
 	| Some(E.FunEntry {label; _}) -> label
 	| _ -> Temp.newlabel() in
 					       
-      let func_level = Translate.outermost
-      (*Translate.newLevel
-        {parent = level; name = label; formals = escapes}*) in
+      let func_level = Translate.new_level level (S.name name) in
 
-      let param_accessed = [](*Translate.formals func_level*) in
-							      
-      let add_params_to_body (temp, i) ({name; ty}: arg_name_type_map) =
-        let mapping = S.enter(
-              temp,
-              name,
-	      E.VarEntry({ ty = ty; access = (List.nth param_accessed i)})) in
-	( mapping, i + 1)
-      in
+      let body_type = ref T.UNIT in
 
+      let add_arg_bindings (addresses: Translate.access list) = 
+        let add_params_to_body (temp, i) ({name; ty}: arg_name_type_map) =
+          let mapping = S.enter(
+                            temp,
+                            name,
+	                    E.VarEntry({ ty = ty; access = (List.nth addresses i)})) in
+	  ( mapping, i + 1)
+        in
+        
+        let startAccessIndex = 0 in (* First access is static link, first front- args is allocated at index 1*)
+        let (body_venv, _) = List.fold_left add_params_to_body (cur_v_env, startAccessIndex) types in
+        let translate_body () =
+          let {exp = bodyIr; ty = result_body_type } = trans_exp(body_venv, t_env, func_level, body, break) in
+          body_type := result_body_type;
+          bodyIr
+        in
+        translate_body
+      in      
       
-      
-      let startAccessIndex = 1 in (* First access is static link, first front- args is allocated at index 1*)
-      let (bodyVenv, _) = List.fold_left add_params_to_body (cur_v_env, startAccessIndex) types in
-      let {exp = bodyIr; ty = body_type } = (*transExp(bodyVenv, t_env, func_level, body, break) *) {exp = (); ty = T.UNIT}
-      in
-      (*Translate.procEntryExit {level = func_level; body = bodyIr};*)
-      (if check_result_type(result_type, body_type) then ()
+      Translate.func_dec (S.name name) result_type types add_arg_bindings;
+      (if check_result_type(result_type, !body_type) then ()
        else 
          let msg = Printf.sprintf "return type '%s'  does not match with '%s'"
-                     (T.name body_type) (T.name result_type) in
+                     (T.name !body_type) (T.name result_type) in
          Err.error pos msg);
        cur_v_env
     in
@@ -239,12 +242,12 @@ let rec trans_dec (
            let msg = Printf.sprintf "Property '%s' does not exist on type '%s'\n"
                        (S.name s) (T.name typeWithObj) in
            Err.error pos msg;
-	   {exp = () (*Translate.intExp(0)*); ty = T.NIL}))
+	   {exp = Translate.nil_exp; ty = T.NIL}))
       | _ ->
          Err.error pos ("Can't access property '"
 			^ S.name(s) ^ "' with type '"
 			^ T.name(typeWithObj) ^ "'");
-	 {exp = () (*Translate.intExp(0)*); ty = T.NIL}
+	 {exp = Translate.nil_exp; ty = T.NIL}
            
     and check_array_var ((var: A.var), (size_exp: A.exp), (pos: int)): expty =
       let { exp = arrayExp; ty = ty } = tr_var var in
@@ -256,11 +259,11 @@ let rec trans_dec (
          then {exp = () (*Translate.subscriptVar(arrayExp, sizeIrExp)*); ty = ty}
          else (
            Err.error pos "index with array is not int";
-           {exp = ()(*Translate.intExp(0)*); ty = T.NIL}
+           {exp = Translate.nil_exp; ty = T.NIL}
          )
       | _ -> (
         Err.error pos ("Can't access member with non-array type");
-        {exp = () (*Translate.intExp(0)*); ty = T.NIL})
+        {exp = Translate.nil_exp; ty = T.NIL})
 
     and tr_var: A.var -> expty = function
       | A.SimpleVar (s, p) -> check_simple_var (s, p)
@@ -278,7 +281,7 @@ let rec trans_dec (
     let actual_ty = U.actual_ty t_env in
     let actual_ty_exp (x: expty) = x.ty |> actual_ty in
 
-    let rec check_type_op (A.OpExp{left; oper; right; pos}): expty =
+    let rec check_type_op (A.OpExp { left; oper; right; pos }): expty =
       let ( left_result, right_result ) = (tr_exp left, tr_exp right) in
       let { exp = left_val; ty = left_type } = left_result in
       let { exp = right_val; ty = right_type } = right_result in
@@ -343,10 +346,10 @@ let rec trans_dec (
 	     in
 	     if List.length field_exps <> List.length types
 	     then (Err.error pos ("RecordExp and record type '" ^ S.name(typ) ^ "' doesn't match");
-		   {exp = (*Translate.recordDec(fieldLetsIR)*) (); ty = T.RECORD (types, refer)})
+		   {exp = Translate.nil_exp(*Translate.recordDec(fieldLetsIR)*); ty = T.RECORD (types, refer)})
 	     else
 	       let typesInCreateOrder = check_fields field_exps in
-	       {exp = (*Translate.recordDec(fieldLetsIR)*)(); ty = T.RECORD (typesInCreateOrder, refer)}
+	       {exp = Translate.nil_exp(*Translate.recordDec(fieldLetsIR)*); ty = T.RECORD (typesInCreateOrder, refer)}
 			    
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not have type record");
@@ -423,9 +426,9 @@ let rec trans_dec (
       let get_type e = e |> tr_exp |> actual_ty_exp in
       let loTy = get_type lo in 
       let hiTy = get_type hi in
-      let _ = checkTypeEq (loTy, T.INT, pos, "from-for clause does not have type int") in
-      let _ = checkTypeEq (hiTy, T.INT, pos, "to-for clause does not have type int") in
-      tr_exp whileAST
+      let _ = U.assert_type_eq (loTy, T.INT, pos, "from-for clause does not have type int") in
+      let _ = U.assert_type_eq (hiTy, T.INT, pos, "to-for clause does not have type int") in
+      tr_exp while_ast
 		    
     and check_let_exp (A.LetExp{decs; body; pos}) =
       let { v_env; t_env } = trans_dec(v_env, t_env, level, decs, break) in

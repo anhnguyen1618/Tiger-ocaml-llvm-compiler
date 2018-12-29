@@ -1,9 +1,9 @@
 
 module T = Types
 module S = Symbol
-type access = unit
+type access = Translate.access
 
-type enventry = VarEntry of {ty: T.ty; access: unit}
+type enventry = VarEntry of {ty: T.ty; access: access}
               | FunEntry of {
 		  level: Translate.level;
 		  label: Temp.label;

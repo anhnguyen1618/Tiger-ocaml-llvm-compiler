@@ -3,7 +3,9 @@ module T = Types
 module A = Absyn
          
 type level = TOP
-           | NESTED of {uniq: unit ref; parent: level; frame: unit }
+           | NESTED of {uniq: unit ref; parent: level }
+
+type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty }
                      
 type access = L.llvalue
 
@@ -12,6 +14,9 @@ type exp = L.llvalue
 type expty = {exp: exp; ty: T.ty}
          
 let outermost = TOP
+
+let new_level (parent: level)  =
+  NESTED { uniq = ref (); parent = parent }
 
 (* LLVM code *)
 let context = L.global_context ()
@@ -35,7 +40,7 @@ let rec get_llvm_type: T.ty -> L.lltype = function
        )
   | _ -> L.void_type context
        
-let alloc_local (level: level) (esc: bool) (name: string) (typ: T.ty): access =
+let alloc_local (esc: bool) (name: string) (typ: T.ty): access =
   let func_block = L.block_parent (L.insertion_block builder) in
   let builder = L.builder_at context (L.instr_begin ( L.entry_block func_block )) in
   L.build_alloca ( get_llvm_type typ) name builder
@@ -136,6 +141,45 @@ let if_exp
   let in_comming =  [(then_val, new_then_block); (else_val, new_else_block)] in
   let phi = L.build_phi in_comming "if_tmp" builder in
   phi
+
+let func_dec
+      (name: string)
+      (typ: T.ty)
+      (args: arg_name_type_map list)
+      (add_arg_bindings: access list -> unit)
+      (gen_body: unit -> exp): unit =
+  let arr_types = (List.map (fun (e: arg_name_type_map) -> get_llvm_type e.ty) args) |> Array.of_list in
+  let func_type = L.function_type (get_llvm_type typ) arr_types in
+  let func_block =
+    match L.lookup_function name the_module with
+    | None -> L.declare_function name func_type the_module
+    | Some x -> raise (Func_not_found "Function already exist") (*This will not happen*)
+  in
+  let entry_block = L.append_block context "entry" func_block in
+  L.position_at_end entry_block builder;
+  let alloc_arg {name; ty}: exp = alloc_local true (*Change escape later*) (Symbol.name name) ty in
+  let assign_val arg_to_alloc arg_val =
+    let address = alloc_arg arg_to_alloc in
+    assign_stm address arg_val;
+    address
+  in
+  let addresses = List.map2 assign_val args (L.params func_block |> Array.to_list) in
+  add_arg_bindings addresses;
+  (* jump back to entry block to eval body *)
+  L.position_at_end entry_block builder;
+  ignore(L.build_ret (gen_body()) builder);
+  (* Validate the generated code, checking for consistency. *)
+  Llvm_analysis.assert_valid_function func_block;
+  
+
+  
+                    
+    
+                      
+  
+                  
+                
+ 
 
   
 

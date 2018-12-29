@@ -22,5 +22,7 @@ val array_exp: exp -> exp -> exp
 
 val func_call_exp: string -> exp list -> exp
       
-val op_exp: exp -> Absyn.oper -> exp -> exp           
+val op_exp: exp -> Absyn.oper -> exp -> exp
+
+val while_exp : (unit -> exp) -> (unit -> unit) -> exp
 

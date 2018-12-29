@@ -374,45 +374,62 @@ let rec trans_dec (
       U.assert_type_eq (left_type, right_type, pos, msg);
       { exp = (Translate.assign_stm left_exp right_exp; Translate.nil_exp); ty=T.UNIT }
 
-    and check_if_exp (A.IfExp {test = testExp; then' = thenExp; else' = elseOption; pos}): expty  =
-      let {exp = testIr; ty = testTy} = tr_exp testExp in
-      let {exp = thenIr; ty = thenTy} = tr_exp thenExp in
-      U.assert_type_eq (actual_ty testTy, T.INT, pos,
+    and check_if_exp (A.IfExp {test = test_exp; then' = then_exp; else' = else_option; pos}): expty =
+      (* This is a hack to get type because we have to thunk code gen*)
+      let final_type = ref T.UNIT in
+      let gen_test_val () = 
+        let {exp = test_val; ty = test_type} = tr_exp test_exp in
+        U.assert_type_eq (actual_ty test_type, T.INT, pos,
                           "if test clause does not have type int");
-      match elseOption with
-      | None -> {exp = () (*Translate.ifExp(testIr, thenIr, NONE)*); ty= thenTy}
-      | Some elseExp ->
-	 let {exp = elseIr; ty = elseTy} = tr_exp elseExp in
-	 U.assert_type_eq (actual_ty thenTy,
-			   actual_ty elseTy,
-			   pos,
-			   "Mismatched types between then and else");
-	 {exp = (*Translate.ifExp(testIr, thenIr, Some(elseIr))*)(); ty = elseTy}
+        test_val
+      in
+
+      let gen_then_else (): Translate.exp * (unit -> Translate.exp) =
+        let { exp = then_val; ty = then_type} = tr_exp then_exp in
+        final_type := then_type;
+        let gen_else_val () = match else_option with
+          | None -> final_type := T.UNIT; Translate.nil_exp
+          | Some else_exp ->
+             let { exp = else_val; ty = else_type} = tr_exp else_exp in
+	     U.assert_type_eq (actual_ty then_type,
+			       actual_ty else_type,
+			       pos,
+			       "Mismatched types between then and else");
+             else_val
+        in
+        (then_val, gen_else_val)
+      in
+              
+      {exp = Translate.if_exp gen_test_val gen_then_else; ty = !final_type}
 
 
-    and check_while_exp (A.WhileExp{test; body; pos}) =
+    and check_while_exp (A.WhileExp {test; body; pos}) =
       let _ = increase_nested_Level() in
-      let {exp = testExp; ty = testTy} = tr_exp test in
+      let translate_test (): Translate.exp = 
+        let {exp = test_exp; ty = test_type} = tr_exp test in
+        U.assert_type_eq (actual_ty test_type, T.INT, pos, "while test clause does not have type int");
+        test_exp
+      in
       let doneLabel = Temp.newlabel() in
-      let {exp = bodyExp; ty = _} = trans_exp (v_env, t_env, level, body, doneLabel) in
-      let _ = decrease_nested_level()  in
-      U.assert_type_eq (actual_ty testTy, T.INT, pos, "while test clause does not have type int");		      
-      { exp = () (*Translate.whileExp(testExp, bodyExp, doneLabel)*); ty = T.UNIT }
+      let translate_body () =
+        ignore(trans_exp (v_env, t_env, level, body, doneLabel));
+        decrease_nested_level()
+      in
+      { exp = Translate.while_exp translate_test translate_body ; ty = T.UNIT }
 
       
-    and check_for_exp (e) =
-
-      (*let whileAST = A.rewriteForExp(e)
-      (* let loTy = (actual_ty_exp o tr_exp o #lo) e
-		    let hiTy = (actual_ty_exp o tr_exp o #hi) e
-		    let _ = checkTypeEq (loTy, T.INT, pos, "from-for clause does not have type int")
-		    let _ = checkTypeEq (hiTy, T.INT, pos, "to-for clause does not have type int") *)
-      in*)
-    (*tr_exp whileAST*) {exp = (); ty = T.UNIT }
+    and check_for_exp (A.ForExp {lo; hi; pos; _} as for_ast) =
+      let while_ast = A.rewrite_for_exp for_ast in
+      let get_type e = e |> tr_exp |> actual_ty_exp in
+      let loTy = get_type lo in 
+      let hiTy = get_type hi in
+      let _ = checkTypeEq (loTy, T.INT, pos, "from-for clause does not have type int") in
+      let _ = checkTypeEq (hiTy, T.INT, pos, "to-for clause does not have type int") in
+      tr_exp whileAST
 		    
     and check_let_exp (A.LetExp{decs; body; pos}) =
       let { v_env; t_env } = trans_dec(v_env, t_env, level, decs, break) in
-      let {exp = body; ty} = trans_exp (v_env, t_env, level, body, break) in 
+      let { exp = body; ty } = trans_exp (v_env, t_env, level, body, break) in 
       { exp = body; ty= ty }
 
 

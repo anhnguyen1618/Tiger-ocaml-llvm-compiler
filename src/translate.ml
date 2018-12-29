@@ -9,6 +9,8 @@ type access = L.llvalue
 
 type exp = L.llvalue
 
+type expty = {exp: exp; ty: T.ty}
+         
 let outermost = TOP
 
 (* LLVM code *)
@@ -85,6 +87,58 @@ let op_exp (left_val: exp) (oper: A.oper) (right_val: exp) =
   | A.LeOp -> compare L.Icmp.Sle "le_tmp"
   | A.GtOp -> compare L.Icmp.Sgt "gt_tmp"
   | A.GeOp -> compare L.Icmp.Sge "ge_tmp"
+
+let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: unit -> unit): exp =
+  let current_block = L.insertion_block builder in
+  let function_block = L.block_parent current_block in
+  let test_block = L.append_block context "test" function_block in
+  let loop_block = L.append_block context "loop" function_block in
+  let end_block = L.append_block context "end" function_block in
+
+  ignore(L.build_br test_block builder);
+  L.position_at_end test_block builder;
+
+  let test_val = eval_test_exp () in
+  let cond_val = L.build_icmp L.Icmp.Eq test_val (int_exp 1) "cond" builder in
+  ignore(L.build_cond_br cond_val loop_block end_block builder);
+
+  L.position_at_end loop_block builder;
+  eval_body_exp();
+  ignore(L.build_br test_block builder);
+  L.position_at_end end_block builder;
+  nil_exp
+
+let if_exp
+      (gen_test_val: unit -> exp)
+      (gen_then_else: unit -> exp * (unit -> exp)): exp =
+
+  let current_block = L.insertion_block builder in
+  let function_block = L.block_parent current_block in
+  let then_block = L.append_block context "then" function_block in
+  let else_block = L.append_block context "else" function_block in
+  let merge_block = L.append_block context "merge" function_block in
+
+  let test_val = gen_test_val () in
+  let cond_val = L.build_icmp L.Icmp.Eq test_val (int_exp 1) "cond" builder in
+  ignore(L.build_cond_br cond_val then_block else_block builder);
+
+  L.position_at_end then_block builder;
+  let (then_val, gen_else_val) = gen_then_else() in
+  let new_then_block = L.insertion_block builder in
+  ignore(L.build_br merge_block builder);
+  
+  L.position_at_end else_block builder;
+  let else_val = gen_else_val() in
+  let new_else_block = L.insertion_block builder in
+  ignore(L.build_br merge_block builder);
+
+  L.position_at_end merge_block builder;
+  let in_comming =  [(then_val, new_then_block); (else_val, new_else_block)] in
+  let phi = L.build_phi in_comming "if_tmp" builder in
+  phi
+
+  
+
   
                     
 

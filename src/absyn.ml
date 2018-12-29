@@ -50,4 +50,46 @@ and fundec = Func of { name: symbol;
 	               body: exp;
 	               pos: pos }
                
+let rewrite_for_exp: exp -> exp = function
+  | ForExp { var; escape; lo; hi; body; pos } ->
+    LetExp {
+	decs = [
+          VarDec {
+	      name = var;
+	      escape = escape;
+	      typ = Some(Symbol.symbol("int"), pos);
+	      init = lo; pos = pos};
+	  VarDec {
+	      name = Symbol.symbol("_limit");
+	      escape = ref(false);
+	      typ = Some(Symbol.symbol("int"), pos);
+	      init = hi; pos = pos}
+        ];
+
+        body = WhileExp {
+	    test = OpExp {
+		left = VarExp(SimpleVar(Symbol.symbol("_limit"), pos));
+		oper = GeOp;
+		right = VarExp(SimpleVar(var, pos));
+		pos = pos
+	    };
+	    body = SeqExp[
+                       (body, pos);
+                       (AssignExp{
+			    var = SimpleVar(var, pos);
+			    exp = OpExp{
+				      left = VarExp(SimpleVar(var, pos));
+				      oper = PlusOp;
+				      right = IntExp(1);
+				      pos = pos
+			            };
+			    pos = pos}, pos)
+                     ];
+	    pos = pos
+	         };
+	pos = pos
+      }
+  | e -> e
+    
+     
 

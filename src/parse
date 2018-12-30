@@ -6,6 +6,11 @@ pwd && \
 
 make -f Makefile parse && \
 
-./bin/parse test/$1
+./bin/parse test/$1 && \
+
+llc llvm_byte_code/test/$1 && \
+
+clang llvm_byte_code/test/$1.s src/bindings.c -o run_prog
+
 
 exit 0

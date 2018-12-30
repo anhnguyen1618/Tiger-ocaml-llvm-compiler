@@ -26,7 +26,7 @@ let () =
     Error.file_name := file_name;
     lexbuf.Lexing.lex_curr_p <- { lexbuf.Lexing.lex_curr_p with Lexing.pos_fname = file_name };
     let ast = display_ast lexbuf in
-    Semant.trans_prog(ast);
+    Semant.trans_prog(ast, file_name);
     close_in in_ch
   (*with e ->
     close_in_noerr in_ch*)

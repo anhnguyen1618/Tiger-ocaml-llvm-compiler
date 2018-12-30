@@ -8,4 +8,6 @@ PKG llvm
 
 PKG ctypes
 
+PKG ocamlbuild
+
 B _build/src

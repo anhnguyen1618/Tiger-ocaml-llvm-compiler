@@ -484,7 +484,7 @@ let rec trans_dec (
     in	    
     tr_exp exp
 
-let trans_prog (my_exp: A.exp) =
+let trans_prog ((my_exp: A.exp), (output_name: string)) =
   (*ignore (Llvm_executionengine.initialize());*)
   ignore(trans_exp (Env.base_venv, Env.base_tenv, Translate.outermost, my_exp, Temp.newlabel()));
   Translate.build_return_main();
@@ -493,8 +493,9 @@ let trans_prog (my_exp: A.exp) =
   Llvm_executionengine.get_function_address "main" ct the_execution_engine; *)
   print_string "the module\n";
   dump_module Translate.the_module;
-  print_module "fib" Translate.the_module;
-  print_string "module";
+  print_string ("llvm_byte_code/"^ output_name);
+  print_module ("llvm_byte_code/"^ output_name) Translate.the_module;
+
   
 (*
     let transProg (my_exp : A.exp): F.frag list = 

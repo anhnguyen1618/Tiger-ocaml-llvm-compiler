@@ -39,3 +39,5 @@ val func_dec: string -> Types.ty -> arg_name_type_map list -> (access list -> un
 
 val build_return_main: unit -> unit
 
+val build_external_func: string -> Types.ty list -> Types.ty -> unit
+

@@ -485,6 +485,12 @@ let rec trans_dec (
     tr_exp exp
 
 let trans_prog ((my_exp: A.exp), (output_name: string)) =
+  let build_external_func = function
+    | (_, Env.FunEntry {formals; result; label}) -> Translate.build_external_func (S.name label) formals result
+    | _ -> ()
+  in
+  
+  List.iter build_external_func Env.external_functions;
   (*ignore (Llvm_executionengine.initialize());*)
   ignore(trans_exp (Env.base_venv, Env.base_tenv, Translate.outermost, my_exp, Temp.newlabel()));
   Translate.build_return_main();

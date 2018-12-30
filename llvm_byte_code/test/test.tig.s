@@ -8,8 +8,10 @@ main:                                   # @main
 # %bb.0:                                # %entry
 	pushq	%rax
 	.cfi_def_cfa_offset 16
-	movl	$5, %edi
+	movl	$30, %edi
 	callq	fib
+	movq	%rax, %rdi
+	callq	tig_print_int
 	xorl	%eax, %eax
 	popq	%rcx
 	retq

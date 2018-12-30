@@ -6,4 +6,6 @@ type enventry = VarEntry of { ty: Types.ty; access: Translate.access }
 
 val base_tenv: Types.ty Symbol.table
 val base_venv: enventry Symbol.table
+
+val external_functions: (string * enventry) list
       

@@ -79,7 +79,7 @@ let func_call_exp (name: string) (vals: exp list): exp =
   in
   let params = L.params callee in
   let final_args = Array.of_list vals in
-  L.build_call callee final_args "temp" builder
+  L.build_call callee final_args "" builder
                      
          
 let op_exp (left_val: exp) (oper: A.oper) (right_val: exp) =
@@ -194,6 +194,14 @@ let func_dec
 
 let build_return_main () =
   ignore(L.build_ret nil_exp builder)
+
+let build_external_func
+      (name: string)
+      (args: T.ty list)
+      (result:T.ty)  =
+  let arg_types = (List.map get_llvm_type args) |> Array.of_list in
+  let func_type = L.function_type (get_llvm_type result) arg_types in
+  ignore(L.declare_function name func_type the_module)
   
   
                     

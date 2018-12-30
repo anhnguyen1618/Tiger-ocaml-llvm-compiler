@@ -2,22 +2,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern void _tig_print(const char *s)
+extern void tig_print(const char *s)
 {
    puts(s);
 }
 
-extern void print_int(const int i)
+extern void tig_print_int(const int i)
 {
    printf("%d\n", i);
 }
 
-extern void _tig_flush(void)
+extern void tig_flush(void)
 {
    fflush(stdout);
 }
 
-extern char *_tig_getchar(void)
+extern char tig_getchar(void)
 {
    char *s = malloc(sizeof(char) * 2);
    s[0] = getchar();
@@ -25,25 +25,25 @@ extern char *_tig_getchar(void)
    return s;
 }
 
-extern int _tig_ord(const char *s)
+extern int tig_ord(const char *s)
 {
    return *s;
 }
 
-extern char *_tig_chr(const int i)
+extern char tig_chr(const int i)
 {
-   char *s = malloc(sizeof(char) * 2);
+   char* s = malloc(sizeof(char) * 2);
    s[0] = i;
    s[1] = '\0';
    return s;
 }
 
-extern int _tig_size(const char *s)
+extern int tig_size(const char *s)
 {
    return strlen(s);
 }
 
-extern char *_tig_substring(const char *s, const int start, const int len)
+extern char tig_substring(const char *s, const int start, const int len)
 {
    char *sub = malloc(sizeof(char) * (len + 1));
    strncpy(sub, s + start, len);
@@ -51,7 +51,7 @@ extern char *_tig_substring(const char *s, const int start, const int len)
    return sub;
 }
 
-extern char *_tig_concat(const char *s1, const char *s2)
+extern char tig_concat(const char *s1, const char *s2)
 {
    const int len1 = strlen(s1);
    const int len2 = strlen(s2);
@@ -62,12 +62,12 @@ extern char *_tig_concat(const char *s1, const char *s2)
    return s;
 }
 
-extern int _tig_not(const int i)
+extern int tig_not(const int i)
 {
    return !i;
 }
 
-extern void _tig_exit(const int i)
+extern void tig_exit(const int i)
 {
    exit(i);
 }

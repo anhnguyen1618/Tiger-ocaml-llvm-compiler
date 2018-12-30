@@ -4,6 +4,8 @@ type exp
 type access = exp
 
 type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty }
+
+val the_module: Llvm.llmodule
             
 val outermost: level
 
@@ -34,4 +36,6 @@ val while_exp : (unit -> exp) -> (unit -> unit) -> exp
 val if_exp: (unit -> exp) -> (unit -> exp * (unit -> exp)) -> exp
 
 val func_dec: string -> Types.ty -> arg_name_type_map list -> (access list -> unit -> exp) -> unit
+
+val build_return_main: unit -> unit
 

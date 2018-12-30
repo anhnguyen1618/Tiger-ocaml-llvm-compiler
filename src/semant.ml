@@ -1,4 +1,6 @@
 open Translate
+open Llvm
+  
 module E = Env
 module T = Types
 module A = Absyn
@@ -282,7 +284,8 @@ let rec trans_dec (
     let actual_ty_exp (x: expty) = x.ty |> actual_ty in
 
     let rec check_type_op (A.OpExp { left; oper; right; pos }): expty =
-      let ( left_result, right_result ) = (tr_exp left, tr_exp right) in
+      let left_result = tr_exp left in
+      let right_result = tr_exp right in 
       let { exp = left_val; ty = left_type } = left_result in
       let { exp = right_val; ty = right_type } = right_result in
 
@@ -304,7 +307,8 @@ let rec trans_dec (
       | Some ( E.FunEntry {formals; result; label; level = decLevel} ) ->
          let arg_formal_pairs = List.map2 (fun a b -> (a, b)) args formals in
 	 let args = List.fold_left check_param [] arg_formal_pairs in
-	 {exp = Translate.func_call_exp (S.name label) args; ty = result}
+         print_string ("translate code for" ^ (S.name label) ^ "\n");
+         {exp = Translate.func_call_exp (S.name label) args; ty = result}
 
       | Some _ ->
          Err.error pos (S.name(func) ^ " does not have type function");
@@ -402,8 +406,8 @@ let rec trans_dec (
         in
         (then_val, gen_else_val)
       in
-              
-      {exp = Translate.if_exp gen_test_val gen_then_else; ty = !final_type}
+      let exp = Translate.if_exp gen_test_val gen_then_else in
+      {exp = exp; ty = !final_type}
 
 
     and check_while_exp (A.WhileExp {test; body; pos}) =
@@ -481,7 +485,17 @@ let rec trans_dec (
     tr_exp exp
 
 let trans_prog (my_exp: A.exp) =
-  trans_exp (Env.base_venv, Env.base_tenv, Translate.outermost, my_exp, Temp.newlabel())
+  (*ignore (Llvm_executionengine.initialize());*)
+  ignore(trans_exp (Env.base_venv, Env.base_tenv, Translate.outermost, my_exp, Temp.newlabel()));
+  Translate.build_return_main();
+  (*let the_execution_engine = Llvm_executionengine.create Translate.the_module in*)
+  (*let ct = Ctypes.p
+  Llvm_executionengine.get_function_address "main" ct the_execution_engine; *)
+  print_string "the module\n";
+  dump_module Translate.the_module;
+  print_module "fib" Translate.the_module;
+  print_string "module";
+  
 (*
     let transProg (my_exp : A.exp): F.frag list = 
 	let

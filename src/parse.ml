@@ -11,8 +11,9 @@ let print_position lexbuf =
 let display_ast lexbuf =
   try
     let ast = Parser.prog Lexer.token lexbuf in
-    Semant.trans_prog(ast);
-    print_endline (expr_to_string ast)
+    (*Semant.trans_prog(ast); *)
+    print_endline (expr_to_string ast);
+    ast
   with e ->
      print_position lexbuf;
      exit (-1)
@@ -20,11 +21,12 @@ let display_ast lexbuf =
 let () =
   let file_name = Sys.argv.(1) in
   let in_ch = open_in file_name in
-  try
+  (*try*)
     let lexbuf = Lexing.from_channel in_ch in
     Error.file_name := file_name;
     lexbuf.Lexing.lex_curr_p <- { lexbuf.Lexing.lex_curr_p with Lexing.pos_fname = file_name };
-    display_ast lexbuf;
+    let ast = display_ast lexbuf in
+    Semant.trans_prog(ast);
     close_in in_ch
-  with e ->
-    close_in_noerr in_ch
+  (*with e ->
+    close_in_noerr in_ch*)

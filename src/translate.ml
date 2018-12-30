@@ -24,6 +24,13 @@ let the_module = L.create_module context "Tiger jit"
 let builder = L.builder context
 
 let int_type = L.i64_type context
+
+let main_function_dec = L.function_type int_type  [||]
+let main_function = L.declare_function "main" main_function_dec the_module
+let main_entry = L.append_block context "entry" main_function
+let _ = L.position_at_end main_entry builder
+(*     ignore (Llvm.build_ret (Llvm.const_int t_i32 123456) builder); *)
+                  
 let string_type = L.pointer_type (L.i64_type context)
             
 let rec get_llvm_type: T.ty -> L.lltype = function
@@ -45,8 +52,8 @@ let alloc_local (esc: bool) (name: string) (typ: T.ty): access =
   let builder = L.builder_at context (L.instr_begin ( L.entry_block func_block )) in
   L.build_alloca ( get_llvm_type typ) name builder
 
-let assign_stm (var: L.llvalue) (value: L.llvalue) =
-  ignore (L.build_store var value builder)
+let assign_stm (location: L.llvalue) (value: L.llvalue) =
+  ignore (L.build_store value location builder)
 
 let simple_var (access: access) (name: string) =
   L.build_load access name builder
@@ -94,6 +101,8 @@ let op_exp (left_val: exp) (oper: A.oper) (right_val: exp) =
   | A.GeOp -> compare L.Icmp.Sge "ge_tmp"
 
 let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: unit -> unit): exp =
+  (*let previous_block = L.insertion_block builder in *)
+  
   let current_block = L.insertion_block builder in
   let function_block = L.block_parent current_block in
   let test_block = L.append_block context "test" function_block in
@@ -111,12 +120,16 @@ let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: unit -> unit): exp =
   eval_body_exp();
   ignore(L.build_br test_block builder);
   L.position_at_end end_block builder;
+
+  (*L.position_at_end previous_block builder;*)
   nil_exp
 
 let if_exp
       (gen_test_val: unit -> exp)
       (gen_then_else: unit -> exp * (unit -> exp)): exp =
 
+  (*let previous_block = L.insertion_block builder in *)
+  
   let current_block = L.insertion_block builder in
   let function_block = L.block_parent current_block in
   let then_block = L.append_block context "then" function_block in
@@ -140,6 +153,8 @@ let if_exp
   L.position_at_end merge_block builder;
   let in_comming =  [(then_val, new_then_block); (else_val, new_else_block)] in
   let phi = L.build_phi in_comming "if_tmp" builder in
+
+  (*L.position_at_end previous_block builder; *)
   phi
 
 let func_dec
@@ -154,6 +169,9 @@ let func_dec
     | None -> L.declare_function name func_type the_module
     | Some x -> raise (Func_not_found "Function already exist") (*This will not happen*)
   in
+  
+  let previous_block = L.insertion_block builder in
+  
   let entry_block = L.append_block context "entry" func_block in
   L.position_at_end entry_block builder;
   let alloc_arg {name; ty}: exp = alloc_local true (*Change escape later*) (Symbol.name name) ty in
@@ -167,8 +185,16 @@ let func_dec
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;
   ignore(L.build_ret (gen_body()) builder);
+  
+  L.position_at_end previous_block builder;
+  
+  L.print_module "Tiger jit" the_module
   (* Validate the generated code, checking for consistency. *)
-  Llvm_analysis.assert_valid_function func_block;
+                 (*Llvm_analysis.assert_valid_function func_block;*)
+
+let build_return_main () =
+  ignore(L.build_ret nil_exp builder)
+  
   
                     
     

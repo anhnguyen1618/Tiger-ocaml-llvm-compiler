@@ -6,4 +6,6 @@ PKG ounit
 
 PKG llvm
 
+PKG ctypes
+
 B _build/src

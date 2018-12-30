@@ -1,0 +1,50 @@
+; ModuleID = 'Tiger jit'
+source_filename = "Tiger jit"
+
+define i64 @main() {
+entry:
+  %temp = call i64 @fib(i64 5)
+  ret i64 0
+}
+
+define i64 @fib(i64) {
+entry:
+  %n = alloca i64
+  store i64 %0, i64* %n
+  %n1 = load i64, i64* %n
+  %eq_tmp = icmp eq i64 %n1, 0
+  %bool_tmp = zext i1 %eq_tmp to i64
+  %cond = icmp eq i64 %bool_tmp, 1
+  br i1 %cond, label %then, label %else
+
+then:                                             ; preds = %entry
+  br label %merge
+
+else:                                             ; preds = %entry
+  %n5 = load i64, i64* %n
+  %eq_tmp6 = icmp eq i64 %n5, 1
+  %bool_tmp7 = zext i1 %eq_tmp6 to i64
+  %cond8 = icmp eq i64 %bool_tmp7, 1
+  br i1 %cond8, label %then2, label %else3
+
+merge:                                            ; preds = %merge4, %then
+  %if_tmp13 = phi i64 [ 0, %then ], [ %if_tmp, %merge4 ]
+  ret i64 %if_tmp13
+
+then2:                                            ; preds = %else
+  br label %merge4
+
+else3:                                            ; preds = %else
+  %n9 = load i64, i64* %n
+  %minus_tmp = sub i64 %n9, 1
+  %temp = call i64 @fib(i64 %minus_tmp)
+  %n10 = load i64, i64* %n
+  %minus_tmp11 = sub i64 %n10, 2
+  %temp12 = call i64 @fib(i64 %minus_tmp11)
+  %add_tmp = add i64 %temp, %temp12
+  br label %merge4
+
+merge4:                                           ; preds = %else3, %then2
+  %if_tmp = phi i64 [ 1, %then2 ], [ %add_tmp, %else3 ]
+  br label %merge
+}

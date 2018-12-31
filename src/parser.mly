@@ -142,9 +142,9 @@ type_opt:
 | COLON ID                                         { Some (Symbol.symbol($2), $startofs($2)) }
 
 varDec:
-  VAR ID COLON type_opt ASSIGN exp                 { Absyn.VarDec({name = Symbol.symbol($2); escape = (ref true);
-                                                              typ = $4;
-                                                              init = $6; pos = $startofs}) }
+  VAR ID type_opt ASSIGN exp                 { Absyn.VarDec({name = Symbol.symbol($2); escape = (ref true);
+                                                              typ = $3;
+                                                              init = $5; pos = $startofs}) }
 ;
 
 functionDec:

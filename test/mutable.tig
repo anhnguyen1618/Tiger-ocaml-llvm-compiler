@@ -1,0 +1,10 @@
+let
+	function f (a: int): int =
+	let
+		var b := a + 5
+	in
+		b := b + 5;
+		b
+	end
+in
+end

@@ -89,7 +89,7 @@ let rec trans_dec (
        )
     | None -> ( if T.eq(rhs_type, T.NIL) (* case  var a := nil *)
 		then (Err.error pos ("Can't assign Nil to non-record type variable"));		
-		let access = Translate.alloc_local !escape (S.name name) T.NIL in
+		let access = Translate.alloc_local !escape (S.name name) rhs_type in
                 let new_entry = E.VarEntry{ty = rhs_type; access = access} in
 		{
 		  v_env = S.enter(v_env, name, new_entry);

@@ -1,10 +1,11 @@
 let
 	function f (a: int): int =
 	let
-		var b := a + 5
+		var b: int := a + 5
 	in
 		b := b + 5;
 		b
 	end
 in
+	printInt(f(10))
 end

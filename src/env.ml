@@ -12,6 +12,16 @@ type enventry = VarEntry of {ty: T.ty; access: Translate.access}
 let external_functions = [
       ("printInt", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_print_int"; formals=[T.INT]; result=T.UNIT}));
       ("print", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_print"; formals=[T.STRING]; result=T.UNIT}));
+      ("init_array", FunEntry ({
+                           level=Translate.outermost;
+                           label=Temp.namedlabel "tig_init_array";
+                           formals=[T.INT; T.INT];
+                           result= T.INT_POINTER}));
+      ("init_record", FunEntry ({
+                           level=Translate.outermost;
+                           label=Temp.namedlabel "tig_init_record";
+                           formals=[T.INT];
+                           result= T.INT_POINTER}));
       ("flush", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_flush"; formals=[]; result=T.UNIT}));
       ("getchar", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_getchar"; formals=[]; result=T.STRING}));
       ("ord", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_ord"; formals=[T.STRING]; result=T.INT}));

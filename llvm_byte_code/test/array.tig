@@ -1,0 +1,48 @@
+; ModuleID = 'Tiger jit'
+source_filename = "Tiger jit"
+
+define i32 @main() {
+entry:
+  %a = alloca i32
+  %arr1 = alloca i32*
+  %0 = call i32* @tig_init_array(i32 1, i32 5)
+  store i32* %0, i32** %arr1
+  %arr11 = load i32*, i32** %arr1
+  %element = getelementptr i32, i32* %arr11, i32 0
+  %lol = load i32, i32* %element
+  store i32 %lol, i32* %a
+  %load_left = load i32*, i32** %arr1
+  %element_left = getelementptr i32, i32* %load_left, i32 0
+  store i32 10, i32* %element_left
+  %arr12 = load i32*, i32** %arr1
+  %element3 = getelementptr i32, i32* %arr12, i32 0
+  %lol4 = load i32, i32* %element3
+  call void @tig_print_int(i32 %lol4)
+  ret i32 0
+}
+
+declare void @tig_print_int(i32)
+
+declare void @tig_print(i32*)
+
+declare i32* @tig_init_array(i32, i32)
+
+declare i32* @tig_init_record(i32)
+
+declare void @tig_flush()
+
+declare i32* @tig_getchar()
+
+declare i32 @tig_ord(i32*)
+
+declare i32* @tig_chr(i32)
+
+declare i32 @tig_size(i32*)
+
+declare i32* @tig_substring(i32*, i32, i32)
+
+declare i32* @tig_concat(i32*, i32*)
+
+declare i32 @tig_not(i32)
+
+declare void @tig_exit(i32)

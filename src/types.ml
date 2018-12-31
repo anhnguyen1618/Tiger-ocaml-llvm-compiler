@@ -9,6 +9,8 @@ type ty =
 | ARRAY of ty * unique
 | NAME of Symbol.symbol * ty option ref
 | UNIT
+| INT_POINTER
+| STRING_POINTER
 
   
 type comp = 
@@ -51,6 +53,7 @@ let rec printTy = function
                                printTy(ty)
   | NAME(sym, _) -> print_string ("name type is " ^ Symbol.name sym ^ "\n")
   | UNIT -> print_string "type is unit\n"
+  | _ -> ()
 
 let rec name = function
   | RECORD(_, _) -> "record"
@@ -60,5 +63,5 @@ let rec name = function
   | ARRAY(arrTy, _) -> "array: " ^ name(arrTy)
   | NAME(sym, _) -> Symbol.name sym
   | UNIT -> "unit"
-
+  | _ -> ""
     

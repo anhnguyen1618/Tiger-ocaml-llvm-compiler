@@ -3,12 +3,16 @@ source_filename = "Tiger jit"
 
 define i64 @main() {
 entry:
+  %0 = call i64 @f(i64 10)
+  call void @tig_print_int(i64 %0)
   ret i64 0
 }
 
 declare void @tig_print_int(i64)
 
 declare void @tig_print(i64*)
+
+declare void @tig_init_array(i64, i64)
 
 declare void @tig_flush()
 
@@ -35,10 +39,10 @@ entry:
   store i64 %0, i64* %a
   %a1 = load i64, i64* %a
   %add_tmp = add i64 %a1, 5
+  store i64 %add_tmp, i64* %b
   %b2 = load i64, i64* %b
-  %b3 = load i64, i64* %b
-  %add_tmp4 = add i64 %b3, 5
-  store i64 %add_tmp4, i64 %b2
-  %b5 = load i64, i64* %b
-  ret i64 %b5
+  %add_tmp3 = add i64 %b2, 5
+  store i64 %add_tmp3, i64* %b
+  %b4 = load i64, i64* %b
+  ret i64 %b4
 }

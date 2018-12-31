@@ -1,0 +1,6 @@
+let
+	type  rectype = {name:int, age:int}
+	var rec1:rectype := rectype {name=5, age=10}
+in
+    printInt(rec1.age) 
+end

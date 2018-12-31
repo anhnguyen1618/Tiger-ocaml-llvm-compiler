@@ -91,6 +91,7 @@ let rec trans_dec (
 		then (Err.error pos ("Can't assign Nil to non-record type variable"));		
 		let access = Translate.alloc_local !escape (S.name name) rhs_type in
                 let new_entry = E.VarEntry{ty = rhs_type; access = access} in
+                 Translate.assign_stm access initial_value;
 		{
 		  v_env = S.enter(v_env, name, new_entry);
 		  t_env = t_env
@@ -239,7 +240,7 @@ let rec trans_dec (
                               (fun (symbol, _) -> (index := !index + 1; S.eq(s, symbol))) tys
          in
          (match matchedField with
-         | Some (_, ty) -> {exp = Translate.nil_exp(*Translate.fieldVar(recExp, !index)*); ty = ty}
+         | Some (_, ty) -> {exp = Translate.subscript_exp recExp (Translate.int_exp !index); ty = ty}
          | None -> (
            let msg = Printf.sprintf "Property '%s' does not exist on type '%s'\n"
                        (S.name s) (T.name typeWithObj) in
@@ -258,7 +259,7 @@ let rec trans_dec (
       | T.ARRAY (ty, _) ->
 	 let  {exp = sizeIrExp; ty = size_type} = trans_exp(v_env, t_env, level, size_exp, break) in
          if T.eq(size_type, T.INT)
-         then {exp = Translate.nil_exp (*Translate.subscriptVar(arrayExp, sizeIrExp)*); ty = ty}
+         then {exp = Translate.subscript_exp arrayExp sizeIrExp; ty = ty}
          else (
            Err.error pos "index with array is not int";
            {exp = Translate.nil_exp; ty = T.NIL}
@@ -274,6 +275,75 @@ let rec trans_dec (
     in
     tr_var exp
 
+  (* experimental *)
+  and trans_var_left (
+      (v_env: venv),
+      (t_env: tenv),
+      (level: Translate.level),
+      (exp: Absyn.var),
+      (break: Temp.label)
+    ): expty =
+
+    let actual_ty = U.actual_ty t_env in
+    let check_simple_var ((s: S.symbol), (pos: int)): expty =
+      print_string ("run here" ^ S.name(s));
+      match S.look(v_env, s) with
+        Some (E.VarEntry({ty; access})) ->
+         {exp = access ; ty = actual_ty ty}
+      | Some _ ->
+         Err.error pos ("Tiger does not support function closure yet!\n");
+         {exp = Translate.int_exp 0; ty = T.NIL}
+      | None ->
+         Err.error pos ("variable '" ^ S.name(s) ^"' has not been declared\n");
+	 {exp = Translate.int_exp 0; ty = T.NIL}
+    in
+    
+    let rec check_field_var (obj, s, pos): expty =
+      let { exp = rec_access; ty = ty } = tr_var obj in
+      let typeWithObj = actual_ty ty in
+      match typeWithObj with
+      | T.RECORD (tys, _) ->
+	 let index = ref (-1) in
+         let matchedField = List.find_opt
+                              (fun (symbol, _) -> (index := !index + 1; S.eq(s, symbol))) tys
+         in
+         (match matchedField with
+          | Some (_, ty) -> {exp = Translate.subscript_exp_left rec_access (int_exp !index); ty = ty}
+          | None -> (
+            let msg = Printf.sprintf "Property '%s' does not exist on type '%s'\n"
+                        (S.name s) (T.name typeWithObj) in
+            Err.error pos msg;
+	    {exp = Translate.nil_exp; ty = T.NIL}))
+      | _ ->
+         Err.error pos ("Can't access property '"
+			^ S.name(s) ^ "' with type '"
+			^ T.name(typeWithObj) ^ "'");
+	 {exp = Translate.nil_exp; ty = T.NIL}
+         
+    and check_array_var ((var: A.var), (size_exp: A.exp), (pos: int)): expty =
+      let { exp = array_access; ty = ty } = tr_var var in
+      let array_type = actual_ty ty in
+      match array_type with
+      | T.ARRAY (ty, _) ->
+	 let  {exp = size_exp; ty = size_type} = trans_exp(v_env, t_env, level, size_exp, break) in
+         if T.eq(size_type, T.INT)
+         then {exp = Translate.subscript_exp_left array_access size_exp ; ty = ty}
+         else (
+           Err.error pos "index with array is not int";
+           {exp = Translate.nil_exp; ty = T.NIL}
+         )
+      | _ -> (
+        Err.error pos ("Can't access member with non-array type");
+        {exp = Translate.nil_exp; ty = T.NIL})
+
+    and tr_var: A.var -> expty = function
+      | A.SimpleVar (s, p) -> check_simple_var (s, p)
+      | A.FieldVar (var, e, p) -> check_field_var (var, e, p)
+      | A.SubscriptVar (var, e, p) -> check_array_var (var, e, p)
+    in
+    tr_var exp
+
+  (* experimental end *)
   and trans_exp (
        (v_env: venv),
        (t_env: tenv),
@@ -353,7 +423,7 @@ let rec trans_dec (
 		   {exp = Translate.nil_exp(*Translate.recordDec(fieldLetsIR)*); ty = T.RECORD (types, refer)})
 	     else
 	       let typesInCreateOrder = check_fields field_exps in
-	       {exp = Translate.nil_exp(*Translate.recordDec(fieldLetsIR)*); ty = T.RECORD (typesInCreateOrder, refer)}
+	       {exp = (Translate.record_exp fieldLetsIR) ; ty = T.RECORD (typesInCreateOrder, refer)}
 			    
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not have type record");
@@ -375,7 +445,8 @@ let rec trans_dec (
 
 
     and check_assign_exp (A.AssignExp{var; exp; pos}): expty =
-      let {ty = left_type; exp = left_exp} = trans_var (v_env, t_env, level, var, break) in 
+      (* check this shit *)
+      let {ty = left_type; exp = left_exp} = trans_var_left (v_env, t_env, level, var, break) in 
       let {ty = right_type; exp = right_exp} = tr_exp exp in 
       let msg = "Can't assign type " ^ T.name(right_type) ^ " to type " ^ T.name(left_type) in
       U.assert_type_eq (left_type, right_type, pos, msg);

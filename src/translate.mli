@@ -27,6 +27,12 @@ val break_exp: 'a -> exp
 
 val array_exp: exp -> exp -> Types.ty -> exp
 
+val record_exp: exp list -> exp
+
+val subscript_exp: exp -> exp -> exp
+
+val subscript_exp_left: exp -> exp -> exp
+
 val func_call_exp: string -> exp list -> exp
       
 val op_exp: exp -> Absyn.oper -> exp -> exp
@@ -40,4 +46,6 @@ val func_dec: string -> Types.ty -> arg_name_type_map list -> (access list -> un
 val build_return_main: unit -> unit
 
 val build_external_func: string -> Types.ty list -> Types.ty -> unit
+
+                                                                  
 

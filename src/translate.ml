@@ -23,7 +23,7 @@ let context = L.global_context ()
 let the_module = L.create_module context "Tiger jit"
 let builder = L.builder context
 
-let int_type = L.i64_type context
+let int_type = L.integer_type context 32 
 
 let main_function_dec = L.function_type int_type  [||]
 let main_function = L.declare_function "main" main_function_dec the_module
@@ -31,21 +31,26 @@ let main_entry = L.append_block context "entry" main_function
 let _ = L.position_at_end main_entry builder
 (*     ignore (Llvm.build_ret (Llvm.const_int t_i32 123456) builder); *)
                   
-let string_type = L.pointer_type (L.i64_type context)
+let string_type = L.pointer_type (L.i32_type context)
+
+let int_pointer = L.pointer_type (L.i32_type context)
             
 let rec get_llvm_type: T.ty -> L.lltype = function
-  | T.RECORD(_, _) -> L.i64_type context
   | T.INT -> int_type
   | T.STRING -> string_type
-  | T.ARRAY(arr_type, _) ->
-     L.pointer_type (
+  | T.ARRAY(arr_type, _) -> int_pointer
+  | T.RECORD(arr_type, _) -> int_pointer
+  | T.INT_POINTER -> int_pointer
+  | _ -> L.void_type context
+
+(* Keep this shit for static link *)
+(*L.pointer_type (
          L.struct_type context
            [|
              int_type;
              L.array_type (get_llvm_type arr_type) 0
            |]
-       )
-  | _ -> L.void_type context
+       ) *)
        
 let alloc_local (esc: bool) (name: string) (typ: T.ty): access =
   let func_block = L.block_parent (L.insertion_block builder) in
@@ -66,21 +71,41 @@ let string_exp s = L.build_global_stringptr s "" builder
 
 let break_exp s = nil_exp
 
-let array_exp (size: exp) (init: exp) (typ: T.ty) =
-  let ele_type = get_llvm_type typ in
-  let init_array = L.const_array ele_type [||] in
-  L.const_struct context [| size; init_array|]
-
 exception Func_not_found of string
 let func_call_exp (name: string) (vals: exp list): exp =
   let callee = match L.lookup_function name the_module with
     | Some fn -> fn
     | None -> raise (Func_not_found "not found")
   in
-  let params = L.params callee in
   let final_args = Array.of_list vals in
   L.build_call callee final_args "" builder
-                     
+
+let array_exp (size: exp) (init: exp) (typ: T.ty) =
+  func_call_exp "tig_init_array" [size; init]
+
+let record_exp (exps: exp list) =
+  let size = exps |> List.length |> int_exp in
+  let record_addr = func_call_exp "tig_init_record" [size] in
+  let alloc index exp =
+    let addr = L.build_gep record_addr [| int_exp(index) |] "element" builder in
+    ignore(L.build_store exp addr builder) in
+  List.iteri alloc exps;
+  record_addr
+
+let subscript_exp (arr_addr: exp) (index: exp) =
+  (*L.build_load arr_addr "zz" builder  *)
+  let addr = L.build_gep arr_addr [| index |] "element" builder in
+  L.build_load addr "lol" builder
+
+let subscript_exp_left (arr_addr: exp ) (index: exp) =
+  (* we have to load here becase 
+     RHS exp: arr := malloc() => arr has int* type and is saved to int**
+     ,when calling transVar(simple) => return int* type 
+     LHS exp: arr := malloc() => arr has int* type and is saved to int**
+     HOWEVER when calling transVar_left(simple) => return int** (address that contain int* type*)
+  let addr = L.build_load arr_addr "load_left" builder in
+  L.build_gep addr [| index |] "element_left" builder
+
          
 let op_exp (left_val: exp) (oper: A.oper) (right_val: exp) =
   let arith f tmp_name = f left_val right_val tmp_name builder in

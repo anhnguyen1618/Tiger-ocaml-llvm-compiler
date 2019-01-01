@@ -1,0 +1,6 @@
+let
+	var a:= 5
+	function x () = printInt(a)
+in
+	x()
+end

@@ -1,6 +1,23 @@
-let
-	type  rectype = {name:int, age:int}
-	var rec1:rectype := rectype {name=5, age=10}
+/*let
+	type  rectype = {name: string, age:int}
+	var rec1:rectype := rectype {name= "hello", age=10}
+	var b := rec1
 in
-    printInt(rec1.age) 
+	print(b.name);
+	b.name := "zozo";
+	printInt(rec1.age);
+	print(rec1.name)
+end */
+
+let
+	type class = {name: string, id:int}
+	type student = {name: string, class: class}
+	var class: class := class {name= "hello", id=10}
+	var student: student := student {name= "world", class = class}
+in
+	print(student.name);
+	printInt(student.class.id);
+	print(student.class.name);
+	class.name := "lol";
+	print(student.class.name)
 end

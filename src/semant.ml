@@ -399,7 +399,7 @@ let rec trans_dec (
                         fields_with_name_types in
       
       match S.look(t_env, typ) with
-	Some (T.RECORD (types, refer)) ->
+	Some (T.RECORD (types, refer) as record_type) ->
 	 let rec check_fields = function
            | [] -> []
 	   | (s, t, p) :: tl ->
@@ -423,7 +423,7 @@ let rec trans_dec (
 		   {exp = Translate.nil_exp(*Translate.recordDec(fieldLetsIR)*); ty = T.RECORD (types, refer)})
 	     else
 	       let typesInCreateOrder = check_fields field_exps in
-	       {exp = (Translate.record_exp fieldLetsIR) ; ty = T.RECORD (typesInCreateOrder, refer)}
+	       {exp = (Translate.record_exp types fieldLetsIR) ; ty = T.RECORD (typesInCreateOrder, refer)}
 			    
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not have type record");

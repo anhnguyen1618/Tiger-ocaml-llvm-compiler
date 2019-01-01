@@ -10,6 +10,7 @@ type ty =
 | NAME of Symbol.symbol * ty option ref
 | UNIT
 | INT_POINTER
+| RECORD_ALLOC of (Symbol.symbol * ty) list * unique
 | STRING_POINTER
 
   

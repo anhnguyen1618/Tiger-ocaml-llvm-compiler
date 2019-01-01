@@ -27,7 +27,7 @@ val break_exp: 'a -> exp
 
 val array_exp: exp -> exp -> Types.ty -> exp
 
-val record_exp: exp list -> exp
+val record_exp: (Symbol.symbol * Types.ty) list -> exp list -> exp
 
 val subscript_exp: exp -> exp -> exp
 

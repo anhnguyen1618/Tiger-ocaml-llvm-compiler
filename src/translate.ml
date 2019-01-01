@@ -31,7 +31,7 @@ let main_entry = L.append_block context "entry" main_function
 let _ = L.position_at_end main_entry builder
 (*     ignore (Llvm.build_ret (Llvm.const_int t_i32 123456) builder); *)
                   
-let string_type = L.pointer_type (L.i32_type context)
+let string_type = L.pointer_type (L.i8_type context)
 
 let int_pointer = L.pointer_type (L.i32_type context)
             
@@ -39,7 +39,11 @@ let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
   | T.STRING -> string_type
   | T.ARRAY(arr_type, _) -> int_pointer
-  | T.RECORD(arr_type, _) -> int_pointer
+  | T.RECORD(field_types, _) ->
+     L.pointer_type 
+       (L.struct_type context ( (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list))
+  | T.RECORD_ALLOC (field_types, _) ->
+     (L.struct_type context ( (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list))
   | T.INT_POINTER -> int_pointer
   | _ -> L.void_type context
 
@@ -83,18 +87,20 @@ let func_call_exp (name: string) (vals: exp list): exp =
 let array_exp (size: exp) (init: exp) (typ: T.ty) =
   func_call_exp "tig_init_array" [size; init]
 
-let record_exp (exps: exp list) =
+let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
+  let record_addr = alloc_local true "record_init" (T.RECORD_ALLOC(tys, ref ())) in
   let size = exps |> List.length |> int_exp in
-  let record_addr = func_call_exp "tig_init_record" [size] in
+  (*let record_addr = func_call_exp "tig_init_record" [size] in *)
   let alloc index exp =
-    let addr = L.build_gep record_addr [| int_exp(index) |] "element" builder in
+    (* pointer to internal struct has to defer by first 0, pointer to external struct does not need *)
+    let addr = L.build_gep record_addr [| int_exp(0); int_exp(index) |] "Element" builder in
     ignore(L.build_store exp addr builder) in
   List.iteri alloc exps;
   record_addr
 
 let subscript_exp (arr_addr: exp) (index: exp) =
   (*L.build_load arr_addr "zz" builder  *)
-  let addr = L.build_gep arr_addr [| index |] "element" builder in
+  let addr = L.build_gep arr_addr [| int_exp(0); index |] "element" builder in
   L.build_load addr "lol" builder
 
 let subscript_exp_left (arr_addr: exp ) (index: exp) =
@@ -104,7 +110,7 @@ let subscript_exp_left (arr_addr: exp ) (index: exp) =
      LHS exp: arr := malloc() => arr has int* type and is saved to int**
      HOWEVER when calling transVar_left(simple) => return int** (address that contain int* type*)
   let addr = L.build_load arr_addr "load_left" builder in
-  L.build_gep addr [| index |] "element_left" builder
+  L.build_gep addr [| int_exp(0);index |] "element_left" builder
 
          
 let op_exp (left_val: exp) (oper: A.oper) (right_val: exp) =

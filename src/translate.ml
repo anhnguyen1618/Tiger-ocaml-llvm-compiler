@@ -39,9 +39,8 @@ let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
   | T.STRING -> string_type
   | T.ARRAY(arr_type, _) -> int_pointer
-  | T.RECORD(field_types, _) ->
-     L.pointer_type 
-       (L.struct_type context ( (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list))
+  | T.RECORD(field_types, uniq) ->
+     L.pointer_type (get_llvm_type (T.RECORD_ALLOC (field_types, uniq)))
   | T.RECORD_ALLOC (field_types, _) ->
      (L.struct_type context ( (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list))
   | T.INT_POINTER -> int_pointer

@@ -76,6 +76,49 @@ let string_exp s = L.build_global_stringptr s "" builder
 
 let break_exp s = nil_exp
 
+let op_exp (left_val: exp) (oper: A.oper) (right_val: exp) =
+  let arith f tmp_name = f left_val right_val tmp_name builder in
+  let compare f tmp_name =
+    let test = L.build_icmp f left_val right_val tmp_name builder in
+    L.build_zext test int_type "bool_tmp" builder
+  in
+  match oper with
+  | A.PlusOp -> arith L.build_add "add_tmp"
+  | A.MinusOp -> arith L.build_sub "minus_tmp"
+  | A.TimesOp -> arith L.build_mul "mul_tmp"
+  | A.DivideOp -> arith L.build_sdiv "div_tmp"
+  | A.EqOp -> compare L.Icmp.Eq "eq_tmp"
+  | A.NeqOp -> compare L.Icmp.Ne "neq_tmp"
+  | A.LtOp -> compare L.Icmp.Slt "lt_tmp"
+  | A.LeOp -> compare L.Icmp.Sle "le_tmp"
+  | A.GtOp -> compare L.Icmp.Sgt "gt_tmp"
+  | A.GeOp -> compare L.Icmp.Sge "ge_tmp"
+
+
+let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: unit -> unit): exp =
+  (*let previous_block = L.insertion_block builder in *)
+  
+  let current_block = L.insertion_block builder in
+  let function_block = L.block_parent current_block in
+  let test_block = L.append_block context "test" function_block in
+  let loop_block = L.append_block context "loop" function_block in
+  let end_block = L.append_block context "end" function_block in
+
+  ignore(L.build_br test_block builder);
+  L.position_at_end test_block builder;
+
+  let test_val = eval_test_exp () in
+  let cond_val = L.build_icmp L.Icmp.Eq test_val (int_exp 1) "cond" builder in
+  ignore(L.build_cond_br cond_val loop_block end_block builder);
+
+  L.position_at_end loop_block builder;
+  eval_body_exp();
+  ignore(L.build_br test_block builder);
+  L.position_at_end end_block builder;
+
+  (*L.position_at_end previous_block builder;*)
+  nil_exp
+
 exception Func_not_found of string
 let func_call_exp (name: string) (vals: exp list): exp =
   let callee = match L.lookup_function name the_module with
@@ -88,16 +131,34 @@ let func_call_exp (name: string) (vals: exp list): exp =
 let array_exp (size: int) (init: exp) (typ: T.ty) =
   let array_addr = alloc_local true "array_init" (T.ARRAY_ALLOC typ) in
   (*let record_addr = func_call_exp "tig_init_record" [size] in *)
-  let alloc index  =
+
+  (*let alloc index  =
     let addr = L.build_gep array_addr [| int_exp(0); int_exp(index) |] "Element" builder in
     ignore(L.build_store init addr builder) in
 
   let rec loop i = if i > 0
                    then (alloc (size - i); loop (i - 1))
                    else ()
+  in *)
+
+
+  let access = alloc_local false "i" T.INT in
+  assign_stm access (int_exp 0);
+  let conditition (): exp =
+    let value = simple_var access "i" in
+    op_exp value A.LtOp (int_exp size)
   in
   
-  loop size;
+  let body (): unit =
+    let value = simple_var access "i" in
+    let addr = L.build_gep array_addr [| int_exp(0); value |] "Element" builder in
+    ignore(L.build_store init addr builder);
+    assign_stm access (op_exp value A.PlusOp (int_exp 1))
+  in
+  
+  ignore(while_exp conditition body);
+  
+  (*loop size; *)
   array_addr
 
 
@@ -127,47 +188,9 @@ let subscript_exp_left (arr_addr: exp ) (index: exp) =
   L.build_gep addr [| int_exp(0);index |] "element_left" builder
 
          
-let op_exp (left_val: exp) (oper: A.oper) (right_val: exp) =
-  let arith f tmp_name = f left_val right_val tmp_name builder in
-  let compare f tmp_name =
-    let test = L.build_icmp f left_val right_val tmp_name builder in
-    L.build_zext test int_type "bool_tmp" builder
-  in
-  match oper with
-  | A.PlusOp -> arith L.build_add "add_tmp"
-  | A.MinusOp -> arith L.build_sub "minus_tmp"
-  | A.TimesOp -> arith L.build_mul "mul_tmp"
-  | A.DivideOp -> arith L.build_sdiv "div_tmp"
-  | A.EqOp -> compare L.Icmp.Eq "eq_tmp"
-  | A.NeqOp -> compare L.Icmp.Ne "neq_tmp"
-  | A.LtOp -> compare L.Icmp.Slt "lt_tmp"
-  | A.LeOp -> compare L.Icmp.Sle "le_tmp"
-  | A.GtOp -> compare L.Icmp.Sgt "gt_tmp"
-  | A.GeOp -> compare L.Icmp.Sge "ge_tmp"
 
-let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: unit -> unit): exp =
-  (*let previous_block = L.insertion_block builder in *)
-  
-  let current_block = L.insertion_block builder in
-  let function_block = L.block_parent current_block in
-  let test_block = L.append_block context "test" function_block in
-  let loop_block = L.append_block context "loop" function_block in
-  let end_block = L.append_block context "end" function_block in
 
-  ignore(L.build_br test_block builder);
-  L.position_at_end test_block builder;
 
-  let test_val = eval_test_exp () in
-  let cond_val = L.build_icmp L.Icmp.Eq test_val (int_exp 1) "cond" builder in
-  ignore(L.build_cond_br cond_val loop_block end_block builder);
-
-  L.position_at_end loop_block builder;
-  eval_body_exp();
-  ignore(L.build_br test_block builder);
-  L.position_at_end end_block builder;
-
-  (*L.position_at_end previous_block builder;*)
-  nil_exp
 
 let if_exp
       (gen_test_val: unit -> exp)

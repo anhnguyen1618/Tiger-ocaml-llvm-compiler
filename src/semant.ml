@@ -537,7 +537,6 @@ let rec trans_dec (
          { exp = Translate.array_exp
                    size_const
                    init_result.exp
-                   unique
                    (actual_ty_exp init_result);
            ty = T.ARRAY(array_type, unique) }
      

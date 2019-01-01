@@ -5,6 +5,8 @@ module A = Absyn
 type level = TOP
            | NESTED of {uniq: unit ref; parent: level }
 
+let new_level x = x
+
 type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty }
                      
 type access = L.llvalue
@@ -14,19 +16,6 @@ type exp = L.llvalue
 type expty = {exp: exp; ty: T.ty}
          
 let outermost = TOP
-
-let hashtable: (Temp.temp, int) Hashtbl.t  = Hashtbl.create 128    
-    
-let find_size temp =
-  match Hashtbl.find_opt hashtable temp with
-    Some i -> i
-  | None -> 1000
-
-let add_size temp size = Hashtbl.add hashtable temp size
-  
-
-let new_level (parent: level)  =
-  NESTED { uniq = ref (); parent = parent }
 
 (* LLVM code *)
 let context = L.global_context ()
@@ -49,10 +38,9 @@ let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
   | T.STRING -> string_type
   | T.ARRAY(arr_type, unique) ->
-     L.pointer_type (L.array_type (get_llvm_type arr_type) (find_size unique))
-  | T.ARRAY_ALLOC(arr_type, size, unique) ->
-     add_size unique size;
-     L.array_type (get_llvm_type arr_type) size
+     L.pointer_type (L.array_type (get_llvm_type arr_type) 0)
+  | T.ARRAY_ALLOC arr_type ->
+     L.array_type (get_llvm_type arr_type) 0
   | T.RECORD(field_types, uniq) ->
      L.pointer_type (get_llvm_type (T.RECORD_ALLOC (field_types, uniq)))
   | T.RECORD_ALLOC (field_types, _) ->
@@ -97,8 +85,8 @@ let func_call_exp (name: string) (vals: exp list): exp =
   let final_args = Array.of_list vals in
   L.build_call callee final_args "" builder
 
-let array_exp (size: int) (init: exp) (uniq: Temp.temp) (typ: T.ty) =
-  let array_addr = alloc_local true "array_init" (T.ARRAY_ALLOC(typ, size, uniq)) in
+let array_exp (size: int) (init: exp) (typ: T.ty) =
+  let array_addr = alloc_local true "array_init" (T.ARRAY_ALLOC typ) in
   (*let record_addr = func_call_exp "tig_init_record" [size] in *)
   let alloc index  =
     let addr = L.build_gep array_addr [| int_exp(0); int_exp(index) |] "Element" builder in

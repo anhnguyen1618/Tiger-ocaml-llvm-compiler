@@ -11,7 +11,7 @@ type ty =
 | UNIT
 | INT_POINTER
 | RECORD_ALLOC of (Symbol.symbol * ty) list * unique
-| ARRAY_ALLOC of ty * int * unique
+| ARRAY_ALLOC of ty
 | STRING_POINTER
 
   

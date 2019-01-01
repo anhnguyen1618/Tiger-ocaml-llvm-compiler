@@ -39,10 +39,12 @@ let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
   | T.STRING -> string_type
   | T.ARRAY(arr_type, _) -> int_pointer
+  | T.ARRAY_ALLOC(arr_type, size) ->
+     L.array_type (get_llvm_type arr_type) size
   | T.RECORD(field_types, uniq) ->
      L.pointer_type (get_llvm_type (T.RECORD_ALLOC (field_types, uniq)))
   | T.RECORD_ALLOC (field_types, _) ->
-     (L.struct_type context ( (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list))
+     L.struct_type context ( (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list)
   | T.INT_POINTER -> int_pointer
   | _ -> L.void_type context
 
@@ -83,8 +85,21 @@ let func_call_exp (name: string) (vals: exp list): exp =
   let final_args = Array.of_list vals in
   L.build_call callee final_args "" builder
 
-let array_exp (size: exp) (init: exp) (typ: T.ty) =
-  func_call_exp "tig_init_array" [size; init]
+let array_exp (size: int) (init: exp) (typ: T.ty) =
+  let array_addr = alloc_local true "array_init" (T.ARRAY_ALLOC(typ, size)) in
+  (*let record_addr = func_call_exp "tig_init_record" [size] in *)
+  let alloc index  =
+    let addr = L.build_gep array_addr [| int_exp(0); int_exp(index) |] "Element" builder in
+    ignore(L.build_store init addr builder) in
+
+  let rec loop i = if i > 0
+                   then (alloc (size - i); loop (i - 1))
+                   else ()
+  in
+  
+  loop size;
+  array_addr
+
 
 let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
   let record_addr = alloc_local true "record_init" (T.RECORD_ALLOC(tys, ref ())) in

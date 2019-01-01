@@ -63,16 +63,17 @@ let rec trans_dec (
        (match S.look(t_env, s) with
 	  Some lhs_type ->
            if T.eq(lhs_type, rhs_type)
-	   then (
-	     let access = Translate.alloc_local !escape (S.name name) lhs_type  in
-             let new_entry = E.VarEntry{ty = lhs_type; access = access} in
-	     let new_v_env = S.enter(v_env, name, new_entry) in
-             Translate.assign_stm access initial_value;
-	     {
-               v_env = new_v_env;
-	       t_env = t_env;
-	     }
-           )
+	   then
+             begin
+	       let access = Translate.alloc_local !escape (S.name name) lhs_type  in
+               let new_entry = E.VarEntry{ty = lhs_type; access = access} in
+	       let new_v_env = S.enter(v_env, name, new_entry) in
+               Translate.assign_stm access initial_value;
+	       {
+                 v_env = new_v_env;
+	         t_env = t_env;
+	       }
+             end
 	   else (
              let msg = Printf.sprintf
                          "Can't assign exp type '%s' to type '%s'"
@@ -514,18 +515,18 @@ let rec trans_dec (
     and check_array_exp (A.ArrayExp {typ; size; init; pos}) =
       match S.look(t_env, typ) with
 	Some (T.ARRAY(array_type, unique)) ->
-         let size_result = tr_exp size in
+         let get_size_const = function
+           | A.IntExp i -> i
+           | _ -> Err.error pos ("Non constant array bound"); 0
+         in
+         let size_const = get_size_const size in (* Size of array must be a constant *)
          let init_result = tr_exp init in
-         U.assert_type_eq (
-             actual_ty_exp size_result,
-             T.INT, pos,
-             "Size with array must have type " ^ T.name(T.INT));
          U.assert_type_eq (
              actual_ty_exp init_result,
              array_type,
              pos,
              "Initialize letue with array does not have type " ^ T.name(array_type));
-         { exp = Translate.array_exp size_result.exp init_result.exp (actual_ty_exp init_result); ty = T.ARRAY(array_type, unique) }
+         { exp = Translate.array_exp size_const init_result.exp (actual_ty_exp init_result); ty = T.ARRAY(array_type, unique) }
      
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not exist");

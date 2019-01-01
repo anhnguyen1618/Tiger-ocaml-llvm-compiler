@@ -31,9 +31,9 @@ let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
     (name, look_up_type(typ, pos)) in
 		    
   let check_record (fields: A.field list): T.ty =
-    T.RECORD (List.map map_field_to_record fields, ref ()) in
+    T.RECORD (List.map map_field_to_record fields, Temp.newtemp()) in
 
-  let check_array_type e = T.ARRAY(look_up_type e, ref()) in
+  let check_array_type e = T.ARRAY(look_up_type e, Temp.newtemp()) in
 			 
   let trans_ty: A.ty -> T.ty = function
     | A.NameTy (s, p) -> look_up_type (s, p)
@@ -68,6 +68,14 @@ let rec trans_dec (
 	       let access = Translate.alloc_local !escape (S.name name) lhs_type  in
                let new_entry = E.VarEntry{ty = lhs_type; access = access} in
 	       let new_v_env = S.enter(v_env, name, new_entry) in
+
+              (* match lhs_type with
+               | T.ARRAY x -> ()
+               | _ -> ()
+
+
+
+               ;*)
                Translate.assign_stm access initial_value;
 	       {
                  v_env = new_v_env;
@@ -400,7 +408,7 @@ let rec trans_dec (
                         fields_with_name_types in
       
       match S.look(t_env, typ) with
-	Some (T.RECORD (types, refer) as record_type) ->
+	Some (T.RECORD (types, refer)) ->
 	 let rec check_fields = function
            | [] -> []
 	   | (s, t, p) :: tl ->
@@ -428,10 +436,10 @@ let rec trans_dec (
 			    
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not have type record");
-	 {exp = Translate.nil_exp; ty = T.RECORD ([], ref ())}
+	 {exp = Translate.nil_exp; ty = T.RECORD ([], Temp.newtemp ())}
       | None ->
          Err.error pos ("type " ^ S.name(typ)  ^ " can't be found");
-	 {exp = Translate.nil_exp; ty = T.RECORD ([], ref ())}
+	 {exp = Translate.nil_exp; ty = T.RECORD ([], Temp.newtemp ())}
 
     and check_seq_exp (exp_pos: (A.exp * int) list): expty =
       match List.length exp_pos with
@@ -526,14 +534,19 @@ let rec trans_dec (
              array_type,
              pos,
              "Initialize letue with array does not have type " ^ T.name(array_type));
-         { exp = Translate.array_exp size_const init_result.exp (actual_ty_exp init_result); ty = T.ARRAY(array_type, unique) }
+         { exp = Translate.array_exp
+                   size_const
+                   init_result.exp
+                   unique
+                   (actual_ty_exp init_result);
+           ty = T.ARRAY(array_type, unique) }
      
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not exist");
-         { exp = Translate.nil_exp ; ty = T.ARRAY(T.NIL, ref ())}
+         { exp = Translate.nil_exp ; ty = T.ARRAY(T.NIL, Temp.newtemp ())}
       | None ->
          Err.error pos ("Type " ^ S.name(typ) ^ " could not be found");
-         {exp = Translate.nil_exp ; ty = T.ARRAY(T.NIL, ref ())}
+         {exp = Translate.nil_exp ; ty = T.ARRAY(T.NIL, Temp.newtemp ())}
 		
 		    
     and tr_exp: A.exp -> expty  = function

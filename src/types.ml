@@ -1,5 +1,5 @@
 module S = Symbol
-type unique = unit ref
+type unique = Temp.temp
 
 type ty = 
   RECORD of (Symbol.symbol * ty) list * unique
@@ -11,7 +11,7 @@ type ty =
 | UNIT
 | INT_POINTER
 | RECORD_ALLOC of (Symbol.symbol * ty) list * unique
-| ARRAY_ALLOC of ty * int
+| ARRAY_ALLOC of ty * int * unique
 | STRING_POINTER
 
   

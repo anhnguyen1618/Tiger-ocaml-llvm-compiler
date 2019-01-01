@@ -8,15 +8,17 @@ main:                                   # @main
 # %bb.0:                                # %entry
 	subq	$24, %rsp
 	.cfi_def_cfa_offset 32
-	movl	$1, %edi
-	movl	$5, %esi
-	callq	tig_init_array
+	movabsq	$25769803782, %rax      # imm = 0x600000006
+	movq	%rax, (%rsp)
+	movl	$6, 8(%rsp)
+	movq	%rsp, %rax
 	movq	%rax, 8(%rsp)
-	movl	(%rax), %ecx
-	movl	%ecx, 20(%rsp)
-	movl	$10, (%rax)
-	movq	8(%rsp), %rax
-	movl	(%rax), %edi
+	movl	$6, 4(%rsp)
+	movq	%rax, 16(%rsp)
+	movl	$10, 16(%rsp)
+	movabsq	$25769803780, %rax      # imm = 0x600000004
+	movq	%rax, 8(%rsp)
+	movl	$4, %edi
 	callq	tig_print_int
 	xorl	%eax, %eax
 	addq	$24, %rsp

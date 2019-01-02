@@ -249,7 +249,7 @@ let rec trans_dec (
                               (fun (symbol, _) -> (index := !index + 1; S.eq(s, symbol))) tys
          in
          (match matchedField with
-         | Some (_, ty) -> {exp = Translate.subscript_exp recExp (Translate.int_exp !index); ty = ty}
+         | Some (_, ty) -> {exp = Translate.field_var_exp recExp (Translate.int_exp !index); ty = ty}
          | None -> (
            let msg = Printf.sprintf "Property '%s' does not exist on type '%s'\n"
                        (S.name s) (T.name typeWithObj) in
@@ -317,7 +317,7 @@ let rec trans_dec (
                               (fun (symbol, _) -> (index := !index + 1; S.eq(s, symbol))) tys
          in
          (match matchedField with
-          | Some (_, ty) -> {exp = Translate.subscript_exp_left rec_access (int_exp !index); ty = ty}
+          | Some (_, ty) -> {exp = Translate.field_var_exp_left rec_access (int_exp !index); ty = ty}
           | None -> (
             let msg = Printf.sprintf "Property '%s' does not exist on type '%s'\n"
                         (S.name s) (T.name typeWithObj) in
@@ -523,19 +523,19 @@ let rec trans_dec (
     and check_array_exp (A.ArrayExp {typ; size; init; pos}) =
       match S.look(t_env, typ) with
 	Some (T.ARRAY(array_type, unique)) ->
-         let get_size_const = function
-           | A.IntExp i -> i
-           | _ -> Err.error pos ("Non constant array bound"); 0
-         in
-         let size_const = get_size_const size in (* Size of array must be a constant *)
+         let size_result = tr_exp size in
          let init_result = tr_exp init in
+         U.assert_type_eq (
+             actual_ty_exp size_result,
+             T.INT, pos,
+             "Size with array must have type " ^ T.name(T.INT));
          U.assert_type_eq (
              actual_ty_exp init_result,
              array_type,
              pos,
              "Initialize letue with array does not have type " ^ T.name(array_type));
          { exp = Translate.array_exp
-                   size_const
+                   size_result.exp
                    init_result.exp
                    (actual_ty_exp init_result);
            ty = T.ARRAY(array_type, unique) }

@@ -38,9 +38,7 @@ let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
   | T.STRING -> string_type
   | T.ARRAY(arr_type, unique) ->
-     L.pointer_type (L.array_type (get_llvm_type arr_type) 0)
-  | T.ARRAY_ALLOC arr_type ->
-     L.array_type (get_llvm_type arr_type) 0
+     L.pointer_type (get_llvm_type arr_type)
   | T.RECORD(field_types, uniq) ->
      L.pointer_type (get_llvm_type (T.RECORD_ALLOC (field_types, uniq)))
   | T.RECORD_ALLOC (field_types, _) ->
@@ -128,30 +126,18 @@ let func_call_exp (name: string) (vals: exp list): exp =
   let final_args = Array.of_list vals in
   L.build_call callee final_args "" builder
 
-let array_exp (size: int) (init: exp) (typ: T.ty) =
-  let array_addr = alloc_local true "array_init" (T.ARRAY_ALLOC typ) in
-  (*let record_addr = func_call_exp "tig_init_record" [size] in *)
-
-  (*let alloc index  =
-    let addr = L.build_gep array_addr [| int_exp(0); int_exp(index) |] "Element" builder in
-    ignore(L.build_store init addr builder) in
-
-  let rec loop i = if i > 0
-                   then (alloc (size - i); loop (i - 1))
-                   else ()
-  in *)
-
-
+let array_exp (size: exp) (init: exp) (typ: T.ty) =
+  let array_addr = L.build_array_alloca (get_llvm_type typ) size "array_init" builder in
   let access = alloc_local false "i" T.INT in
   assign_stm access (int_exp 0);
   let conditition (): exp =
     let value = simple_var access "i" in
-    op_exp value A.LtOp (int_exp size)
+    op_exp value A.LtOp size
   in
   
   let body (): unit =
     let value = simple_var access "i" in
-    let addr = L.build_gep array_addr [| int_exp(0); value |] "Element" builder in
+    let addr = L.build_gep array_addr [| value |] "Element" builder in
     ignore(L.build_store init addr builder);
     assign_stm access (op_exp value A.PlusOp (int_exp 1))
   in
@@ -173,9 +159,23 @@ let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
   List.iteri alloc exps;
   record_addr
 
-let subscript_exp (arr_addr: exp) (index: exp) =
+let field_var_exp (arr_addr: exp) (index: exp) =
   (*L.build_load arr_addr "zz" builder  *)
   let addr = L.build_gep arr_addr [| int_exp(0); index |] "element" builder in
+  L.build_load addr "field_var" builder
+
+let field_var_exp_left (arr_addr: exp ) (index: exp) =
+  (* we have to load here becase 
+     RHS exp: arr := malloc() => arr has int* type and is saved to int**
+     ,when calling transVar(simple) => return int* type 
+     LHS exp: arr := malloc() => arr has int* type and is saved to int**
+     HOWEVER when calling transVar_left(simple) => return int** (address that contain int* type*)
+  let addr = L.build_load arr_addr "load_left" builder in
+  L.build_gep addr [| int_exp(0);index |] "element_left" builder
+
+let subscript_exp (arr_addr: exp) (index: exp) =
+  (*L.build_load arr_addr "zz" builder  *)
+  let addr = L.build_gep arr_addr [| index |] "element" builder in
   L.build_load addr "lol" builder
 
 let subscript_exp_left (arr_addr: exp ) (index: exp) =
@@ -185,7 +185,7 @@ let subscript_exp_left (arr_addr: exp ) (index: exp) =
      LHS exp: arr := malloc() => arr has int* type and is saved to int**
      HOWEVER when calling transVar_left(simple) => return int** (address that contain int* type*)
   let addr = L.build_load arr_addr "load_left" builder in
-  L.build_gep addr [| int_exp(0);index |] "element_left" builder
+  L.build_gep addr [| index |] "element_left" builder
 
          
 

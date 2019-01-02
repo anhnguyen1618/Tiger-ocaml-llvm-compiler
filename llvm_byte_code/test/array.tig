@@ -3,47 +3,45 @@ source_filename = "Tiger jit"
 
 define i32 @main() {
 entry:
-  %b = alloca [0 x i32]*
-  %a = alloca i32
-  %arr1 = alloca [0 x i32]*
+  %arr1 = alloca i32*
   %i = alloca i32
-  %array_init = alloca [0 x i32]
+  %x = alloca i32
+  store i32 5, i32* %x
+  %x1 = load i32, i32* %x
+  %array_init = alloca i32, i32 %x1
   store i32 0, i32* %i
   br label %test
 
 test:                                             ; preds = %loop, %entry
-  %i1 = load i32, i32* %i
-  %lt_tmp = icmp slt i32 %i1, 5
+  %i2 = load i32, i32* %i
+  %lt_tmp = icmp slt i32 %i2, %x1
   %bool_tmp = zext i1 %lt_tmp to i32
   %cond = icmp eq i32 %bool_tmp, 1
   br i1 %cond, label %loop, label %end
 
 loop:                                             ; preds = %test
-  %i2 = load i32, i32* %i
-  %Element = getelementptr [0 x i32], [0 x i32]* %array_init, i32 0, i32 %i2
+  %i3 = load i32, i32* %i
+  %Element = getelementptr i32, i32* %array_init, i32 %i3
   store i32 6, i32* %Element
-  %add_tmp = add i32 %i2, 1
+  %add_tmp = add i32 %i3, 1
   store i32 %add_tmp, i32* %i
   br label %test
 
 end:                                              ; preds = %test
-  store [0 x i32]* %array_init, [0 x i32]** %arr1
-  %arr13 = load [0 x i32]*, [0 x i32]** %arr1
-  %element = getelementptr [0 x i32], [0 x i32]* %arr13, i32 0, i32 0
-  %lol = load i32, i32* %element
-  store i32 %lol, i32* %a
-  %arr14 = load [0 x i32]*, [0 x i32]** %arr1
-  store [0 x i32]* %arr14, [0 x i32]** %b
-  %load_left = load [0 x i32]*, [0 x i32]** %arr1
-  %element_left = getelementptr [0 x i32], [0 x i32]* %load_left, i32 0, i32 4
+  store i32* %array_init, i32** %arr1
+  %load_left = load i32*, i32** %arr1
+  %element_left = getelementptr i32, i32* %load_left, i32 2
   store i32 10, i32* %element_left
-  %load_left5 = load [0 x i32]*, [0 x i32]** %b
-  %element_left6 = getelementptr [0 x i32], [0 x i32]* %load_left5, i32 0, i32 2
-  store i32 4, i32* %element_left6
-  %arr17 = load [0 x i32]*, [0 x i32]** %arr1
-  %element8 = getelementptr [0 x i32], [0 x i32]* %arr17, i32 0, i32 2
-  %lol9 = load i32, i32* %element8
-  call void @tig_print_int(i32 %lol9)
+  %arr14 = load i32*, i32** %arr1
+  %element = getelementptr i32, i32* %arr14, i32 4
+  %lol = load i32, i32* %element
+  call void @tig_print_int(i32 %lol)
+  %arr15 = load i32*, i32** %arr1
+  %0 = call i32 @f(i32* %arr15)
+  %arr16 = load i32*, i32** %arr1
+  %element7 = getelementptr i32, i32* %arr16, i32 2
+  %lol8 = load i32, i32* %element7
+  call void @tig_print_int(i32 %lol8)
   ret i32 0
 }
 
@@ -72,3 +70,14 @@ declare i8* @tig_concat(i8*, i8*)
 declare i32 @tig_not(i32)
 
 declare void @tig_exit(i32)
+
+define i32 @f(i32*) {
+entry:
+  %n = alloca i32*
+  store i32* %0, i32** %n
+  %n1 = load i32*, i32** %n
+  %element = getelementptr i32, i32* %n1, i32 2
+  %lol = load i32, i32* %element
+  call void @tig_print_int(i32 %lol)
+  ret i32 1
+}

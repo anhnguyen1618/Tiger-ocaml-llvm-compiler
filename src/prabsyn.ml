@@ -68,10 +68,9 @@ let rec expr_to_string = function
        (join " " let_decl_to_string decs)
        (expr_to_string body)
 
-  | ArrayExp { typ; size; init; _ } ->
-     sprintf "%s [%s] of %s"
+  | ArrayExp { typ; init; _ } ->
+     sprintf "%s of %s"
        (S.name typ)
-       (expr_to_string size)
        (expr_to_string init)
 
 
@@ -117,7 +116,7 @@ and field_to_string (Field { name; typ; _ }) =
 and type_to_string = function
   | NameTy (name, _) -> S.name name
   | RecordTy fields -> sprintf "{ %s }" (join ", " field_to_string fields)
-  | ArrayTy (base_type, _) -> sprintf "array of %s" (S.name base_type)
+  | ArrayTy (size, base_type, _) -> sprintf "array of %s" (S.name base_type)
 
 and op_to_string = function
   | PlusOp   -> "+"

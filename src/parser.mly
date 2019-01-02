@@ -20,7 +20,7 @@ let addTypeDec x = match x with
 %token <string> STRING
 %token <string> ID
 %token          FOR WHILE BREAK LET IN NIL TO END
-%token          FUNCTION VAR TYPE ARRAY IF THEN ELSE DO OF
+%token          FUNCTION VAR TYPE IF THEN ELSE DO OF
 %token          LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE
 %token          DOT COLON COMMA SEMI
 %token          PLUS MINUS TIMES DIVIDE UMINUS
@@ -53,11 +53,8 @@ exp:
   NIL                                              { Absyn.NilExp }
 | INT                                              { Absyn.IntExp $1 }
 | STRING                                           { Absyn.StringExp($1, $startofs) }
-
-| ID LBRACK exp RBRACK OF exp                      { Absyn.ArrayExp {typ = Symbol.symbol($1); size = $3; init = $6; pos = $startofs($1)} }
+| ID OF exp                                        { Absyn.ArrayExp {typ = Symbol.symbol($1); init = $3; pos = $startofs($1)} }
 | ID LBRACE field_value_list RBRACE                { Absyn.RecordExp {fields = $3; typ = Symbol.symbol($1); pos = $startofs} }
-
-
 | lvalue                                           { Absyn.VarExp $1 }
 
 | lvalue ASSIGN exp                                { Absyn.AssignExp({ var = $1; exp = $3; pos = $startofs }) }
@@ -165,7 +162,7 @@ typeDec:
 ty:
   ID                                               { Absyn.NameTy (Symbol.symbol($1), $startofs) }
 | LBRACE fields RBRACE                             { Absyn.RecordTy $2 }
-| ARRAY OF ID                                      { Absyn.ArrayTy (Symbol.symbol($3), $startofs) }
+| LBRACK exp RBRACK ID                             { Absyn.ArrayTy ($2, Symbol.symbol($4), $startofs) }
 ;
 
 decs: dec decs                        {$1 :: $2 }

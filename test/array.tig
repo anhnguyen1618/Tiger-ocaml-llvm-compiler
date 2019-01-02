@@ -1,12 +1,14 @@
 let
 	type myint = int
-	type arrtype = array of myint
+	type arrtype = [5] myint
 
-	var arr1:arrtype := arrtype [5] of 6
+	var arr1:arrtype := arrtype of 6
 	var a := arr1[0]
 	var b := arr1
+	function f (a: arrtype): int = (printInt(a[3]); 1)
 in
     arr1[4] := 10;
     b[2] := 4;
-    printInt(arr1[2])
+    printInt(arr1[2]);
+    f (b)
 end

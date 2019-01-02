@@ -1,8 +1,8 @@
 
 int main () {
-
-  int a = 2 +3; 
-  int n[ 5 ] = {1,2,3,4,5};
+  int a = 5;
+  int L[a];
+  L[2] = 4;
  
    return 0;
 }

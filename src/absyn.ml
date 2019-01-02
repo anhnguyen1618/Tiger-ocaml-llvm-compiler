@@ -22,7 +22,7 @@ and exp = VarExp of var
 		      lo: exp; hi: exp; body: exp; pos: pos }
         | BreakExp of pos
         | LetExp of { decs: dec list; body: exp; pos: pos }
-        | ArrayExp of { typ: symbol; size: exp; init: exp; pos: pos }
+        | ArrayExp of { typ: symbol; init: exp; pos: pos }
 
 and typeDec = Type of { name: symbol; ty: ty; pos: pos }
 
@@ -36,7 +36,7 @@ and dec = FunctionDec of fundec list
 
 and ty = NameTy of symbol * pos
        | RecordTy of field list
-       | ArrayTy of symbol * pos
+       | ArrayTy of exp * symbol * pos
 
 and oper = PlusOp | MinusOp | TimesOp | DivideOp
            | EqOp | NeqOp | LtOp | LeOp | GtOp | GeOp

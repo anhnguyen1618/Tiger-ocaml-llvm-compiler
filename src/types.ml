@@ -6,12 +6,12 @@ type ty =
 | NIL
 | INT
 | STRING
-| ARRAY of ty * unique
+| ARRAY of int * ty
 | NAME of Symbol.symbol * ty option ref
 | UNIT
 | INT_POINTER
 | RECORD_ALLOC of (Symbol.symbol * ty) list * unique
-| ARRAY_ALLOC of ty
+| ARRAY_ALLOC of int * ty
 | STRING_POINTER
 
   
@@ -21,19 +21,19 @@ type comp =
 | EQ
 | INCOMP (* incomparable *)
 
-let leq = function
+let rec leq = function
   | (_, UNIT) -> true
   | (NIL, RECORD(_)) -> true
   | (RECORD(_), NIL) -> true 
   | (INT, INT) -> true
   | (STRING, STRING) -> true
   | (RECORD(_, unique1), RECORD(_, unique2)) -> (unique1 = unique2)
-  | (ARRAY(_, unique1), ARRAY(_, unique2)) -> (unique1 = unique2)
+  | (ARRAY(left_size, left_ty), ARRAY(right_size, right_ty)) -> left_size = right_size && eq(left_ty, right_ty)
   | (NIL, NIL) -> true
   | (NAME(sym1, _), NAME(sym2, _)) -> S.name(sym1) = S.name(sym2)
   | (_, _) -> false
 
-let comp (t1, t2) = 
+and comp (t1, t2) = 
   if leq(t1, t2) && leq(t2, t1)
   then EQ
   else if leq(t1, t2)
@@ -43,7 +43,7 @@ let comp (t1, t2) =
   else
     INCOMP
 
-let eq (t1, t2) = 
+and eq (t1, t2) = 
   comp(t1, t2) = EQ
 
 let rec printTy = function
@@ -62,7 +62,7 @@ let rec name = function
   | NIL -> "nil"
   | INT -> "int"
   | STRING -> "string"
-  | ARRAY(arrTy, _) -> "array: " ^ name(arrTy)
+  | ARRAY(size, arrTy) -> "array: " ^ "[ " ^ string_of_int(size) ^ " ]" ^ name(arrTy)
   | NAME(sym, _) -> Symbol.name sym
   | UNIT -> "unit"
   | _ -> ""

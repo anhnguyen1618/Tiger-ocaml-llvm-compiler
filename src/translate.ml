@@ -37,10 +37,10 @@ let int_pointer = L.pointer_type (L.i32_type context)
 let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
   | T.STRING -> string_type
-  | T.ARRAY(arr_type, unique) ->
-     L.pointer_type (L.array_type (get_llvm_type arr_type) 0)
-  | T.ARRAY_ALLOC arr_type ->
-     L.array_type (get_llvm_type arr_type) 0
+  | T.ARRAY(size_const, arr_type) ->
+     L.pointer_type (L.array_type (get_llvm_type arr_type) size_const)
+  | T.ARRAY_ALLOC (size_const, arr_type) ->
+     L.array_type (get_llvm_type arr_type) size_const
   | T.RECORD(field_types, uniq) ->
      L.pointer_type (get_llvm_type (T.RECORD_ALLOC (field_types, uniq)))
   | T.RECORD_ALLOC (field_types, _) ->
@@ -129,7 +129,7 @@ let func_call_exp (name: string) (vals: exp list): exp =
   L.build_call callee final_args "" builder
 
 let array_exp (size: int) (init: exp) (typ: T.ty) =
-  let array_addr = alloc_local true "array_init" (T.ARRAY_ALLOC typ) in
+  let array_addr = alloc_local true "array_init" (T.ARRAY_ALLOC(size, typ)) in
   (*let record_addr = func_call_exp "tig_init_record" [size] in *)
 
   (*let alloc index  =

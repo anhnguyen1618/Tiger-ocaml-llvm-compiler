@@ -70,7 +70,6 @@ and token = parse
   | '\n'	  { incr_linenum lexbuf; token lexbuf }
   | "/*"          { comment [lexbuf.Lexing.lex_start_p] lexbuf }
   | '"'           { string lexbuf.Lexing.lex_start_p "" lexbuf }
-  | "array"	  { P.ARRAY }
   | "break"	  { P.BREAK }
   | "do"	  { P.DO }
   | "else"	  { P.ELSE }
@@ -137,7 +136,6 @@ let string_of_token = function
   | P.FUNCTION -> "FUNCTION"
   | P.VAR      -> "VAR"
   | P.TYPE     -> "TYPE"
-  | P.ARRAY    -> "ARRAY"
   | P.IF       -> "IF"
   | P.THEN     -> "THEN"
   | P.ELSE     -> "ELSE"

@@ -33,12 +33,17 @@ let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
   let check_record (fields: A.field list): T.ty =
     T.RECORD (List.map map_field_to_record fields, Temp.newtemp()) in
 
-  let check_array_type e = T.ARRAY(look_up_type e, Temp.newtemp()) in
-			 
+  let check_array_type (size_exp, ty, pos) =
+    match size_exp with
+    | A.IntExp size -> T.ARRAY(size, look_up_type (ty, pos))
+    | _ -> Err.error pos ("Non constant array bound");
+           T.ARRAY(999, look_up_type (ty, pos))
+  in
+  
   let trans_ty: A.ty -> T.ty = function
     | A.NameTy (s, p) -> look_up_type (s, p)
     | A.RecordTy e -> check_record e
-    | A.ArrayTy (s, p) -> check_array_type (s, p)
+    | A.ArrayTy (e, s, p) -> check_array_type (e, s, p)
   in
   trans_ty ty
 
@@ -265,7 +270,7 @@ let rec trans_dec (
       let { exp = arrayExp; ty = ty } = tr_var var in
       let array_type = actual_ty ty in
       match array_type with
-      | T.ARRAY (ty, _) ->
+      | T.ARRAY (size_const, ty) ->
 	 let  {exp = sizeIrExp; ty = size_type} = trans_exp(v_env, t_env, level, size_exp, break) in
          if T.eq(size_type, T.INT)
          then {exp = Translate.subscript_exp arrayExp sizeIrExp; ty = ty}
@@ -333,7 +338,7 @@ let rec trans_dec (
       let { exp = array_access; ty = ty } = tr_var var in
       let array_type = actual_ty ty in
       match array_type with
-      | T.ARRAY (ty, _) ->
+      | T.ARRAY (size_const, ty) ->
 	 let  {exp = size_exp; ty = size_type} = trans_exp(v_env, t_env, level, size_exp, break) in
          if T.eq(size_type, T.INT)
          then {exp = Translate.subscript_exp_left array_access size_exp ; ty = ty}
@@ -520,14 +525,9 @@ let rec trans_dec (
       { exp = body; ty= ty }
 
 
-    and check_array_exp (A.ArrayExp {typ; size; init; pos}) =
+    and check_array_exp (A.ArrayExp {typ; init; pos}) =
       match S.look(t_env, typ) with
-	Some (T.ARRAY(array_type, unique)) ->
-         let get_size_const = function
-           | A.IntExp i -> i
-           | _ -> Err.error pos ("Non constant array bound"); 0
-         in
-         let size_const = get_size_const size in (* Size of array must be a constant *)
+	Some (T.ARRAY(size_const, array_type) as t) ->
          let init_result = tr_exp init in
          U.assert_type_eq (
              actual_ty_exp init_result,
@@ -538,14 +538,14 @@ let rec trans_dec (
                    size_const
                    init_result.exp
                    (actual_ty_exp init_result);
-           ty = T.ARRAY(array_type, unique) }
+           ty = t }
      
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not exist");
-         { exp = Translate.nil_exp ; ty = T.ARRAY(T.NIL, Temp.newtemp ())}
+         { exp = Translate.nil_exp ; ty = T.ARRAY(999, T.NIL)}
       | None ->
          Err.error pos ("Type " ^ S.name(typ) ^ " could not be found");
-         {exp = Translate.nil_exp ; ty = T.ARRAY(T.NIL, Temp.newtemp ())}
+         {exp = Translate.nil_exp ; ty = T.ARRAY(999, T.NIL)}
 		
 		    
     and tr_exp: A.exp -> expty  = function

@@ -5,7 +5,11 @@ type esc_env = (depth * bool ref) Symbol.table
 
                 (* looks through the variable references to the underlying var *)
 let rec traverse_var: esc_env * depth * A.var -> unit = function
-  | (env, d, (A.SimpleVar(id, pos))) -> 
+  | (env, d, (A.SimpleVar(id, pos))) ->
+     print_string ("run into var\n");
+     print_string ("var :" ^ Symbol.name(id) ^"\n");
+     print_string (string_of_int d);
+     print_string "\n";
      (match Symbol.look (env,id) with
       | Some (depth, escape) -> escape := depth < d
       | None -> ())
@@ -55,23 +59,25 @@ and traverse_exp = function
      traverse_exp(env, d, init)
 
 and traverseDecs (env, d, (decs:Absyn.dec list)) : esc_env =
-  let add_field (A.Field {name; escape; typ; pos}) env =
+  let add_field env (A.Field {name; escape; typ; pos}) env =
     Symbol.enter(env, name, (d + 1, escape))
   in
-  let traverse_fun(fields, body) =
-    let funEnv = List.fold_right (add_field) fields env
+  let traverse_fun(env, fields, body) =
+    let funEnv = List.fold_right (add_field env) fields env
     in
     traverse_exp(funEnv, d + 1, body)
   in
   let traverse_dec = function
     | (env, d, A.FunctionDec(fundecs)) ->
-      List.iter (fun (A.Func{name; params; result; body; pos}) -> traverse_fun(params, body)) fundecs;
+      List.iter (fun (A.Func{name; params; result; body; pos}) -> traverse_fun(env, params, body)) fundecs;
       env
     | (env, d, A.VarDec{name; escape; typ; init; pos}) ->
+       traverse_exp (env, d, init);
        Symbol.enter(env, name, (d, escape))
     | (env, d, A.TypeDec(typedecs)) -> env
   in
-  List.fold_right(fun x env -> traverse_dec(env, d, x)) decs env
+  List.fold_left(fun env x -> traverse_dec(env, d, x)) env decs
 
-let find_escape(prog: Absyn.exp) = traverse_exp(Symbol.empty, 0, prog)
+let find_escape(prog: Absyn.exp) =
+  traverse_exp(Symbol.empty, 0, prog)
 

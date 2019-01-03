@@ -13,6 +13,8 @@ type tenv = T.ty Symbol.table
 type expty = T.ty
 type decty =  { v_env : venv; t_env: tenv }
 
+let escape_vars: T.ty list ref  = ref []
+
 
 let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
 
@@ -48,6 +50,8 @@ let rec trans_dec (
           A.VarDec { name; typ; init; pos; escape }
         ) =
     let rhs_type = trans_exp (v_env, t_env, init) in
+    if !escape then escape_vars := rhs_type:: !escape_vars;
+    if !escape then print_string ("hello world: " ^ Symbol.name(name));
     match typ with
       Some (s, p) ->
        begin
@@ -127,7 +131,7 @@ let rec trans_dec (
     | (v_env, t_env, A.FunctionDec(e)) -> check_func_dec(v_env, t_env, e)
   in
 						       
-  let helper = fun {v_env = v_env; t_env = t_env } dec -> tr_dec(v_env, t_env, dec) in
+  let helper = fun {v_env; t_env} dec -> tr_dec(v_env, t_env, dec) in
   let result = List.fold_left helper {v_env = v_env; t_env = t_env } exps in
   result
 
@@ -141,7 +145,7 @@ let rec trans_dec (
     let check_simple_var (s: S.symbol): expty =
       match S.look(v_env, s) with
         Some (E.VarEntry({ty; _})) -> actual_ty ty
-      | _ -> T.NIL
+      | _ -> print_string ("couldn't find variable " ^ S.name(s) ^ "\n"); T.NIL
     in
     
     let rec check_field_var (obj, s, pos): expty =
@@ -261,5 +265,11 @@ let rec trans_dec (
       | A.BreakExp pos -> T.NIL
       | (A.LetExp _ as e) -> check_let_exp e
       | (A.ArrayExp _ as e) -> check_array_exp e
-    in	    
+    in
     tr_exp exp
+
+let extract_esc (v_env, t_env, body): T.ty list =
+  let empty_list: T.ty list = [] in
+  escape_vars := empty_list;
+  ignore(trans_exp (v_env, t_env, body));
+  List.rev !escape_vars

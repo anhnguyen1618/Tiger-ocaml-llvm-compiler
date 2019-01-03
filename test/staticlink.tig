@@ -1,6 +1,15 @@
 let
 	var a:= 5
-	function x () = printInt(a)
+	function x (): int =
+		 let
+			var b := a
+			function n (): int = b
+		 in
+			1
+		 end
+	
+	/*var b := "hello world"
+	function f (): int = (a; 4)*/
 in
 	x()
 end

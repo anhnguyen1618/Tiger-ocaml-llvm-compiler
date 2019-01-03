@@ -5,13 +5,13 @@ define i32 @main() {
 entry:
   %a = alloca i32
   store i32 5, i32* %a
-  call void @x()
+  %0 = call i32 @x()
   ret i32 0
 }
 
 declare void @tig_print_int(i32)
 
-declare void @tig_print(i32*)
+declare void @tig_print(i8*)
 
 declare i32* @tig_init_array(i32, i32)
 
@@ -19,25 +19,32 @@ declare i32* @tig_init_record(i32)
 
 declare void @tig_flush()
 
-declare i32* @tig_getchar()
+declare i8* @tig_getchar()
 
-declare i32 @tig_ord(i32*)
+declare i32 @tig_ord(i8*)
 
-declare i32* @tig_chr(i32)
+declare i8* @tig_chr(i32)
 
-declare i32 @tig_size(i32*)
+declare i32 @tig_size(i8*)
 
-declare i32* @tig_substring(i32*, i32, i32)
+declare i8* @tig_substring(i8*, i32, i32)
 
-declare i32* @tig_concat(i32*, i32*)
+declare i8* @tig_concat(i8*, i8*)
 
 declare i32 @tig_not(i32)
 
 declare void @tig_exit(i32)
 
-define void @x() {
+define i32 @x() {
 entry:
+  %b = alloca i32
   %a = load i32, i32* %a
-  call void @tig_print_int(i32 %a)
-  ret void <badref>
+  store i32 %a, i32* %b
+  ret i32 1
+}
+
+define i32 @n() {
+entry:
+  %b = load i32, i32* %b
+  ret i32 %b
 }

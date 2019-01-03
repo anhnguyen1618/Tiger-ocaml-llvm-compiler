@@ -81,7 +81,7 @@ exp:
 | IF exp THEN exp ELSE exp                         { Absyn.IfExp({ test = $2; then' = $4; else' = Some $6; pos = $startofs}) }
 | IF exp THEN exp                                  { Absyn.IfExp({ test = $2; then' = $4; else' = None; pos = $startofs}) }
 | WHILE exp DO exp                                 { Absyn.WhileExp({test = $2; body = $4; pos = $startofs}) }
-| FOR ID ASSIGN exp TO exp DO exp                  { Absyn.ForExp({var = Symbol.symbol($2); escape = (ref true); lo = $4; hi = $6 ; body = $8; pos = $startofs}) }
+| FOR ID ASSIGN exp TO exp DO exp                  { Absyn.ForExp({var = Symbol.symbol($2); escape = (ref false); lo = $4; hi = $6 ; body = $8; pos = $startofs}) }
 | BREAK                                            { Absyn.BreakExp($startofs) }
 
 | LET decs IN sequence END                         { Absyn.LetExp({decs = $2; body = Absyn.SeqExp($4); pos = $startofs }) }
@@ -106,13 +106,13 @@ lvaluetail:
 fields:
   /* empty */                                       {[]}
   | ID COLON ID tyfieldstail                        { (Absyn.Field {name = Symbol.symbol($1);
-								    escape = (ref true);
+								    escape = (ref false);
 								    typ = Symbol.symbol($3);
 								    pos = $startofs}) :: $4 }
 ;
 
 tyfieldstail :  {[]}
-| COMMA ID COLON ID tyfieldstail { (Absyn.Field {name = Symbol.symbol($2); escape = (ref true);
+| COMMA ID COLON ID tyfieldstail { (Absyn.Field {name = Symbol.symbol($2); escape = (ref false);
                                     typ = Symbol.symbol($4); pos = $startofs($2)}) :: $5 }
 
 sequence:
@@ -142,7 +142,7 @@ type_opt:
 | COLON ID                                         { Some (Symbol.symbol($2), $startofs($2)) }
 
 varDec:
-  VAR ID type_opt ASSIGN exp                 { Absyn.VarDec({name = Symbol.symbol($2); escape = (ref true);
+  VAR ID type_opt ASSIGN exp                 { Absyn.VarDec({name = Symbol.symbol($2); escape = (ref false);
                                                               typ = $3;
                                                               init = $5; pos = $startofs}) }
 ;

@@ -192,8 +192,11 @@ let rec trans_dec (
           bodyIr
         in
         translate_body
-      in      
-      
+      in
+      print_string "print esc-----------------\n";
+      let esc = Link.extract_esc(v_env, t_env, body) in
+      List.iter T.printTy esc;
+      print_string "-------------------\n";
       Translate.func_dec (S.name name) result_type types add_arg_bindings;
       (if check_result_type(result_type, !body_type) then ()
        else 
@@ -384,6 +387,9 @@ let rec trans_dec (
       in
       match S.look(v_env, func) with
       | Some ( E.FunEntry {formals; result; label; level = decLevel} ) ->
+         if (List.length args) <> (List.length formals)
+         then Err.error pos
+                ("Function requires "^  (args |> List.length |> string_of_int) ^ " arguments");
          let arg_formal_pairs = List.map2 (fun a b -> (a, b)) args formals in
 	 let args = List.fold_left check_param [] arg_formal_pairs in
          print_string ("translate code for" ^ (S.name label) ^ "\n");
@@ -576,6 +582,13 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   
   List.iter build_external_func Env.external_functions;
   (*ignore (Llvm_executionengine.initialize());*)
+  Escape.find_escape(my_exp);
+  
+  print_string "print esc-----------------\n";
+  let esc = Link.extract_esc (Env.base_venv, Env.base_tenv, my_exp) in
+  List.iter T.printTy esc;
+  print_string "-------------------\n";
+  
   ignore(trans_exp (Env.base_venv, Env.base_tenv, Translate.outermost, my_exp, Temp.newlabel()));
   Translate.build_return_main();
   (*let the_execution_engine = Llvm_executionengine.create Translate.the_module in*)

@@ -1,11 +1,14 @@
+
 module L = Llvm
 module T = Types
 module A = Absyn
+module Err = Error.Error
+         
          
 type level = TOP
-           | NESTED of {uniq: unit ref; parent: level }
+           | NESTED of {uniq: Temp.temp; parent: level }
 
-let new_level x = x
+let new_level (parent: level) = NESTED { uniq = Temp.newtemp(); parent = parent }
 
 type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty }
                      
@@ -30,6 +33,8 @@ let int_type = L.integer_type context 32
 let string_type = L.pointer_type (L.i8_type context)
 
 let int_pointer = L.pointer_type (L.i32_type context)
+
+let int_exp i = L.const_int int_type i
             
 let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
@@ -63,6 +68,11 @@ let pop_fp_from_stack () = Stack.pop frame_pointer_stack
 
 let get_current_fp () = Stack.top frame_pointer_stack
 
+let get_fp_value (): exp =
+  let (_, fp_struct_addr) = get_current_fp() in
+  let fp_addr = L.build_gep fp_struct_addr [| int_exp(0); int_exp (0) |] "frame_pointer_address" builder in
+  L.build_load fp_addr "frame_pointer_val" builder          
+
 (* Frame pointer stack ends here *)
                        
 
@@ -91,7 +101,7 @@ let assign_stm (location: L.llvalue) (value: L.llvalue) =
 let simple_var (access: access) (name: string) =
   L.build_load access name builder
 
-let int_exp i = L.const_int int_type i
+
 
 let nil_exp = int_exp 0
 
@@ -142,15 +152,35 @@ let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: unit -> unit): exp =
   (*L.position_at_end previous_block builder;*)
   nil_exp
 
+let rec gen_static_link = function
+  | (NESTED(dec_level), NESTED(use_level), current_fp) ->
+     if Temp.eq(dec_level.uniq, use_level.uniq)
+     then current_fp
+     else
+       begin
+         let static_link_offset = int_exp (0) in
+         let next_fp_addr = L.build_gep
+                                 current_fp
+                                 [| int_exp(0); static_link_offset |]
+                                 "frame_pointer_address" builder in
+         gen_static_link (NESTED(dec_level), use_level.parent, next_fp_addr)
+       end
+  | (_, _, current_fp) -> Err.error 0 "Impossible"; current_fp
+
+
 exception Func_not_found of string
-let func_call_exp (name: string) (vals: exp list): exp =
+let func_call_exp
+      (dec_level: level)
+      (call_level: level)
+      (name: string)
+      (vals: exp list): exp =
   let callee = match L.lookup_function name the_module with
     | Some fn -> fn
     | None -> raise (Func_not_found "not found")
   in
-  let (_, fp_val) = get_current_fp() in
-  (* check fp nested here *)
-  let final_args = (fp_val :: vals) |> Array.of_list in
+  let (_, current_fp) = get_current_fp() in
+  let dec_fp_addr = gen_static_link (dec_level, call_level, current_fp) in
+  let final_args = (dec_fp_addr :: vals) |> Array.of_list in
   L.build_call callee final_args "" builder
 
 let array_exp (size: exp) (init: exp) (typ: T.ty) =

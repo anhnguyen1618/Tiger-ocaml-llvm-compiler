@@ -589,8 +589,9 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   List.iter T.printTy escs;
   Translate.build_main_func escs;
   print_string "-------------------\n";
-  
-  ignore(trans_exp (Env.base_venv, Env.base_tenv, Translate.outermost, my_exp, Temp.newlabel()));
+
+  let main_level = Translate.new_level Translate.outermost in
+  ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, Temp.newlabel()));
   Translate.build_return_main();
   (*let the_execution_engine = Llvm_executionengine.create Translate.the_module in*)
   (*let ct = Ctypes.p

@@ -178,10 +178,13 @@ let func_call_exp
     | Some fn -> fn
     | None -> raise (Func_not_found "not found")
   in
-  let (_, current_fp) = get_current_fp() in
-  let dec_fp_addr = gen_static_link (dec_level, call_level, current_fp) in
-  let final_args = (dec_fp_addr :: vals) |> Array.of_list in
-  L.build_call callee final_args "" builder
+  match dec_level with
+  | TOP -> L.build_call callee (Array.of_list vals) "" builder
+  | _ ->
+     let (_, current_fp) = get_current_fp() in
+     let dec_fp_addr = gen_static_link (dec_level, call_level, current_fp) in
+     let final_args = (dec_fp_addr :: vals) |> Array.of_list in
+     L.build_call callee final_args "" builder
 
 let array_exp (size: exp) (init: exp) (typ: T.ty) =
   let array_addr = L.build_array_alloca (get_llvm_type typ) size "array_init" builder in

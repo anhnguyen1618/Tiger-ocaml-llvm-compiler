@@ -47,6 +47,8 @@ val if_exp: (unit -> exp) -> (unit -> exp * (unit -> exp)) -> exp
 
 val func_dec: string -> Types.ty -> arg_name_type_map list -> (access list -> unit -> exp) -> unit
 
+val build_main_func: Types.ty list -> unit
+
 val build_return_main: unit -> unit
 
 val build_external_func: string -> Types.ty list -> Types.ty -> unit

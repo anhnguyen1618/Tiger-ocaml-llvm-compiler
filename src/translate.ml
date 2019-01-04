@@ -24,10 +24,7 @@ let builder = L.builder context
 
 let int_type = L.integer_type context 32 
 
-let main_function_dec = L.function_type int_type  [||]
-let main_function = L.declare_function "main" main_function_dec the_module
-let main_entry = L.append_block context "entry" main_function
-let _ = L.position_at_end main_entry builder
+
 (*     ignore (Llvm.build_ret (Llvm.const_int t_i32 123456) builder); *)
                   
 let string_type = L.pointer_type (L.i8_type context)
@@ -54,6 +51,34 @@ let rec get_llvm_type: T.ty -> L.lltype = function
              L.array_type (get_llvm_type arr_type) 0
            |]
        ) *)
+
+(* Frame pointer stack section *)
+       
+let frame_pointer_stack = Stack.create()
+
+let push_fp_to_stack (typ: L.lltype) (addr: L.llvalue) =
+  Stack.push (typ, addr) frame_pointer_stack
+
+let pop_fp_from_stack () = Stack.pop frame_pointer_stack
+
+let get_current_fp () = Stack.top frame_pointer_stack
+
+(* Frame pointer stack ends here *)
+                       
+
+let build_frame_pointer_alloc (esc_vars: T.ty list) =
+  let element_types = esc_vars |> List.map get_llvm_type |> Array.of_list in
+  let frame_pointer_type = L.struct_type context element_types in
+  let address = L.build_alloca frame_pointer_type "frame_pointer" builder in
+  push_fp_to_stack frame_pointer_type address
+  
+
+let build_main_func (esc_vars: T.ty list): unit = 
+  let main_function_dec = L.function_type int_type  [||] in
+  let main_function = L.declare_function "main" main_function_dec the_module in
+  let main_entry = L.append_block context "entry" main_function in
+  L.position_at_end main_entry builder;
+  build_frame_pointer_alloc esc_vars
        
 let alloc_local (esc: bool) (name: string) (typ: T.ty): access =
   let func_block = L.block_parent (L.insertion_block builder) in
@@ -123,7 +148,9 @@ let func_call_exp (name: string) (vals: exp list): exp =
     | Some fn -> fn
     | None -> raise (Func_not_found "not found")
   in
-  let final_args = Array.of_list vals in
+  let (_, fp_val) = get_current_fp() in
+  (* check fp nested here *)
+  let final_args = (fp_val :: vals) |> Array.of_list in
   L.build_call callee final_args "" builder
 
 let array_exp (size: exp) (init: exp) (typ: T.ty) =
@@ -187,10 +214,6 @@ let subscript_exp_left (arr_addr: exp ) (index: exp) =
   let addr = L.build_load arr_addr "load_left" builder in
   L.build_gep addr [| index |] "element_left" builder
 
-         
-
-
-
 
 let if_exp
       (gen_test_val: unit -> exp)
@@ -230,8 +253,10 @@ let func_dec
       (typ: T.ty)
       (args: arg_name_type_map list)
       (add_arg_bindings: access list -> unit -> exp) =
-  let arr_types = (List.map (fun (e: arg_name_type_map) -> get_llvm_type e.ty) args) |> Array.of_list in
-  let func_type = L.function_type (get_llvm_type typ) arr_types in
+  let (fp_type, _) = get_current_fp() in
+  let arg_type_list = fp_type :: (List.map (fun (e: arg_name_type_map) -> get_llvm_type e.ty) args) in
+  let arg_types = arg_type_list |> Array.of_list in
+  let func_type = L.function_type (get_llvm_type typ) arg_types in
   let func_block =
     match L.lookup_function name the_module with
     | None -> L.declare_function name func_type the_module
@@ -253,7 +278,7 @@ let func_dec
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;
   ignore(L.build_ret (gen_body()) builder);
-  
+  ignore(pop_fp_from_stack());
   L.position_at_end previous_block builder;
   
   L.print_module "Tiger jit" the_module
@@ -261,6 +286,7 @@ let func_dec
                  (*Llvm_analysis.assert_valid_function func_block;*)
 
 let build_return_main () =
+  ignore(pop_fp_from_stack());
   ignore(L.build_ret nil_exp builder)
 
 let build_external_func

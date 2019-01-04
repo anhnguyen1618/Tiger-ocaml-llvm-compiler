@@ -1,12 +1,6 @@
 ; ModuleID = 'Tiger jit'
 source_filename = "Tiger jit"
 
-define i32 @main() {
-entry:
-  %a = alloca i32
-  store i32 5, i32* %a
-}
-
 declare void @tig_print_int(i32)
 
 declare void @tig_print(i8*)
@@ -32,6 +26,13 @@ declare i8* @tig_concat(i8*, i8*)
 declare i32 @tig_not(i32)
 
 declare void @tig_exit(i32)
+
+define i32 @main() {
+entry:
+  %a = alloca i32
+  %frame_pointer = alloca { i32 }
+  store i32 5, i32* %a
+}
 
 define i32 @x() {
 entry:

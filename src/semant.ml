@@ -585,8 +585,9 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   Escape.find_escape(my_exp);
   
   print_string "print esc-----------------\n";
-  let esc = Link.extract_esc (Env.base_venv, Env.base_tenv, my_exp) in
-  List.iter T.printTy esc;
+  let escs = Link.extract_esc (Env.base_venv, Env.base_tenv, my_exp) in
+  List.iter T.printTy escs;
+  Translate.build_main_func escs;
   print_string "-------------------\n";
   
   ignore(trans_exp (Env.base_venv, Env.base_tenv, Translate.outermost, my_exp, Temp.newlabel()));

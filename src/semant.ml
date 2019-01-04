@@ -53,7 +53,7 @@ let rec trans_dec (
   let check_var_dec (
           (v_env: venv),
           (t_env: tenv),
-          A.VarDec { name; typ; init; pos; escape }
+          A.VarDec { name; typ; init; pos; escape; order }
         ) =
     let {exp = initial_value; ty = rhs_type} = trans_exp (v_env, t_env, level, init, break)
     in
@@ -65,8 +65,8 @@ let rec trans_dec (
            if T.eq(lhs_type, rhs_type)
 	   then
              begin
-	       let access = Translate.alloc_local !escape (S.name name) lhs_type  in
-               let new_entry = E.VarEntry{ty = lhs_type; access = access} in
+	       let access = Translate.alloc_local !order (S.name name) lhs_type  in
+               let new_entry = E.VarEntry{ty = lhs_type; access = } in
 	       let new_v_env = S.enter(v_env, name, new_entry) in
 
               (* match lhs_type with
@@ -233,7 +233,7 @@ let rec trans_dec (
     let check_simple_var ((s: S.symbol), (pos: int)): expty =
       match S.look(v_env, s) with
         Some (E.VarEntry({ty; access})) ->
-         {exp = Translate.simple_var access (S.name s); ty = actual_ty ty}
+         {exp = Translate.simple_var access (S.name s) level; ty = actual_ty ty}
       | Some _ ->
          Err.error pos ("Tiger does not support function closure yet!\n");
          {exp = Translate.int_exp 0; ty = T.NIL}
@@ -301,7 +301,8 @@ let rec trans_dec (
       print_string ("run here" ^ S.name(s));
       match S.look(v_env, s) with
         Some (E.VarEntry({ty; access})) ->
-         {exp = access ; ty = actual_ty ty}
+         let abs_addr = Translate.simple_var_left access (S.name s) level in
+         {exp = abs_addr ; ty = actual_ty ty}
       | Some _ ->
          Err.error pos ("Tiger does not support function closure yet!\n");
          {exp = Translate.int_exp 0; ty = T.NIL}

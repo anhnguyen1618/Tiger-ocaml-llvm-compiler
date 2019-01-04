@@ -12,13 +12,18 @@ let new_level (parent: level) = NESTED { uniq = Temp.newtemp(); parent = parent 
 
 type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty }
                      
-type access = L.llvalue
+type address = IN_STATIC_LINK of L.llvalue
+             | IN_FRAME of L.llvalue
+
+type access = level * address
 
 type exp = L.llvalue
 
 type expty = {exp: exp; ty: T.ty}
          
 let outermost = TOP
+
+let not_esc_order = -1
 
 (* LLVM code *)
 let context = L.global_context ()
@@ -90,19 +95,61 @@ let build_main_func (esc_vars: T.ty list): unit =
   L.position_at_end main_entry builder;
   build_frame_pointer_alloc esc_vars
        
-let alloc_local (esc: bool) (name: string) (typ: T.ty): access =
+let alloc_local
+      (dec_level: level)
+      (esc_order: int)
+      (name: string)
+      (typ: T.ty): access =
   let func_block = L.block_parent (L.insertion_block builder) in
   let builder = L.builder_at context (L.instr_begin ( L.entry_block func_block )) in
-  L.build_alloca ( get_llvm_type typ) name builder
+  match esc_order with
+  | -1 ->
+     let address = L.build_alloca (get_llvm_type typ) name builder in
+     (dec_level, IN_FRAME(address))
+  | _ -> (dec_level, IN_STATIC_LINK(int_exp esc_order))
 
-let assign_stm (location: L.llvalue) (value: L.llvalue) =
+let rec gen_static_link = function
+  | (NESTED(dec_level), NESTED(use_level), current_fp) ->
+     if Temp.eq(dec_level.uniq, use_level.uniq)
+     then current_fp
+     else
+       begin
+         let static_link_offset = int_exp (0) in
+         let next_fp_addr = L.build_gep
+                                 current_fp
+                                 [| int_exp(0); static_link_offset |]
+                                 "frame_pointer_address" builder in
+         gen_static_link (NESTED(dec_level), use_level.parent, next_fp_addr)
+       end
+  | (_, _, current_fp) -> Err.error 0 "Impossible"; current_fp
+
+(* assume that other part pass calculated location already *)
+let assign_stm (location: exp) (value: L.llvalue) =
   ignore (L.build_store value location builder)
 
-let simple_var (access: access) (name: string) =
-  L.build_load access name builder
+       
+let simple_var_left
+      ((dec_level, address): access)
+      (name: string)
+      (use_level: level) =
+  match address with
+  | IN_FRAME addr -> addr (* var in-frame never esc -> no need for static link *)
+  | IN_STATIC_LINK offset ->
+     let (_, fp_addr) = get_current_fp() in
+     let fp_dec_level_addr = gen_static_link (dec_level, use_level, fp_addr) in
+     L.build_gep fp_dec_level_addr
+       [| int_exp(0); offset |]
+       name
+       builder
+  
+let simple_var
+      (access: access)
+      (name: string)
+      (use_level: level) =
+  let absolute_addr = simple_var_left access name use_level in
+  L.build_load absolute_addr name builder  
 
-
-
+     
 let nil_exp = int_exp 0
 
 let string_exp s = L.build_global_stringptr s "" builder
@@ -152,20 +199,6 @@ let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: unit -> unit): exp =
   (*L.position_at_end previous_block builder;*)
   nil_exp
 
-let rec gen_static_link = function
-  | (NESTED(dec_level), NESTED(use_level), current_fp) ->
-     if Temp.eq(dec_level.uniq, use_level.uniq)
-     then current_fp
-     else
-       begin
-         let static_link_offset = int_exp (0) in
-         let next_fp_addr = L.build_gep
-                                 current_fp
-                                 [| int_exp(0); static_link_offset |]
-                                 "frame_pointer_address" builder in
-         gen_static_link (NESTED(dec_level), use_level.parent, next_fp_addr)
-       end
-  | (_, _, current_fp) -> Err.error 0 "Impossible"; current_fp
 
 
 exception Func_not_found of string

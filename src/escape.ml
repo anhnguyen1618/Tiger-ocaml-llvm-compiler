@@ -2,8 +2,9 @@ module A = Absyn
 
 type depth = int
 type esc_env = (depth * bool ref) Symbol.table
-
-                (* looks through the variable references to the underlying var *)
+              
+  
+(* looks through the variable references to the underlying var *)
 let rec traverse_var: esc_env * depth * A.var -> unit = function
   | (env, d, (A.SimpleVar(id, pos))) ->
      print_string ("run into var\n");
@@ -11,7 +12,7 @@ let rec traverse_var: esc_env * depth * A.var -> unit = function
      print_string (string_of_int d);
      print_string "\n";
      (match Symbol.look (env,id) with
-      | Some (depth, escape) -> escape := depth < d
+      | Some (depth, escape) -> escape := depth < d;
       | None -> ())
   | (env, d, (A.FieldVar(var, id, pos))) ->
       traverse_var(env, d, var)
@@ -71,7 +72,7 @@ and traverseDecs (env, d, (decs:Absyn.dec list)) : esc_env =
     | (env, d, A.FunctionDec(fundecs)) ->
       List.iter (fun (A.Func{name; params; result; body; pos}) -> traverse_fun(env, params, body)) fundecs;
       env
-    | (env, d, A.VarDec{name; escape; typ; init; pos}) ->
+    | (env, d, A.VarDec{name; escape; typ; init; pos; _}) ->
        traverse_exp (env, d, init);
        Symbol.enter(env, name, (d, escape))
     | (env, d, A.TypeDec(typedecs)) -> env

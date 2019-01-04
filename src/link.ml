@@ -13,7 +13,18 @@ type tenv = T.ty Symbol.table
 type expty = T.ty
 type decty =  { v_env : venv; t_env: tenv }
 
+(* state*)
 let escape_vars: T.ty list ref  = ref []
+let current_counter = ref 1 (* 0 belongs to static link *)
+
+let increase_counter () = current_counter := !current_counter + 1
+
+let get_counter () = !current_counter
+
+let reset_global_state () =
+  let empty_list: T.ty list = [] in
+  escape_vars := empty_list;
+  current_counter := 1
 
 
 let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
@@ -37,6 +48,7 @@ let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
     | A.ArrayTy (s, p) -> check_array_type (s, p)
   in
   trans_ty ty
+  
 
 let rec trans_dec (
             (v_env: venv),
@@ -47,10 +59,16 @@ let rec trans_dec (
   let check_var_dec (
           (v_env: venv),
           (t_env: tenv),
-          A.VarDec { name; typ; init; pos; escape }
+          A.VarDec { name; typ; init; pos; escape; order }
         ) =
     let rhs_type = trans_exp (v_env, t_env, init) in
-    if !escape then escape_vars := rhs_type:: !escape_vars;
+    if !escape
+    then
+      begin
+        escape_vars := rhs_type :: !escape_vars;
+        order := !current_counter;
+        increase_counter()
+      end;
     if !escape then print_string ("hello world: " ^ Symbol.name(name));
     match typ with
       Some (s, p) ->
@@ -269,7 +287,6 @@ let rec trans_dec (
     tr_exp exp
 
 let extract_esc (v_env, t_env, body): T.ty list =
-  let empty_list: T.ty list = [] in
-  escape_vars := empty_list;
+  reset_global_state ();
   ignore(trans_exp (v_env, t_env, body));
   List.rev !escape_vars

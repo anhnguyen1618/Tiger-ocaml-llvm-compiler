@@ -2,6 +2,8 @@
 type pos = int
 type symbol = Symbol.symbol
 
+let gen_dumb_order () = ref (-1)
+
 type var = SimpleVar of symbol * pos
          | FieldVar of var * symbol * pos
          | SubscriptVar of var * exp * pos
@@ -29,6 +31,7 @@ and typeDec = Type of { name: symbol; ty: ty; pos: pos }
 and dec = FunctionDec of fundec list
         | VarDec of { name: symbol;
 		      escape: bool ref;
+                      order: int ref;
 		      typ: (symbol * pos) option;
 		      init: exp;
 		      pos: pos }
@@ -57,11 +60,13 @@ let rewrite_for_exp: exp -> exp = function
           VarDec {
 	      name = var;
 	      escape = escape;
+              order = gen_dumb_order();
 	      typ = Some(Symbol.symbol("int"), pos);
 	      init = lo; pos = pos};
 	  VarDec {
 	      name = Symbol.symbol("_limit");
 	      escape = ref(false);
+              order = gen_dumb_order();
 	      typ = Some(Symbol.symbol("int"), pos);
 	      init = hi; pos = pos}
         ];

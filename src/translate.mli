@@ -1,7 +1,6 @@
 type level
 type exp
-
-type access = exp
+type access
 
 type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty }
 
@@ -13,11 +12,13 @@ val new_level: level -> level
 
 val nil_exp: exp
 
-val alloc_local: bool -> string -> Types.ty -> access
+val alloc_local: level -> int -> string -> Types.ty -> access
 
-val assign_stm: (*access*) exp -> exp -> unit
+val assign_stm: exp -> exp -> unit
 
-val simple_var: access -> string -> exp
+val simple_var: access -> string -> level -> exp
+
+val simple_var_left: access -> string -> level -> exp
 
 val int_exp: int -> exp
 

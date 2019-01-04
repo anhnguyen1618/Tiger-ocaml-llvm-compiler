@@ -14,6 +14,8 @@ let addFuncDec  = function
 let addTypeDec x = match x with
                   | (Absyn.TypeDec(nextTypes), curType) -> Absyn.TypeDec(curType :: nextTypes)
                   | (_, curType) -> Absyn.TypeDec([curType])
+
+let dumb_order = -1
 %}
 
 %token <int>    INT
@@ -143,7 +145,7 @@ type_opt:
 
 varDec:
   VAR ID type_opt ASSIGN exp                 { Absyn.VarDec({name = Symbol.symbol($2); escape = (ref false);
-                                                              typ = $3;
+                                                              order = ref dumb_order; typ = $3;
                                                               init = $5; pos = $startofs}) }
 ;
 

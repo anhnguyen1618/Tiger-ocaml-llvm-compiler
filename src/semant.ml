@@ -13,6 +13,8 @@ type tenv = T.ty Symbol.table
 type expty = {exp: Translate.exp; ty: T.ty}
 type decty =  { v_env : venv; t_env: tenv }
 
+type name_type = {name: S.symbol; ty: T.ty}
+
 let nested_loop_level = ref 0
 let change_nested_loop_level oper = nested_loop_level := oper !nested_loop_level 1
 let increase_nested_Level () = change_nested_loop_level (+)
@@ -42,6 +44,7 @@ let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
   in
   trans_ty ty
 
+exception Bar of string
 let rec trans_dec (
             (v_env: venv),
             (t_env: tenv),
@@ -57,7 +60,6 @@ let rec trans_dec (
         ) =
     let {exp = initial_value; ty = rhs_type} = trans_exp (v_env, t_env, level, init, break)
     in
-    
     match typ with
       Some (s, p) ->
        (match S.look(t_env, s) with
@@ -65,18 +67,12 @@ let rec trans_dec (
            if T.eq(lhs_type, rhs_type)
 	   then
              begin
-	       let access = Translate.alloc_local level !order (S.name name) lhs_type  in
-               let new_entry = E.VarEntry{ty = lhs_type; access = } in
+	       let access = Translate.alloc_local level !order (S.name name) lhs_type in
+               let new_entry = E.VarEntry{ty = lhs_type; access = access} in
 	       let new_v_env = S.enter(v_env, name, new_entry) in
-
-              (* match lhs_type with
-               | T.ARRAY x -> ()
-               | _ -> ()
-
-
-
-               ;*)
-               Translate.assign_stm access initial_value;
+               
+               let addr = Translate.simple_var_left access "var_dec" level in
+               Translate.assign_stm addr initial_value;
 	       {
                  v_env = new_v_env;
 	         t_env = t_env;
@@ -97,10 +93,12 @@ let rec trans_dec (
 	  {v_env = v_env; t_env = t_env })
        )
     | None -> ( if T.eq(rhs_type, T.NIL) (* case  var a := nil *)
-		then (Err.error pos ("Can't assign Nil to non-record type variable"));		
-		let access = Translate.alloc_local !escape (S.name name) rhs_type in
+		then (Err.error pos ("Can't assign Nil to non-record type variable"));
+		let access = Translate.alloc_local level !order (S.name name) rhs_type in
                 let new_entry = E.VarEntry{ty = rhs_type; access = access} in
-                 Translate.assign_stm access initial_value;
+                let addr = Translate.simple_var_left access "var_dec" level in
+
+                 Translate.assign_stm addr initial_value;
 		{
 		  v_env = S.enter(v_env, name, new_entry);
 		  t_env = t_env
@@ -182,7 +180,8 @@ let rec trans_dec (
       let add_arg_bindings ((_:: alloc_addrs): Translate.access list) =
         let f v_env {name; ty} access =
           S.enter (v_env, name, E.VarEntry{ ty = ty; access = access})
-        let body_venv = List.fold_left2 f cur_v_env param_name_type addresses 
+        in
+        let body_venv = List.fold_left2 f cur_v_env param_name_type alloc_addrs in
         let translate_body () =
           let {exp = bodyIr; ty = result_body_type } = trans_exp(body_venv, t_env, func_level, body, break) in
           body_type := result_body_type;
@@ -193,15 +192,18 @@ let rec trans_dec (
       
       print_string "print esc-----------------\n";
       let esc_vars = Link.extract_esc(v_env, t_env, body) in
-      let next_esc_order = 1 + List.length esc in
+      let next_esc_order = 1 + List.length esc_vars in
       
-      List.iter T.printTy esc;
+      List.iter T.printTy esc_vars;
       print_string "-------------------\n";
       
-      let gen_arg_mappings (result, index) (A.Field {escape} as e) =
+      let gen_arg_mappings
+            (result, index)
+            (A.Field {escape} as e) =
         let esc_order = if !escape then index else -1 in
         let new_index = if !escape then index + 1 else index in
-        let new_result = result @ {name = get_name e; ty = get_type e; esc_order = esc_order} in
+        let cur_map: arg_name_type_map = {name = get_name e; ty = get_type e; esc_order = esc_order} in
+        let new_result = result @ [cur_map] in
         (new_result, new_index)
       in
       let (args, _) = List.fold_left gen_arg_mappings ([], next_esc_order) params in
@@ -402,14 +404,14 @@ let rec trans_dec (
         acc @ [argIr]
       in
       match S.look(v_env, func) with
-      | Some ( E.FunEntry {formals; result; label; level = decLevel} ) ->
+      | Some ( E.FunEntry {formals; result; label; level = dec_level} ) ->
          if (List.length args) <> (List.length formals)
          then Err.error pos
                 ("Function requires "^  (args |> List.length |> string_of_int) ^ " arguments");
          let arg_formal_pairs = List.map2 (fun a b -> (a, b)) args formals in
 	 let args = List.fold_left check_param [] arg_formal_pairs in
          print_string ("translate code for" ^ (S.name label) ^ "\n");
-         {exp = Translate.func_call_exp (S.name label) args; ty = result}
+         {exp = Translate.func_call_exp dec_level level (S.name label) args; ty = result}
 
       | Some _ ->
          Err.error pos (S.name(func) ^ " does not have type function");
@@ -590,6 +592,7 @@ let rec trans_dec (
     in	    
     tr_exp exp
 
+exception Foo of string
 let trans_prog ((my_exp: A.exp), (output_name: string)) =
   let build_external_func = function
     | (_, Env.FunEntry {formals; result; label}) -> Translate.build_external_func (S.name label) formals result
@@ -600,14 +603,16 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   (*ignore (Llvm_executionengine.initialize());*)
   Escape.find_escape(my_exp);
   
-  print_string "print esc-----------------\n";
+  print_string "print this shit esc-----------------\n";
   let escs = Link.extract_esc (Env.base_venv, Env.base_tenv, my_exp) in
   List.iter T.printTy escs;
-  Translate.build_main_func escs;
+
+    Translate.build_main_func escs;
+    
   print_string "-------------------\n";
 
   let main_level = Translate.new_level Translate.outermost in
-  ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, Temp.newlabel()));
+  ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, Temp.newlabel())); 
   Translate.build_return_main();
   (*let the_execution_engine = Llvm_executionengine.create Translate.the_module in*)
   (*let ct = Ctypes.p

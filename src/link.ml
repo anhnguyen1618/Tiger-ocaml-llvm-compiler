@@ -67,15 +67,17 @@ let rec trans_dec (
       begin
         escape_vars := rhs_type :: !escape_vars;
         order := !current_counter;
+        print_string ("hello world: " ^ Symbol.name(name));
         increase_counter()
-      end;
-    if !escape then print_string ("hello world: " ^ Symbol.name(name));
+      end
+    else
+      print_string (Symbol.name(name) ^" not escape\n");
     match typ with
       Some (s, p) ->
        begin
          match S.look(t_env, s) with
 	 | Some lhs_type ->
-            let new_entry = E.VarEntry{ty = lhs_type; access = nil_exp} in
+            let new_entry = E.VarEntry{ty = lhs_type; access = Translate.dummy_access} in
 	    let new_v_env = S.enter(v_env, name, new_entry) in
             {
               v_env = new_v_env;
@@ -84,7 +86,7 @@ let rec trans_dec (
 	 | None -> {v_env = v_env; t_env = t_env }
        end
     | None ->
-       let new_entry = E.VarEntry{ty = rhs_type; access = nil_exp} in
+       let new_entry = E.VarEntry{ty = rhs_type; access = Translate.dummy_access} in
        {
 	 v_env = S.enter(v_env, name, new_entry);
 	 t_env = t_env
@@ -125,7 +127,7 @@ let rec trans_dec (
     in
    
     let get_type (A.Field {name; escape = _; typ; pos}): arg_name_type_map =
-      {name = name; ty = look_type_up (typ, pos)}
+      {name = name; ty = look_type_up (typ, pos); esc_order = -1}
     in
     
     let add_func_header acc (A.Func {name; params; result; body; pos}) =

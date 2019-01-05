@@ -2,7 +2,7 @@ type level
 type exp
 type access
 
-type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty }
+type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty; esc_order: int }
 
 val the_module: Llvm.llmodule
             
@@ -11,6 +11,8 @@ val outermost: level
 val new_level: level -> level
 
 val nil_exp: exp
+
+val dummy_access: access
 
 val alloc_local: level -> int -> string -> Types.ty -> access
 
@@ -38,7 +40,7 @@ val subscript_exp: exp -> exp -> exp
 
 val subscript_exp_left: exp -> exp -> exp
 
-val func_call_exp: string -> exp list -> exp
+val func_call_exp: level -> level -> string -> exp list -> exp
       
 val op_exp: exp -> Absyn.oper -> exp -> exp
 
@@ -46,7 +48,7 @@ val while_exp : (unit -> exp) -> (unit -> unit) -> exp
 
 val if_exp: (unit -> exp) -> (unit -> exp * (unit -> exp)) -> exp
 
-val func_dec: string -> Types.ty -> arg_name_type_map list -> (access list -> unit -> exp) -> unit
+val func_dec: level -> string -> Types.ty -> Types.ty list -> arg_name_type_map list -> (access list -> unit -> exp) -> unit
 
 val build_main_func: Types.ty list -> unit
 

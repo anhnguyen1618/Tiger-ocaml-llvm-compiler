@@ -83,17 +83,19 @@ let get_fp_value (): exp =
 
 let build_frame_pointer_alloc (esc_vars: T.ty list) =
   let element_types = List.map (fun typ -> (Symbol.symbol(""), typ)) esc_vars in
-  let frame_pointer_type = T.RECORD_ALLOC(element_types, Temp.newtemp()) in
-  let address = L.build_alloca (get_llvm_type frame_pointer_type) "frame_pointer" builder in
+  let frame_pointer_struct_type = T.RECORD_ALLOC(element_types, Temp.newtemp()) in
+  let address = L.build_alloca (get_llvm_type frame_pointer_struct_type) "frame_pointer" builder in
+  let frame_pointer_type = T.RECORD(element_types, Temp.newtemp()) in
   push_fp_to_stack frame_pointer_type address
   
 
-let build_main_func (esc_vars: T.ty list): unit = 
+let build_main_func (esc_vars: T.ty list): unit =
   let main_function_dec = L.function_type int_type  [||] in
   let main_function = L.declare_function "main" main_function_dec the_module in
   let main_entry = L.append_block context "entry" main_function in
+  let stuff_static_link = T.INT in
   L.position_at_end main_entry builder;
-  build_frame_pointer_alloc esc_vars
+  build_frame_pointer_alloc (stuff_static_link::esc_vars)
 
 
 let point_to_func_entry_builder (): L.llbuilder =
@@ -111,11 +113,12 @@ let alloc_local
       (name: string)
       (typ: T.ty): access =
   let builder = point_to_func_entry_builder() in
+
   match esc_order with
   | -1 ->
      let address = L.build_alloca (get_llvm_type typ) name builder in
      (dec_level, IN_FRAME(address))
-  | _ -> (dec_level, IN_STATIC_LINK(int_exp esc_order))
+  | _ -> (*print_string ("offset " ^ (string_of_int esc_order)); exit 1;*) (dec_level, IN_STATIC_LINK(int_exp esc_order))
 
 let rec gen_static_link = function
   | (NESTED(dec_level), NESTED(use_level), current_fp) ->
@@ -124,17 +127,20 @@ let rec gen_static_link = function
      else
        begin
          let static_link_offset = int_exp (0) in
-         let next_fp_addr = L.build_gep
+         let next_fp_addr_in_static_link = L.build_gep
                                  current_fp
                                  [| int_exp(0); static_link_offset |]
-                                 "frame_pointer_address" builder in
+                                 "frame_pointer_address_in_static_link" builder in
+         let next_fp_addr = L.build_load next_fp_addr_in_static_link "frame_pointer_address" builder in
          gen_static_link (NESTED(dec_level), use_level.parent, next_fp_addr)
        end
   | (_, _, current_fp) -> Err.error 0 "Impossible"; current_fp
 
+
 (* assume that other part pass calculated location already *)
 let assign_stm (location: exp) (value: L.llvalue) =
   ignore (L.build_store value location builder)
+  
 
        
 let simple_var_left
@@ -146,11 +152,12 @@ let simple_var_left
   | IN_STATIC_LINK offset ->
      let (_, fp_addr) = get_current_fp() in
      let fp_dec_level_addr = gen_static_link (dec_level, use_level, fp_addr) in
+     
      L.build_gep fp_dec_level_addr
        [| int_exp(0); offset |]
        name
        builder
-  
+
 let simple_var
       (access: access)
       (name: string)
@@ -160,6 +167,8 @@ let simple_var
 
      
 let nil_exp = int_exp 0
+
+let dummy_access: access = (outermost, IN_FRAME(nil_exp))
 
 let string_exp s = L.build_global_stringptr s "" builder
 
@@ -221,7 +230,7 @@ let func_call_exp
     | None -> raise (Func_not_found "not found")
   in
   match dec_level with
-  | TOP -> L.build_call callee (Array.of_list vals) "" builder
+  | TOP -> print_string "run to top call\n"; L.build_call callee (Array.of_list vals) "" builder
   | _ ->
      let (_, current_fp) = get_current_fp() in
      let dec_fp_addr = gen_static_link (dec_level, call_level, current_fp) in
@@ -375,7 +384,11 @@ let func_dec
     assign_stm final_addr arg_val;
     (level, address)
   in
-  let addresses = List.map2 assign_val args (L.params func_block |> Array.to_list) in
+  print_string "run through here\n";
+  print_string ("args length: " ^ string_of_int (List.length args));
+  let arg_mappings = {name = Symbol.symbol "static_link";
+                      ty= parent_fp_type; esc_order = 0 } :: args in
+  let addresses = List.map2 assign_val arg_mappings (L.params func_block |> Array.to_list) in
   let gen_body = add_arg_bindings addresses in
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;

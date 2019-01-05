@@ -29,21 +29,20 @@ declare void @tig_exit(i32)
 
 define i32 @main() {
 entry:
-  %a = alloca i32
-  %frame_pointer = alloca { i32 }
-  store i32 5, i32* %a
+  %frame_pointer = alloca { i32, i32 }
+  %var_dec = getelementptr { i32, i32 }, { i32, i32 }* %frame_pointer, i32 0, i32 1
+  store i32 5, i32* %var_dec
 }
 
-define i32 @x() {
+define i32 @x({ i32, i32 }*) {
 entry:
-  %b = alloca i32
-  %a = load i32, i32* %a
-  store i32 %a, i32* %b
-  ret i32 1
-}
-
-define i32 @n() {
-entry:
-  %b = load i32, i32* %b
-  ret i32 %b
+  %frame_pointer = alloca { { i32, i32 }* }
+  %arg_address = getelementptr { { i32, i32 }* }, { { i32, i32 }* }* %frame_pointer, i32 0, i32 0
+  store { i32, i32 }* %0, { i32, i32 }** %arg_address
+  %frame_pointer_address_in_static_link = getelementptr { { i32, i32 }* }, { { i32, i32 }* }* %frame_pointer, i32 0, i32 0
+  %frame_pointer_address = load { i32, i32 }*, { i32, i32 }** %frame_pointer_address_in_static_link
+  %a = getelementptr { i32, i32 }, { i32, i32 }* %frame_pointer_address, i32 0, i32 1
+  %a1 = load i32, i32* %a
+  call void @tig_print_int(i32 %a1)
+  ret i32 5
 }

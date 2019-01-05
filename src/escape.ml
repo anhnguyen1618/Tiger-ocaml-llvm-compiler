@@ -12,7 +12,7 @@ let rec traverse_var: esc_env * depth * A.var -> unit = function
      print_string (string_of_int d);
      print_string "\n";
      (match Symbol.look (env,id) with
-      | Some (depth, escape) -> escape := depth < d;
+      | Some (depth, escape) -> if not(!escape) then escape := depth < d (* have to check here because esc = false can override prev true*)
       | None -> ())
   | (env, d, (A.FieldVar(var, id, pos))) ->
       traverse_var(env, d, var)

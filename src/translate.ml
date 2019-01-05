@@ -130,8 +130,8 @@ let rec gen_static_link = function
          let next_fp_addr_in_static_link = L.build_gep
                                  current_fp
                                  [| int_exp(0); static_link_offset |]
-                                 "frame_pointer_address_in_static_link" builder in
-         let next_fp_addr = L.build_load next_fp_addr_in_static_link "frame_pointer_address" builder in
+                                 "fp_addr_in_sl" builder in
+         let next_fp_addr = L.build_load next_fp_addr_in_static_link "fp_addr" builder in
          gen_static_link (NESTED(dec_level), use_level.parent, next_fp_addr)
        end
   | (_, _, current_fp) -> Err.error 0 "Impossible"; current_fp

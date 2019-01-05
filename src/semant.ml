@@ -65,7 +65,7 @@ let rec trans_dec (
            if T.eq(lhs_type, rhs_type)
 	   then
              begin
-	       let access = Translate.alloc_local !order (S.name name) lhs_type  in
+	       let access = Translate.alloc_local level !order (S.name name) lhs_type  in
                let new_entry = E.VarEntry{ty = lhs_type; access = } in
 	       let new_v_env = S.enter(v_env, name, new_entry) in
 
@@ -141,9 +141,13 @@ let rec trans_dec (
       | None -> T.UNIT
     in
    
-    let get_type (A.Field {name; escape = _; typ; pos}): arg_name_type_map =
-      {name = name; ty = look_type_up (typ, pos)}
+    let get_type (A.Field {name; escape = _; typ; pos}): T.ty =
+      look_type_up (typ, pos)
     in
+
+    let get_name (A.Field {name}): S.symbol = name in
+
+    let get_name_type x = {name = get_name x; ty = get_type x} in
 
     let check_result_type (expectType, resultType) =
       if T.eq(expectType, T.UNIT) then true
@@ -151,7 +155,7 @@ let rec trans_dec (
     in
     
     let add_func_header acc (A.Func {name; params; result; body; pos}) =
-      let f param = get_type param |> (fun x -> x.ty) |> (U.actual_ty t_env) in
+      let f param = get_type param |> (U.actual_ty t_env) in
       let type_list = List.map f params in
       let result_type = get_type_for_result result in
       let label = Temp.newlabel in (* add label here later to avoid duplicate name*)
@@ -164,9 +168,9 @@ let rec trans_dec (
     
 						
     let add_new_func_entry (cur_v_env: venv) (A.Func {name; params; result; body; pos}) = 
-      let types: arg_name_type_map list = List.map get_type params in
+      let param_name_type = List.map get_name_type params in
       let result_type = get_type_for_result result in
-      let escapes = List.map (fun (A.Field x) -> !(x.escape)) params in
+      let escapes = List.map (fun (A.Field {escape}) -> !escape) params in
       let label = match S.look(cur_v_env, name) with
 	| Some(E.FunEntry {label; _}) -> label
 	| _ -> Temp.newlabel() in
@@ -175,17 +179,10 @@ let rec trans_dec (
 
       let body_type = ref T.UNIT in
 
-      let add_arg_bindings (addresses: Translate.access list) = 
-        let add_params_to_body (temp, i) ({name; ty}: arg_name_type_map) =
-          let mapping = S.enter(
-                            temp,
-                            name,
-	                    E.VarEntry({ ty = ty; access = (List.nth addresses i)})) in
-	  ( mapping, i + 1)
-        in
-        
-        let startAccessIndex = 0 in (* First access is static link, first front- args is allocated at index 1*)
-        let (body_venv, _) = List.fold_left add_params_to_body (cur_v_env, startAccessIndex) types in
+      let add_arg_bindings ((_:: alloc_addrs): Translate.access list) =
+        let f v_env {name; ty} access =
+          S.enter (v_env, name, E.VarEntry{ ty = ty; access = access})
+        let body_venv = List.fold_left2 f cur_v_env param_name_type addresses 
         let translate_body () =
           let {exp = bodyIr; ty = result_body_type } = trans_exp(body_venv, t_env, func_level, body, break) in
           body_type := result_body_type;
@@ -193,11 +190,29 @@ let rec trans_dec (
         in
         translate_body
       in
+      
       print_string "print esc-----------------\n";
-      let esc = Link.extract_esc(v_env, t_env, body) in
+      let esc_vars = Link.extract_esc(v_env, t_env, body) in
+      let next_esc_order = 1 + List.length esc in
+      
       List.iter T.printTy esc;
       print_string "-------------------\n";
-      Translate.func_dec (S.name name) result_type types add_arg_bindings;
+      
+      let gen_arg_mappings (result, index) (A.Field {escape} as e) =
+        let esc_order = if !escape then index else -1 in
+        let new_index = if !escape then index + 1 else index in
+        let new_result = result @ {name = get_name e; ty = get_type e; esc_order = esc_order} in
+        (new_result, new_index)
+      in
+      let (args, _) = List.fold_left gen_arg_mappings ([], next_esc_order) params in
+      
+      Translate.func_dec
+        func_level
+        (S.name name)
+        result_type
+        esc_vars
+        args
+        add_arg_bindings;
       (if check_result_type(result_type, !body_type) then ()
        else 
          let msg = Printf.sprintf "return type '%s'  does not match with '%s'"

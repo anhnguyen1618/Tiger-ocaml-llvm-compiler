@@ -94,14 +94,23 @@ let build_main_func (esc_vars: T.ty list): unit =
   let main_entry = L.append_block context "entry" main_function in
   L.position_at_end main_entry builder;
   build_frame_pointer_alloc esc_vars
+
+
+let point_to_func_entry_builder (): L.llbuilder =
+  let func_block = L.block_parent (L.insertion_block builder) in
+  L.builder_at context (L.instr_begin ( L.entry_block func_block ))
+  
+
+let alloc_unesc_temp (name: string) (typ: T.ty): exp =
+  let builder = point_to_func_entry_builder() in
+  L.build_alloca (get_llvm_type typ) name builder
        
 let alloc_local
       (dec_level: level)
       (esc_order: int)
       (name: string)
       (typ: T.ty): access =
-  let func_block = L.block_parent (L.insertion_block builder) in
-  let builder = L.builder_at context (L.instr_begin ( L.entry_block func_block )) in
+  let builder = point_to_func_entry_builder() in
   match esc_order with
   | -1 ->
      let address = L.build_alloca (get_llvm_type typ) name builder in
@@ -219,20 +228,29 @@ let func_call_exp
      let final_args = (dec_fp_addr :: vals) |> Array.of_list in
      L.build_call callee final_args "" builder
 
-let array_exp (size: exp) (init: exp) (typ: T.ty) =
+let array_exp
+      (level: level)
+      (size: exp)
+      (init: exp)
+      (typ: T.ty) =
   let array_addr = L.build_array_alloca (get_llvm_type typ) size "array_init" builder in
-  let access = alloc_local false "i" T.INT in
-  assign_stm access (int_exp 0);
+  (* This code is to alloc counter -> add init value for array *)
+  let counter_addr = alloc_unesc_temp "i" T.INT in
+  assign_stm counter_addr (int_exp 0);
+
+  let load_counter (): L.llvalue =
+    L.build_load counter_addr "i" builder in
+                                 
   let conditition (): exp =
-    let value = simple_var access "i" in
+    let value = load_counter() in
     op_exp value A.LtOp size
   in
   
   let body (): unit =
-    let value = simple_var access "i" in
+    let value = load_counter() in
     let addr = L.build_gep array_addr [| value |] "Element" builder in
     ignore(L.build_store init addr builder);
-    assign_stm access (op_exp value A.PlusOp (int_exp 1))
+    assign_stm counter_addr (op_exp value A.PlusOp (int_exp 1))
   in
   
   ignore(while_exp conditition body);
@@ -242,7 +260,7 @@ let array_exp (size: exp) (init: exp) (typ: T.ty) =
 
 
 let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
-  let record_addr = alloc_local true "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in
+  let record_addr = alloc_unesc_temp "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in
   let size = exps |> List.length |> int_exp in
   (*let record_addr = func_call_exp "tig_init_record" [size] in *)
   let alloc index exp =

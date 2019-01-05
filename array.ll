@@ -4,6 +4,11 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
 ; Function Attrs: noinline nounwind optnone uwtable
+define void @f() #0 {
+  ret void
+}
+
+; Function Attrs: noinline nounwind optnone uwtable
 define i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i32, align 4
@@ -17,6 +22,7 @@ define i32 @main() #0 {
   %7 = alloca i32, i64 %5, align 16
   %8 = getelementptr inbounds i32, i32* %7, i64 0
   store i32 1, i32* %8, align 16
+  call void @f()
   store i32 0, i32* %1, align 4
   %9 = load i8*, i8** %3, align 8
   call void @llvm.stackrestore(i8* %9)

@@ -392,7 +392,12 @@ let func_dec
   let gen_body = add_arg_bindings addresses in
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;
-  ignore(L.build_ret (gen_body()) builder);
+
+  ignore(match typ with
+         | T.NIL -> L.build_ret_void builder
+         | T.UNIT -> L.build_ret_void builder
+         | _ -> L.build_ret (gen_body()) builder);
+
   ignore(pop_fp_from_stack());
   L.position_at_end previous_block builder;
   

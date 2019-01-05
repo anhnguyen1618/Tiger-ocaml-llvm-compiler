@@ -30,6 +30,8 @@ declare void @tig_exit(i32)
 define i32 @main() {
 entry:
   %frame_pointer = alloca { i32 }
+  call void @f({ i32 }* %frame_pointer, i32 50)
+  ret i32 0
 }
 
 define void @f({ i32 }*, i32) {

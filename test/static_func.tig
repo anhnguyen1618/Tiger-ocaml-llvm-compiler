@@ -1,0 +1,10 @@
+let
+	function f (a: int) =
+		 let
+			function g(b: int) = printInt(a + b)
+		 in
+			g(4)
+		 end
+in
+	f(50)
+end

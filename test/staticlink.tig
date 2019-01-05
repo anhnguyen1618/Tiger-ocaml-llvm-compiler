@@ -1,6 +1,17 @@
 let
 	var a:= 5
-	function x () = printInt(a)
+	type myint = int	
+	type arrtype = array of myint
+	var x := 7
+	var arr1:arrtype := arrtype [x] of 4
+	function x (): int =
+		 let
+			var b := 6
+			function f (): int = (printInt(a + b + arr1[2]); 4)
+		 in
+			arr1[2] := 7;
+			f()
+		 end
 in
 	x()
 end

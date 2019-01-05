@@ -50,8 +50,8 @@ let rec printTy = function
   | NIL -> print_string "type is nil\n"
   | INT -> print_string "type is int\n"
   | STRING -> print_string "type is string\n"
-  | (ARRAY(arrTy, _) as ty) -> print_string "array: ";
-                               printTy(ty)
+  | (ARRAY(arrTy, _)) -> print_string "array: ";
+                               printTy(arrTy)
   | NAME(sym, _) -> print_string ("name type is " ^ Symbol.name sym ^ "\n")
   | UNIT -> print_string "type is unit\n"
   | _ -> ()

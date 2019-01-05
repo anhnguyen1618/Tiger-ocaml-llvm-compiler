@@ -1,21 +1,29 @@
+
 module L = Llvm
 module T = Types
 module A = Absyn
+module Err = Error.Error
+         
          
 type level = TOP
-           | NESTED of {uniq: unit ref; parent: level }
+           | NESTED of {uniq: Temp.temp; parent: level }
 
-let new_level x = x
+let new_level (parent: level) = NESTED { uniq = Temp.newtemp(); parent = parent }
 
-type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty }
+type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty; esc_order: int }
                      
-type access = L.llvalue
+type address = IN_STATIC_LINK of L.llvalue
+             | IN_FRAME of L.llvalue
+
+type access = level * address
 
 type exp = L.llvalue
 
 type expty = {exp: exp; ty: T.ty}
          
 let outermost = TOP
+
+let not_esc_order = -1
 
 (* LLVM code *)
 let context = L.global_context ()
@@ -24,15 +32,14 @@ let builder = L.builder context
 
 let int_type = L.integer_type context 32 
 
-let main_function_dec = L.function_type int_type  [||]
-let main_function = L.declare_function "main" main_function_dec the_module
-let main_entry = L.append_block context "entry" main_function
-let _ = L.position_at_end main_entry builder
+
 (*     ignore (Llvm.build_ret (Llvm.const_int t_i32 123456) builder); *)
                   
 let string_type = L.pointer_type (L.i8_type context)
 
 let int_pointer = L.pointer_type (L.i32_type context)
+
+let int_exp i = L.const_int int_type i
             
 let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
@@ -54,21 +61,114 @@ let rec get_llvm_type: T.ty -> L.lltype = function
              L.array_type (get_llvm_type arr_type) 0
            |]
        ) *)
+
+(* Frame pointer stack section *)
        
-let alloc_local (esc: bool) (name: string) (typ: T.ty): access =
+let frame_pointer_stack = Stack.create()
+
+let push_fp_to_stack (typ: T.ty) (addr: L.llvalue) =
+  Stack.push (typ, addr) frame_pointer_stack
+
+let pop_fp_from_stack () = Stack.pop frame_pointer_stack
+
+let get_current_fp () = Stack.top frame_pointer_stack
+
+let get_fp_value (): exp =
+  let (_, fp_struct_addr) = get_current_fp() in
+  let fp_addr = L.build_gep fp_struct_addr [| int_exp(0); int_exp (0) |] "frame_pointer_address" builder in
+  L.build_load fp_addr "frame_pointer_val" builder          
+
+(* Frame pointer stack ends here *)
+                       
+
+let build_frame_pointer_alloc (esc_vars: T.ty list) =
+  let element_types = List.map (fun typ -> (Symbol.symbol(""), typ)) esc_vars in
+  let frame_pointer_struct_type = T.RECORD_ALLOC(element_types, Temp.newtemp()) in
+  let address = L.build_alloca (get_llvm_type frame_pointer_struct_type) "frame_pointer" builder in
+  let frame_pointer_type = T.RECORD(element_types, Temp.newtemp()) in
+  push_fp_to_stack frame_pointer_type address
+  
+
+let build_main_func (esc_vars: T.ty list): unit =
+  let main_function_dec = L.function_type int_type  [||] in
+  let main_function = L.declare_function "main" main_function_dec the_module in
+  let main_entry = L.append_block context "entry" main_function in
+  let stuff_static_link = T.INT in
+  L.position_at_end main_entry builder;
+  build_frame_pointer_alloc (stuff_static_link::esc_vars)
+
+
+let point_to_func_entry_builder (): L.llbuilder =
   let func_block = L.block_parent (L.insertion_block builder) in
-  let builder = L.builder_at context (L.instr_begin ( L.entry_block func_block )) in
-  L.build_alloca ( get_llvm_type typ) name builder
+  L.builder_at context (L.instr_begin ( L.entry_block func_block ))
+  
 
-let assign_stm (location: L.llvalue) (value: L.llvalue) =
+let alloc_unesc_temp (name: string) (typ: T.ty): exp =
+  let builder = point_to_func_entry_builder() in
+  L.build_alloca (get_llvm_type typ) name builder
+       
+let alloc_local
+      (dec_level: level)
+      (esc_order: int)
+      (name: string)
+      (typ: T.ty): access =
+  let builder = point_to_func_entry_builder() in
+
+  match esc_order with
+  | -1 ->
+     let address = L.build_alloca (get_llvm_type typ) name builder in
+     (dec_level, IN_FRAME(address))
+  | _ -> (*print_string ("offset " ^ (string_of_int esc_order)); exit 1;*) (dec_level, IN_STATIC_LINK(int_exp esc_order))
+
+let rec gen_static_link = function
+  | (NESTED(dec_level), NESTED(use_level), current_fp) ->
+     if Temp.eq(dec_level.uniq, use_level.uniq)
+     then current_fp
+     else
+       begin
+         let static_link_offset = int_exp (0) in
+         let next_fp_addr_in_static_link = L.build_gep
+                                 current_fp
+                                 [| int_exp(0); static_link_offset |]
+                                 "fp_addr_in_sl" builder in
+         let next_fp_addr = L.build_load next_fp_addr_in_static_link "fp_addr" builder in
+         gen_static_link (NESTED(dec_level), use_level.parent, next_fp_addr)
+       end
+  | (_, _, current_fp) -> Err.error 0 "Impossible"; current_fp
+
+
+(* assume that other part pass calculated location already *)
+let assign_stm (location: exp) (value: L.llvalue) =
   ignore (L.build_store value location builder)
+  
 
-let simple_var (access: access) (name: string) =
-  L.build_load access name builder
+       
+let simple_var_left
+      ((dec_level, address): access)
+      (name: string)
+      (use_level: level) =
+  match address with
+  | IN_FRAME addr -> addr (* var in-frame never esc -> no need for static link *)
+  | IN_STATIC_LINK offset ->
+     let (_, fp_addr) = get_current_fp() in
+     let fp_dec_level_addr = gen_static_link (dec_level, use_level, fp_addr) in
+     
+     L.build_gep fp_dec_level_addr
+       [| int_exp(0); offset |]
+       name
+       builder
 
-let int_exp i = L.const_int int_type i
+let simple_var
+      (access: access)
+      (name: string)
+      (use_level: level) =
+  let absolute_addr = simple_var_left access name use_level in
+  L.build_load absolute_addr name builder  
 
+     
 let nil_exp = int_exp 0
+
+let dummy_access: access = (outermost, IN_FRAME(nil_exp))
 
 let string_exp s = L.build_global_stringptr s "" builder
 
@@ -117,29 +217,48 @@ let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: unit -> unit): exp =
   (*L.position_at_end previous_block builder;*)
   nil_exp
 
+
+
 exception Func_not_found of string
-let func_call_exp (name: string) (vals: exp list): exp =
+let func_call_exp
+      (dec_level: level)
+      (call_level: level)
+      (name: string)
+      (vals: exp list): exp =
   let callee = match L.lookup_function name the_module with
     | Some fn -> fn
     | None -> raise (Func_not_found "not found")
   in
-  let final_args = Array.of_list vals in
-  L.build_call callee final_args "" builder
+  match dec_level with
+  | TOP -> print_string "run to top call\n"; L.build_call callee (Array.of_list vals) "" builder
+  | _ ->
+     let (_, current_fp) = get_current_fp() in
+     let dec_fp_addr = gen_static_link (dec_level, call_level, current_fp) in
+     let final_args = (dec_fp_addr :: vals) |> Array.of_list in
+     L.build_call callee final_args "" builder
 
-let array_exp (size: exp) (init: exp) (typ: T.ty) =
+let array_exp
+      (size: exp)
+      (init: exp)
+      (typ: T.ty) =
   let array_addr = L.build_array_alloca (get_llvm_type typ) size "array_init" builder in
-  let access = alloc_local false "i" T.INT in
-  assign_stm access (int_exp 0);
+  (* This code is to alloc counter -> add init value for array *)
+  let counter_addr = alloc_unesc_temp "i" T.INT in
+  assign_stm counter_addr (int_exp 0);
+
+  let load_counter (): L.llvalue =
+    L.build_load counter_addr "i" builder in
+                                 
   let conditition (): exp =
-    let value = simple_var access "i" in
+    let value = load_counter() in
     op_exp value A.LtOp size
   in
   
   let body (): unit =
-    let value = simple_var access "i" in
+    let value = load_counter() in
     let addr = L.build_gep array_addr [| value |] "Element" builder in
     ignore(L.build_store init addr builder);
-    assign_stm access (op_exp value A.PlusOp (int_exp 1))
+    assign_stm counter_addr (op_exp value A.PlusOp (int_exp 1))
   in
   
   ignore(while_exp conditition body);
@@ -149,7 +268,7 @@ let array_exp (size: exp) (init: exp) (typ: T.ty) =
 
 
 let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
-  let record_addr = alloc_local true "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in
+  let record_addr = alloc_unesc_temp "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in
   let size = exps |> List.length |> int_exp in
   (*let record_addr = func_call_exp "tig_init_record" [size] in *)
   let alloc index exp =
@@ -187,10 +306,6 @@ let subscript_exp_left (arr_addr: exp ) (index: exp) =
   let addr = L.build_load arr_addr "load_left" builder in
   L.build_gep addr [| index |] "element_left" builder
 
-         
-
-
-
 
 let if_exp
       (gen_test_val: unit -> exp)
@@ -226,12 +341,24 @@ let if_exp
   phi
 
 let func_dec
+      (func_level: level)
       (name: string)
       (typ: T.ty)
+      (esc_vars: T.ty list)
       (args: arg_name_type_map list)
       (add_arg_bindings: access list -> unit -> exp) =
-  let arr_types = (List.map (fun (e: arg_name_type_map) -> get_llvm_type e.ty) args) |> Array.of_list in
-  let func_type = L.function_type (get_llvm_type typ) arr_types in
+  let (parent_fp_type, _) = get_current_fp() in
+  
+  let add_esc_arg arg acc = if arg.esc_order <> -1 then (arg.ty :: acc) else acc in
+  let esc_arg_types = List.fold_right add_esc_arg args [] in
+  let next_fp_type = parent_fp_type::(esc_vars @ esc_arg_types) in
+
+  let arg_types =
+    get_llvm_type(parent_fp_type)
+    :: (List.map (fun (e: arg_name_type_map) -> get_llvm_type e.ty) args)
+    |> Array.of_list
+  in
+  let func_type = L.function_type (get_llvm_type typ) arg_types in
   let func_block =
     match L.lookup_function name the_module with
     | None -> L.declare_function name func_type the_module
@@ -242,18 +369,36 @@ let func_dec
   
   let entry_block = L.append_block context "entry" func_block in
   L.position_at_end entry_block builder;
-  let alloc_arg {name; ty}: exp = alloc_local true (*Change escape later*) (Symbol.name name) ty in
-  let assign_val arg_to_alloc arg_val =
-    let address = alloc_arg arg_to_alloc in
-    assign_stm address arg_val;
-    address
+  build_frame_pointer_alloc next_fp_type;
+  let (cur_fp_type, cur_fp_addr) = get_current_fp() in
+  let alloc_arg {name; ty; esc_order}: access = alloc_local func_level esc_order (Symbol.name name) ty in
+  let assign_val arg_to_alloc arg_val: access =
+    let (level, address) = alloc_arg arg_to_alloc in
+    let final_addr = match address with
+      | IN_STATIC_LINK offset -> L.build_gep cur_fp_addr
+                                   [| int_exp(0); offset |]
+                                   "arg_address" builder
+      | IN_FRAME addr -> addr
+    in
+    (* in the same level, no need to build static link *)
+    assign_stm final_addr arg_val;
+    (level, address)
   in
-  let addresses = List.map2 assign_val args (L.params func_block |> Array.to_list) in
+  print_string "run through here\n";
+  print_string ("args length: " ^ string_of_int (List.length args));
+  let arg_mappings = {name = Symbol.symbol "static_link";
+                      ty= parent_fp_type; esc_order = 0 } :: args in
+  let addresses = List.map2 assign_val arg_mappings (L.params func_block |> Array.to_list) in
   let gen_body = add_arg_bindings addresses in
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;
-  ignore(L.build_ret (gen_body()) builder);
-  
+
+  ignore(match typ with
+         | T.NIL -> L.build_ret_void builder
+         | T.UNIT -> L.build_ret_void builder
+         | _ -> L.build_ret (gen_body()) builder);
+
+  ignore(pop_fp_from_stack());
   L.position_at_end previous_block builder;
   
   L.print_module "Tiger jit" the_module
@@ -261,6 +406,7 @@ let func_dec
                  (*Llvm_analysis.assert_valid_function func_block;*)
 
 let build_return_main () =
+  ignore(pop_fp_from_stack());
   ignore(L.build_ret nil_exp builder)
 
 let build_external_func

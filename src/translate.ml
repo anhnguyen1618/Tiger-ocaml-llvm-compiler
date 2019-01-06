@@ -3,6 +3,8 @@ module L = Llvm
 module T = Types
 module A = Absyn
 module Err = Error.Error
+
+type break_block = Llvm.llbasicblock
          
          
 type level = TOP
@@ -40,6 +42,11 @@ let string_type = L.pointer_type (L.i8_type context)
 let int_pointer = L.pointer_type (L.i32_type context)
 
 let int_exp i = L.const_int int_type i
+
+let nil_exp = int_exp 0
+
+let dummy_access: access = (outermost, IN_FRAME(nil_exp))
+
             
 let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
@@ -87,38 +94,56 @@ let build_frame_pointer_alloc (esc_vars: T.ty list) =
   let address = L.build_alloca (get_llvm_type frame_pointer_struct_type) "frame_pointer" builder in
   let frame_pointer_type = T.RECORD(element_types, Temp.newtemp()) in
   push_fp_to_stack frame_pointer_type address
-  
 
-let build_main_func (esc_vars: T.ty list): unit =
+let build_return_main () =
+  ignore(pop_fp_from_stack());
+  ignore(L.build_ret nil_exp builder)
+
+let build_main_func (esc_vars: T.ty list): break_block =
   let main_function_dec = L.function_type int_type  [||] in
   let main_function = L.declare_function "main" main_function_dec the_module in
   let main_entry = L.append_block context "entry" main_function in
+  
+  let exit_loop_block = L.append_block context "break_loop" main_function in
+  L.position_at_end exit_loop_block builder;
+  ignore(L.build_ret nil_exp builder);
+  
   let stuff_static_link = T.INT in
   L.position_at_end main_entry builder;
-  build_frame_pointer_alloc (stuff_static_link::esc_vars)
+  build_frame_pointer_alloc (stuff_static_link::esc_vars);
+  exit_loop_block
 
 
-let point_to_func_entry_builder (): L.llbuilder =
+
+
+let point_to_func_entry_builder (): L.llbuilder * L.llbasicblock =
+  let current_block = L.insertion_block builder in
   let func_block = L.block_parent (L.insertion_block builder) in
-  L.builder_at context (L.instr_begin ( L.entry_block func_block ))
-  
+  let builder = func_block |> L.entry_block |> L.instr_begin |> L.builder_at context in
+  (builder , current_block)
 
 let alloc_unesc_temp (name: string) (typ: T.ty): exp =
-  let builder = point_to_func_entry_builder() in
-  L.build_alloca (get_llvm_type typ) name builder
+  let (builder, cur_block) = point_to_func_entry_builder() in
+  let addr = L.build_alloca (get_llvm_type typ) name builder in
+  L.position_at_end cur_block builder;
+  addr
        
 let alloc_local
       (dec_level: level)
       (esc_order: int)
       (name: string)
       (typ: T.ty): access =
-  let builder = point_to_func_entry_builder() in
+  let (builder, cur_block) = point_to_func_entry_builder() in
 
-  match esc_order with
-  | -1 ->
-     let address = L.build_alloca (get_llvm_type typ) name builder in
-     (dec_level, IN_FRAME(address))
-  | _ -> (*print_string ("offset " ^ (string_of_int esc_order)); exit 1;*) (dec_level, IN_STATIC_LINK(int_exp esc_order))
+  let access = match esc_order with
+    | -1 ->
+       let address = L.build_alloca (get_llvm_type typ) name builder in
+       (dec_level, IN_FRAME(address))
+    | _ -> (*print_string ("offset " ^ (string_of_int esc_order)); exit 1;*) (dec_level, IN_STATIC_LINK(int_exp esc_order))
+  in
+  L.position_at_end cur_block builder;
+  access
+                                                                         
 
 let rec gen_static_link = function
   | (NESTED(dec_level), NESTED(use_level), current_fp) ->
@@ -166,13 +191,12 @@ let simple_var
   L.build_load absolute_addr name builder  
 
      
-let nil_exp = int_exp 0
-
-let dummy_access: access = (outermost, IN_FRAME(nil_exp))
-
 let string_exp s = L.build_global_stringptr s "" builder
 
-let break_exp s = nil_exp
+let break_exp (terminate_block: break_block) =
+  let result = L.build_br terminate_block builder in
+  (*L.position_at_end terminate_block builder;*)
+  result
 
 let op_exp (left_val: exp) (oper: A.oper) (right_val: exp) =
   let arith f tmp_name = f left_val right_val tmp_name builder in
@@ -193,7 +217,7 @@ let op_exp (left_val: exp) (oper: A.oper) (right_val: exp) =
   | A.GeOp -> compare L.Icmp.Sge "ge_tmp"
 
 
-let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: unit -> unit): exp =
+let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: break_block -> unit): exp =
   (*let previous_block = L.insertion_block builder in *)
   
   let current_block = L.insertion_block builder in
@@ -210,11 +234,9 @@ let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: unit -> unit): exp =
   ignore(L.build_cond_br cond_val loop_block end_block builder);
 
   L.position_at_end loop_block builder;
-  eval_body_exp();
+  eval_body_exp(end_block);
   ignore(L.build_br test_block builder);
   L.position_at_end end_block builder;
-
-  (*L.position_at_end previous_block builder;*)
   nil_exp
 
 
@@ -254,7 +276,7 @@ let array_exp
     op_exp value A.LtOp size
   in
   
-  let body (): unit =
+  let body (break: break_block): unit =
     let value = load_counter() in
     let addr = L.build_gep array_addr [| value |] "Element" builder in
     ignore(L.build_store init addr builder);
@@ -309,7 +331,7 @@ let subscript_exp_left (arr_addr: exp ) (index: exp) =
 
 let if_exp
       (gen_test_val: unit -> exp)
-      (gen_then_else: unit -> exp * (unit -> exp)): exp =
+      (gen_then_else: unit -> exp * (unit -> T.ty * exp)): exp =
 
   (*let previous_block = L.insertion_block builder in *)
   
@@ -325,20 +347,23 @@ let if_exp
 
   L.position_at_end then_block builder;
   let (then_val, gen_else_val) = gen_then_else() in
-  let new_then_block = L.insertion_block builder in
-  ignore(L.build_br merge_block builder);
   
   L.position_at_end else_block builder;
-  let else_val = gen_else_val() in
-  let new_else_block = L.insertion_block builder in
+  let (if_else_type, else_val) = gen_else_val() in
+  
+  let addr = alloc_unesc_temp "if_result_addr" if_else_type in
+  L.position_at_end then_block builder;
+  assign_stm addr then_val;
   ignore(L.build_br merge_block builder);
 
-  L.position_at_end merge_block builder;
-  let in_comming =  [(then_val, new_then_block); (else_val, new_else_block)] in
-  let phi = L.build_phi in_comming "if_tmp" builder in
+  L.position_at_end else_block builder;
+  assign_stm addr else_val;
+  ignore(L.build_br merge_block builder);
 
-  (*L.position_at_end previous_block builder; *)
-  phi
+
+  L.position_at_end merge_block builder;
+  L.build_load addr "if_result" builder
+
 
 let func_dec
       (func_level: level)
@@ -406,9 +431,7 @@ let func_dec
   (* Validate the generated code, checking for consistency. *)
                  (*Llvm_analysis.assert_valid_function func_block;*)
 
-let build_return_main () =
-  ignore(pop_fp_from_stack());
-  ignore(L.build_ret nil_exp builder)
+
 
 let build_external_func
       (name: string)

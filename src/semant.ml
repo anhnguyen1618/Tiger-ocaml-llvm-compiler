@@ -243,7 +243,7 @@ let rec trans_dec (
         (t_env: tenv),
         (level: Translate.level),
         (exp: Absyn.var),
-        (break: Temp.label)
+        (break: Translate.break_block)
       ): expty =
 
     let actual_ty = U.actual_ty t_env in
@@ -310,7 +310,7 @@ let rec trans_dec (
       (t_env: tenv),
       (level: Translate.level),
       (exp: Absyn.var),
-      (break: Temp.label)
+      (break: Translate.break_block)
     ): expty =
 
     let actual_ty = U.actual_ty t_env in
@@ -379,7 +379,7 @@ let rec trans_dec (
        (t_env: tenv),
        (level: Translate.level),
        (exp: Absyn.exp),
-       (break: Temp.label)): expty  =
+       (break: Translate.break_block)): expty  =
     let actual_ty = U.actual_ty t_env in
     let actual_ty_exp (x: expty) = x.ty |> actual_ty in
 
@@ -495,20 +495,25 @@ let rec trans_dec (
         test_val
       in
 
-      let gen_then_else (): Translate.exp * (unit -> Translate.exp) =
+      let gen_then_else (): Translate.exp * (unit -> T.ty * Translate.exp) =
         let { exp = then_val; ty = then_type} = tr_exp then_exp in
+        let then_final_val = match then_type with
+          | T.NIL -> Translate.nil_exp
+          | T.UNIT -> Translate.nil_exp
+          | _ -> then_val
+        in
         final_type := then_type;
-        let gen_else_val () = match else_option with
-          | None -> final_type := T.UNIT; Translate.nil_exp
+        let gen_else_val (): T.ty * Translate.exp = match else_option with
+          | None -> final_type := T.NIL; (T.INT, Translate.nil_exp)
           | Some else_exp ->
              let { exp = else_val; ty = else_type} = tr_exp else_exp in
 	     U.assert_type_eq (actual_ty then_type,
 			       actual_ty else_type,
 			       pos,
 			       "Mismatched types between then and else");
-             else_val
+             (else_type, else_val)
         in
-        (then_val, gen_else_val)
+        (then_final_val, gen_else_val)
       in
       let exp = Translate.if_exp gen_test_val gen_then_else in
       {exp = exp; ty = !final_type}
@@ -521,9 +526,8 @@ let rec trans_dec (
         U.assert_type_eq (actual_ty test_type, T.INT, pos, "while test clause does not have type int");
         test_exp
       in
-      let doneLabel = Temp.newlabel() in
-      let translate_body () =
-        ignore(trans_exp (v_env, t_env, level, body, doneLabel));
+      let translate_body (break_block: Translate.break_block) =
+        ignore(trans_exp (v_env, t_env, level, body, break_block));
         decrease_nested_level()
       in
       { exp = Translate.while_exp translate_test translate_body ; ty = T.UNIT }
@@ -586,7 +590,7 @@ let rec trans_dec (
       | (A.WhileExp _ as e) -> check_while_exp e
       | (A.ForExp _ as e) -> check_for_exp e
       | A.BreakExp pos -> (if get_nested_level() > 0 then () else Err.error pos "Break exp is not nested inside loop";
-			   {exp = Translate.break_exp break; ty = T.STRING})
+			   {exp = Translate.break_exp break; ty = T.NIL})
       | (A.LetExp _ as e) -> check_let_exp e
       | (A.ArrayExp _ as e) -> check_array_exp e
     in	    
@@ -607,12 +611,12 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   let escs = Link.extract_esc (Env.base_venv, Env.base_tenv, my_exp) in
   List.iter T.printTy escs;
 
-    Translate.build_main_func escs;
+  let outermost_break_block = Translate.build_main_func escs in
     
   print_string "-------------------\n";
 
   let main_level = Translate.new_level Translate.outermost in
-  ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, Temp.newlabel())); 
+  ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, outermost_break_block)); 
   Translate.build_return_main();
   (*let the_execution_engine = Llvm_executionengine.create Translate.the_module in*)
   (*let ct = Ctypes.p

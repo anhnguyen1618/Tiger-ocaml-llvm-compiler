@@ -1,6 +1,7 @@
 type level
 type exp
 type access
+type break_block = Llvm.llbasicblock
 
 type arg_name_type_map = { name: Symbol.symbol; ty: Types.ty; esc_order: int }
 
@@ -26,7 +27,7 @@ val int_exp: int -> exp
 
 val string_exp: string -> exp
 
-val break_exp: 'a -> exp
+val break_exp: break_block -> exp
 
 val array_exp: exp -> exp -> Types.ty -> exp
 
@@ -44,13 +45,13 @@ val func_call_exp: level -> level -> string -> exp list -> exp
       
 val op_exp: exp -> Absyn.oper -> exp -> exp
 
-val while_exp : (unit -> exp) -> (unit -> unit) -> exp
+val while_exp : (unit -> exp) -> (break_block -> unit) -> exp
 
-val if_exp: (unit -> exp) -> (unit -> exp * (unit -> exp)) -> exp
+val if_exp: (unit -> exp) -> (unit -> exp * (unit -> Types.ty * exp)) -> exp
 
 val func_dec: level -> string -> Types.ty -> Types.ty list -> arg_name_type_map list -> (access list -> unit -> exp) -> unit
 
-val build_main_func: Types.ty list -> unit
+val build_main_func: Types.ty list -> break_block
 
 val build_return_main: unit -> unit
 

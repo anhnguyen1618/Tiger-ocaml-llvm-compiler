@@ -1,0 +1,15 @@
+let
+	var a := 5
+in
+	if a = 5 then (
+	let
+		var b := 6
+	in
+		b		
+	end) else (
+	let
+		var c := 7
+	in
+		c		
+	end)
+end

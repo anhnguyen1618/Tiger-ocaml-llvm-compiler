@@ -1,14 +1,11 @@
-void f () {
-  return;
-}
 
 int main () {
-
-  int n = 4;
-  int L[n];
-  L[0] = 1;
-  f();
-   return 0;
+  int a = 5;
+  if (a == 5) {
+    a = 6;
+  } else {
+    a = 7;
+  }
 }
 
 

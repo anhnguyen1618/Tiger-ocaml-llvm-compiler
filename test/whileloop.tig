@@ -5,7 +5,7 @@ in
 	while a < 5 do
 	      (
 		printInt(a);
-		if a >= 3 then break;
+		if a = 3 then break;
 		b := b + 1;
 		a := a + 1
 	      );

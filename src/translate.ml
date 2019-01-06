@@ -116,16 +116,15 @@ let build_main_func (esc_vars: T.ty list): break_block =
 
 
 
-let point_to_func_entry_builder (): L.llbuilder * L.llbasicblock =
+let point_to_func_entry_builder (): L.llbuilder =
   let current_block = L.insertion_block builder in
-  let func_block = L.block_parent (L.insertion_block builder) in
+  let func_block = current_block |> L.block_parent in
   let builder = func_block |> L.entry_block |> L.instr_begin |> L.builder_at context in
-  (builder , current_block)
+  builder
 
 let alloc_unesc_temp (name: string) (typ: T.ty): exp =
-  let (builder, cur_block) = point_to_func_entry_builder() in
+  let builder = point_to_func_entry_builder() in
   let addr = L.build_alloca (get_llvm_type typ) name builder in
-  L.position_at_end cur_block builder;
   addr
        
 let alloc_local
@@ -133,16 +132,12 @@ let alloc_local
       (esc_order: int)
       (name: string)
       (typ: T.ty): access =
-  let (builder, cur_block) = point_to_func_entry_builder() in
-
-  let access = match esc_order with
-    | -1 ->
-       let address = L.build_alloca (get_llvm_type typ) name builder in
-       (dec_level, IN_FRAME(address))
-    | _ -> (*print_string ("offset " ^ (string_of_int esc_order)); exit 1;*) (dec_level, IN_STATIC_LINK(int_exp esc_order))
-  in
-  L.position_at_end cur_block builder;
-  access
+  let builder = point_to_func_entry_builder() in
+  match esc_order with
+  | -1 ->
+     let address = L.build_alloca (get_llvm_type typ) name builder in
+     (dec_level, IN_FRAME(address))
+  | _ -> (*print_string ("offset " ^ (string_of_int esc_order)); exit 1;*) (dec_level, IN_STATIC_LINK(int_exp esc_order))
                                                                          
 
 let rec gen_static_link = function
@@ -337,10 +332,13 @@ let if_exp
   
   let current_block = L.insertion_block builder in
   let function_block = L.block_parent current_block in
+  let test_block = L.append_block context "test" function_block in
   let then_block = L.append_block context "then" function_block in
   let else_block = L.append_block context "else" function_block in
   let merge_block = L.append_block context "merge" function_block in
 
+  ignore(L.build_br test_block builder);
+  L.position_at_end test_block builder;
   let test_val = gen_test_val () in
   let cond_val = L.build_icmp L.Icmp.Eq test_val (int_exp 1) "cond" builder in
   ignore(L.build_cond_br cond_val then_block else_block builder);

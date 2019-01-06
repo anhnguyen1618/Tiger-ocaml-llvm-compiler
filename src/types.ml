@@ -22,7 +22,7 @@ type comp =
 
 let leq = function
   | (_, UNIT) -> true
-  | (NIL, RECORD(_)) -> true
+  | (NIL, RECORD(_)) -> false
   | (RECORD(_), NIL) -> true 
   | (INT, INT) -> true
   | (STRING, STRING) -> true

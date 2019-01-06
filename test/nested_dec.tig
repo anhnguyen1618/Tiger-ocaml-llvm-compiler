@@ -1,15 +1,16 @@
 let
 	var a := 5
 in
-	if a = 5 then (
+	a := if a = 5 then (
 	let
-		var b := 6
+	var b := 6
 	in
-		b		
+	b		
 	end) else (
 	let
-		var c := 7
+	var c := 7
 	in
-		c		
-	end)
+	c		
+	end);
+	printInt(a)
 end

@@ -456,6 +456,7 @@ let rec trans_dec (
 		   {exp = Translate.nil_exp(*Translate.recordDec(fieldLetsIR)*); ty = T.RECORD (types, refer)})
 	     else
 	       let typesInCreateOrder = check_fields field_exps in
+               print_string "run through here\n";
 	       {exp = (Translate.record_exp types fieldLetsIR) ; ty = T.RECORD (typesInCreateOrder, refer)}
 			    
       | Some _ ->

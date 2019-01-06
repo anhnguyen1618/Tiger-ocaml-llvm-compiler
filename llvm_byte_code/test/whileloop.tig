@@ -9,6 +9,8 @@ declare i32* @tig_init_array(i32, i32)
 
 declare i32* @tig_init_record(i32)
 
+declare void @tig_exit(i32)
+
 declare void @tig_flush()
 
 declare i8* @tig_getchar()
@@ -24,8 +26,6 @@ declare i8* @tig_substring(i8*, i32, i32)
 declare i8* @tig_concat(i8*, i8*)
 
 declare i32 @tig_not(i32)
-
-declare void @tig_exit(i32)
 
 define i32 @main() {
 entry:
@@ -50,33 +50,36 @@ test:                                             ; preds = %merge, %entry
 loop:                                             ; preds = %test
   %a2 = load i32, i32* %a
   call void @tig_print_int(i32 %a2)
-  %a3 = load i32, i32* %a
-  %ge_tmp = icmp sge i32 %a3, 3
-  %bool_tmp4 = zext i1 %ge_tmp to i32
-  %cond5 = icmp eq i32 %bool_tmp4, 1
-  br i1 %cond5, label %then, label %else
+  br label %test3
 
 end:                                              ; preds = %then, %test
-  %b9 = load i32, i32* %b
-  call void @tig_print_int(i32 %b9)
+  %b10 = load i32, i32* %b
+  call void @tig_print_int(i32 %b10)
   ret i32 0
 
-then:                                             ; preds = %loop
+test3:                                            ; preds = %loop
+  %a4 = load i32, i32* %a
+  %eq_tmp = icmp eq i32 %a4, 3
+  %bool_tmp5 = zext i1 %eq_tmp to i32
+  %cond6 = icmp eq i32 %bool_tmp5, 1
+  br i1 %cond6, label %then, label %else
+
+then:                                             ; preds = %test3
   br label %end
   store i32 0, i32* %if_result_addr
   br label %merge
 
-else:                                             ; preds = %loop
+else:                                             ; preds = %test3
   store i32 0, i32* %if_result_addr
   br label %merge
 
 merge:                                            ; preds = %else, %then
   %if_result = load i32, i32* %if_result_addr
-  %b6 = load i32, i32* %b
-  %add_tmp = add i32 %b6, 1
+  %b7 = load i32, i32* %b
+  %add_tmp = add i32 %b7, 1
   store i32 %add_tmp, i32* %b
-  %a7 = load i32, i32* %a
-  %add_tmp8 = add i32 %a7, 1
-  store i32 %add_tmp8, i32* %a
+  %a8 = load i32, i32* %a
+  %add_tmp9 = add i32 %a8, 1
+  store i32 %add_tmp9, i32* %a
   br label %test
 }

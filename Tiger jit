@@ -39,5 +39,23 @@ entry:
   store { i32 }* %0, { i32 }** %arg_address
   %arg_address1 = getelementptr { { i32 }*, i32 }, { { i32 }*, i32 }* %frame_pointer, i32 0, i32 1
   store i32 %1, i32* %arg_address1
+  call void @g({ { i32 }*, i32 }* %frame_pointer, i32 4)
+  ret void
+}
+
+define void @g({ { i32 }*, i32 }*, i32) {
+entry:
+  %b = alloca i32
+  %frame_pointer = alloca { { { i32 }*, i32 }* }
+  %arg_address = getelementptr { { { i32 }*, i32 }* }, { { { i32 }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  store { { i32 }*, i32 }* %0, { { i32 }*, i32 }** %arg_address
+  store i32 %1, i32* %b
+  %fp_addr_in_sl = getelementptr { { { i32 }*, i32 }* }, { { { i32 }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr = load { { i32 }*, i32 }*, { { i32 }*, i32 }** %fp_addr_in_sl
+  %a = getelementptr { { i32 }*, i32 }, { { i32 }*, i32 }* %fp_addr, i32 0, i32 1
+  %a1 = load i32, i32* %a
+  %b2 = load i32, i32* %b
+  %add_tmp = add i32 %a1, %b2
+  call void @tig_print_int(i32 %add_tmp)
   ret void
 }

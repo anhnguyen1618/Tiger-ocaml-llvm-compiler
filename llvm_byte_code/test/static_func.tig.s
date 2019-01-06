@@ -24,11 +24,36 @@ main:                                   # @main
 f:                                      # @f
 	.cfi_startproc
 # %bb.0:                                # %entry
-	movq	%rdi, -16(%rsp)
-	movl	%esi, -8(%rsp)
+	subq	$24, %rsp
+	.cfi_def_cfa_offset 32
+	movq	%rdi, 8(%rsp)
+	movl	%esi, 16(%rsp)
+	leaq	8(%rsp), %rdi
+	movl	$4, %esi
+	callq	g
+	addq	$24, %rsp
 	retq
 .Lfunc_end1:
 	.size	f, .Lfunc_end1-f
+	.cfi_endproc
+                                        # -- End function
+	.globl	g                       # -- Begin function g
+	.p2align	4, 0x90
+	.type	g,@function
+g:                                      # @g
+	.cfi_startproc
+# %bb.0:                                # %entry
+	subq	$24, %rsp
+	.cfi_def_cfa_offset 32
+	movq	%rdi, 16(%rsp)
+	movl	%esi, 12(%rsp)
+	addl	8(%rdi), %esi
+	movl	%esi, %edi
+	callq	tig_print_int
+	addq	$24, %rsp
+	retq
+.Lfunc_end2:
+	.size	g, .Lfunc_end2-g
 	.cfi_endproc
                                         # -- End function
 

@@ -1,0 +1,8 @@
+let
+	type tree = {result: string}
+	var a: tree := nil
+	var b := tree {result = "hello world"}
+in
+	print(b.result);
+	b := nil
+end

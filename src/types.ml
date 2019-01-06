@@ -8,7 +8,6 @@ type ty =
 | STRING
 | ARRAY of ty * unique
 | NAME of Symbol.symbol * ty option ref
-| UNIT
 | INT_POINTER
 | RECORD_ALLOC of (Symbol.symbol * ty) list * unique
 | STRING_POINTER
@@ -21,8 +20,7 @@ type comp =
 | INCOMP (* incomparable *)
 
 let leq = function
-  | (_, UNIT) -> true
-  | (NIL, RECORD(_)) -> false
+  | (NIL, RECORD(_)) -> true
   | (RECORD(_), NIL) -> true 
   | (INT, INT) -> true
   | (STRING, STRING) -> true
@@ -53,7 +51,6 @@ let rec printTy = function
   | (ARRAY(arrTy, _)) -> print_string "array: ";
                                printTy(arrTy)
   | NAME(sym, _) -> print_string ("name type is " ^ Symbol.name sym ^ "\n")
-  | UNIT -> print_string "type is unit\n"
   | _ -> ()
 
 let rec name = function
@@ -63,6 +60,5 @@ let rec name = function
   | STRING -> "string"
   | ARRAY(arrTy, _) -> "array: " ^ name(arrTy)
   | NAME(sym, _) -> Symbol.name sym
-  | UNIT -> "unit"
   | _ -> ""
     

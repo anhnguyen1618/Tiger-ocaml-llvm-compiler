@@ -10,8 +10,8 @@ type enventry = VarEntry of {ty: T.ty; access: Translate.access}
 		  result : T.ty}
 
 let external_functions = [
-      ("printInt", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_print_int"; formals=[T.INT]; result=T.UNIT}));
-      ("print", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_print"; formals=[T.STRING]; result=T.UNIT}));
+      ("printInt", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_print_int"; formals=[T.INT]; result=T.NIL}));
+      ("print", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_print"; formals=[T.STRING]; result=T.NIL}));
       ("init_array", FunEntry ({
                            level=Translate.outermost;
                            label=Temp.namedlabel "tig_init_array";
@@ -22,8 +22,8 @@ let external_functions = [
                            label=Temp.namedlabel "tig_init_record";
                            formals=[T.INT];
                            result= T.INT_POINTER}));
-      ("exit", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_exit"; formals=[T.INT]; result=T.UNIT}));
-      ("flush", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_flush"; formals=[]; result=T.UNIT}));
+      ("exit", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_exit"; formals=[T.INT]; result=T.NIL}));
+      ("flush", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_flush"; formals=[]; result=T.NIL}));
       ("getchar", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_getchar"; formals=[]; result=T.STRING}));
       ("ord", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_ord"; formals=[T.STRING]; result=T.INT}));
       ("chr", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_chr"; formals=[T.INT]; result=T.STRING}));
@@ -31,7 +31,7 @@ let external_functions = [
       ("substring", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_substring"; formals=[T.STRING; T.INT; T.INT]; result=T.STRING}));
       ("concat", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_concat"; formals=[T.STRING; T.STRING]; result=T.STRING}));
       ("not", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_not"; formals=[T.INT]; result=T.INT}));
-      ("exit", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_exit"; formals=[T.INT]; result=T.UNIT}))
+      ("exit", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_exit"; formals=[T.INT]; result=T.NIL}))
     ] 
 
 let base_tenv =

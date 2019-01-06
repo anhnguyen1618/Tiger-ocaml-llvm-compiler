@@ -123,7 +123,7 @@ let rec trans_dec (
 
     let get_type_for_result = function
       | Some (s, p) -> look_type_up (s, p)
-      | None -> T.UNIT
+      | None -> T.NIL
     in
    
     let get_type (A.Field {name; escape = _; typ; pos}): arg_name_type_map =

@@ -33,9 +33,6 @@ let the_module = L.create_module context "Tiger jit"
 let builder = L.builder context
 
 let int_type = L.integer_type context 32 
-
-
-(*     ignore (Llvm.build_ret (Llvm.const_int t_i32 123456) builder); *)
                   
 let string_type = L.pointer_type (L.i8_type context)
 
@@ -43,9 +40,9 @@ let int_pointer = L.pointer_type (L.i32_type context)
 
 let int_exp i = L.const_int int_type i
 
-let nil_exp = int_exp 0
+let dummy_exp = int_exp 0
 
-let dummy_access: access = (outermost, IN_FRAME(nil_exp))
+let dummy_access: access = (outermost, IN_FRAME(dummy_exp))
 
             
 let rec get_llvm_type: T.ty -> L.lltype = function
@@ -59,17 +56,6 @@ let rec get_llvm_type: T.ty -> L.lltype = function
      L.struct_type context ( (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list)
   | T.INT_POINTER -> int_pointer
   | _ -> L.void_type context
-
-(* Keep this shit for static link *)
-(*L.pointer_type (
-         L.struct_type context
-           [|
-             int_type;
-             L.array_type (get_llvm_type arr_type) 0
-           |]
-       ) *)
-
-(* Frame pointer stack section *)
        
 let frame_pointer_stack = Stack.create()
 
@@ -97,7 +83,7 @@ let build_frame_pointer_alloc (esc_vars: T.ty list) =
 
 let build_return_main () =
   ignore(pop_fp_from_stack());
-  ignore(L.build_ret nil_exp builder)
+  ignore(L.build_ret dummy_exp builder)
 
 let build_main_func (esc_vars: T.ty list): break_block =
   let main_function_dec = L.function_type int_type  [||] in
@@ -106,7 +92,7 @@ let build_main_func (esc_vars: T.ty list): break_block =
   
   let exit_loop_block = L.append_block context "break_loop" main_function in
   L.position_at_end exit_loop_block builder;
-  ignore(L.build_ret nil_exp builder);
+  ignore(L.build_ret dummy_exp builder);
   
   let stuff_static_link = T.INT in
   L.position_at_end main_entry builder;
@@ -161,7 +147,7 @@ let rec gen_static_link = function
 let assign_stm (location: exp) (value: L.llvalue) =
   ignore (L.build_store value location builder)
   
-
+let nil_exp (typ: T.ty) = typ |> get_llvm_type |> L.const_null 
        
 let simple_var_left
       ((dec_level, address): access)
@@ -232,7 +218,7 @@ let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: break_block -> unit):
   eval_body_exp(end_block);
   ignore(L.build_br test_block builder);
   L.position_at_end end_block builder;
-  nil_exp
+  dummy_exp
 
 
 
@@ -322,7 +308,6 @@ let subscript_exp_left (arr_addr: exp ) (index: exp) =
      HOWEVER when calling transVar_left(simple) => return int** (address that contain int* type*)
   let addr = L.build_load arr_addr "load_left" builder in
   L.build_gep addr [| index |] "element_left" builder
-
 
 let if_exp
       (gen_test_val: unit -> exp)
@@ -419,7 +404,6 @@ let func_dec
   let body = gen_body() in
   ignore(match typ with
          | T.NIL -> L.build_ret_void builder
-         | T.UNIT -> L.build_ret_void builder
          | _ -> L.build_ret body builder);
 
   ignore(pop_fp_from_stack());

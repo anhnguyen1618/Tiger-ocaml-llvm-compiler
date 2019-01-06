@@ -11,9 +11,11 @@ val outermost: level
 
 val new_level: level -> level
 
-val nil_exp: exp
+val dummy_exp: exp
 
 val dummy_access: access
+
+val nil_exp: Types.ty -> exp
 
 val alloc_local: level -> int -> string -> Types.ty -> access
 

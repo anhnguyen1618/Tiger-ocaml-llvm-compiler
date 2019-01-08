@@ -1,0 +1,22 @@
+let
+  type record_type = { input: string, name: string }
+  var record := record_type { input = 5, name = "Demo program" }
+
+  type arrary_type = array of record_type
+	var array_size := 5
+	var array: array_type := array_type [array_size] of record
+
+  function fib (n: int): int =
+    if n = 0 then 0
+    else if n = 1 then 1
+    else fib (n - 1) + fib (n - 2)
+
+  var counter := array[0].input
+in
+  while counter > 0 do
+    (
+      printInt (fib(counter));
+      print (record.name);
+      counter := counter - 1
+    )
+end

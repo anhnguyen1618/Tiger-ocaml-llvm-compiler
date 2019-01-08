@@ -1,0 +1,19 @@
+let
+	type rec = {a: int}
+	var a := rec {a = 5}
+	type arr = array of rec
+	var arr := arr [2] of a
+
+	function add (): arr =
+		 let
+			var another_rec := rec {a = 6}
+		 in
+			arr[1] := another_rec;
+			arr
+		 end
+
+	var b := add()
+in
+	printInt (arr[0].a);
+	printInt (b[1].a)
+end

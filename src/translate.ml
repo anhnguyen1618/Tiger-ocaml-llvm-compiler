@@ -124,7 +124,9 @@ let alloc_local
      let address = L.build_alloca (get_llvm_type typ) name builder in
      (dec_level, IN_FRAME(address))
   | _ -> (*print_string ("offset " ^ (string_of_int esc_order)); exit 1;*) (dec_level, IN_STATIC_LINK(int_exp esc_order))
-                                                                         
+
+let malloc (name: string) (typ: T.ty): exp =
+  L.build_malloc (typ |> get_llvm_type) name builder 
 
 let rec gen_static_link = function
   | (NESTED(dec_level), NESTED(use_level), current_fp) ->
@@ -244,7 +246,7 @@ let array_exp
       (size: exp)
       (init: exp)
       (typ: T.ty) =
-  let array_addr = L.build_array_alloca (get_llvm_type typ) size "array_init" builder in
+  let array_addr = L.build_array_malloc (get_llvm_type typ) size "array_init" builder in
   (* This code is to alloc counter -> add init value for array *)
   let counter_addr = alloc_unesc_temp "i" T.INT in
   assign_stm counter_addr (int_exp 0);
@@ -271,8 +273,10 @@ let array_exp
 
 
 let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
-  let record_addr = alloc_unesc_temp "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in
+  (*let record_addr = alloc_unesc_temp "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in*)
+  let record_addr = malloc "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in
   let size = exps |> List.length |> int_exp in
+
   (*let record_addr = func_call_exp "tig_init_record" [size] in *)
   let alloc index exp =
     (* pointer to internal struct has to defer by first 0, pointer to external struct does not need *)

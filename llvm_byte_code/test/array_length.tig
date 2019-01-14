@@ -36,7 +36,7 @@ entry:
   %arr1 = alloca { i32, i32* }*
   %i = alloca i32
   %frame_pointer = alloca { i32 }
-  %malloccall = tail call i8* @malloc(i32 mul (i32 ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32), i32 3))
+  %malloccall = tail call i8* @malloc(i32 mul (i32 ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32), i32 9))
   %array_init = bitcast i8* %malloccall to i32*
   store i32 0, i32* %i
   br label %test
@@ -46,7 +46,7 @@ break_loop:                                       ; No predecessors!
 
 test:                                             ; preds = %loop, %entry
   %i1 = load i32, i32* %i
-  %lt_tmp = icmp slt i32 %i1, 3
+  %lt_tmp = icmp slt i32 %i1, 9
   %bool_tmp = zext i1 %lt_tmp to i32
   %cond = icmp eq i32 %bool_tmp, 1
   br i1 %cond, label %loop, label %end
@@ -63,7 +63,7 @@ end:                                              ; preds = %test
   %malloccall3 = tail call i8* @malloc(i32 ptrtoint ({ i32, i32* }* getelementptr ({ i32, i32* }, { i32, i32* }* null, i32 1) to i32))
   %array_wrapper = bitcast i8* %malloccall3 to { i32, i32* }*
   %array_info = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 0
-  store i32 3, i32* %array_info
+  store i32 9, i32* %array_info
   %array_info4 = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 1
   store i32* %array_init, i32** %array_info4
   store { i32, i32* }* %array_wrapper, { i32, i32* }** %arr1
@@ -73,11 +73,9 @@ end:                                              ; preds = %test
   %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 0
   store i32 1, i32* %arr_ele_addr
   %arr15 = load { i32, i32* }*, { i32, i32* }** %arr1
-  %array_addr_ptr6 = getelementptr { i32, i32* }, { i32, i32* }* %arr15, i32 0, i32 1
-  %arr_addr7 = load i32*, i32** %array_addr_ptr6
-  %arr_ele_addr8 = getelementptr i32, i32* %arr_addr7, i32 0
-  %arr_ele = load i32, i32* %arr_ele_addr8
-  call void @tig_print_int(i32 %arr_ele)
+  %0 = bitcast { i32, i32* }* %arr15 to i8*
+  %1 = call i32 @tig_array_length(i8* %0)
+  call void @tig_print_int(i32 %1)
   ret i32 0
 }
 

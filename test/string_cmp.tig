@@ -1,8 +1,10 @@
 let
 	var a := "string1"
 	var b := "string1"
-	var result := string_cmp(a,b)
+	var result := str_cmp(a, b)
+	var c := str_concat(a, "hello world")
 in
 	printInt(result);
+	print(c);
 	if result then (print("true"); 1) else (print("false"); 0)
 end

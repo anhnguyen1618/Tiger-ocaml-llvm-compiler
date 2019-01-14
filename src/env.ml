@@ -27,10 +27,10 @@ let external_functions = [
       ("getchar", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_getchar"; formals=[]; result=T.STRING}));
       ("ord", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_ord"; formals=[T.STRING]; result=T.INT}));
       ("chr", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_chr"; formals=[T.INT]; result=T.STRING}));
-      ("string_cmp", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_string_cmp"; formals=[T.STRING; T.STRING]; result=T.INT}));
+      ("str_cmp", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_string_cmp"; formals=[T.STRING; T.STRING]; result=T.INT}));
       ("size", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_size"; formals=[T.STRING]; result=T.INT}));
       ("substring", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_substring"; formals=[T.STRING; T.INT; T.INT]; result=T.STRING}));
-      ("concat", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_concat"; formals=[T.STRING; T.STRING]; result=T.STRING}));
+      ("str_concat", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_concat"; formals=[T.STRING; T.STRING]; result=T.STRING}));
       ("not", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_not"; formals=[T.INT]; result=T.INT}));
       ("exit", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_exit"; formals=[T.INT]; result=T.NIL}))
     ] 

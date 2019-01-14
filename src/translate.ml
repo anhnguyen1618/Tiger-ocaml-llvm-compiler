@@ -315,19 +315,34 @@ let field_var_exp_left (arr_addr: exp ) (index: exp) =
   let addr = L.build_load arr_addr "load_left" builder in
   L.build_gep addr [| int_exp(0);index |] "element_left" builder
 
-let subscript_exp (arr_addr: exp) (index: exp) =
+let subscript_exp (arr_wrapper_addr: exp) (index: exp) =
+  (* address of array is in the second position in struct*)
+  let struct_arr_index = int_exp(1) in
   (*L.build_load arr_addr "zz" builder  *)
-  let addr = L.build_gep arr_addr [| index |] "element" builder in
-  L.build_load addr "lol" builder
+  let array_addr_ptr = L.build_gep arr_wrapper_addr
+                         [| int_exp(0); struct_arr_index |] "array_addr_ptr" builder in
+  (* have to load when getting data from struct *)
+  let array_addr = L.build_load array_addr_ptr "arr_addr" builder in
+  
+  let ele_addr = L.build_gep array_addr [| index |] "arr_ele_addr" builder in
+  
+  L.build_load ele_addr "arr_ele" builder
 
-let subscript_exp_left (arr_addr: exp ) (index: exp) =
+let subscript_exp_left (arr_wrapper_addr_ptr: exp ) (index: exp) =
   (* we have to load here becase 
      RHS exp: arr := malloc() => arr has int* type and is saved to int**
      ,when calling transVar(simple) => return int* type 
      LHS exp: arr := malloc() => arr has int* type and is saved to int**
      HOWEVER when calling transVar_left(simple) => return int** (address that contain int* type*)
-  let addr = L.build_load arr_addr "load_left" builder in
-  L.build_gep addr [| index |] "element_left" builder
+  let arr_wrapper_addr = L.build_load arr_wrapper_addr_ptr "load_left" builder in
+  let struct_arr_index = int_exp(1) in
+  let array_addr_ptr = L.build_gep arr_wrapper_addr
+                         [| int_exp(0); struct_arr_index |] "array_addr_ptr" builder in
+  (* have to load when getting data from struct *)
+  let array_addr = L.build_load array_addr_ptr "arr_addr" builder in
+  
+  L.build_gep array_addr [| index |] "arr_ele_addr" builder
+
 
 let if_exp
       (gen_test_val: unit -> exp)

@@ -13,27 +13,24 @@ main:                                   # @main
 	movl	$.L__unnamed_1, %edi
 	movl	$.L__unnamed_2, %esi
 	callq	tig_string_cmp
-	movl	%eax, (%rsp)
+	movl	%eax, 4(%rsp)
 	movq	8(%rsp), %rdi
 	movl	$.L__unnamed_3, %esi
 	callq	tig_concat
 	movq	%rax, 16(%rsp)
-	movl	(%rsp), %edi
+	movl	4(%rsp), %edi
 	callq	tig_print_int
 	movq	16(%rsp), %rdi
 	callq	tig_print
-	cmpl	$1, (%rsp)
+	cmpl	$1, 4(%rsp)
 	jne	.LBB0_2
 # %bb.1:                                # %then
 	movl	$.L__unnamed_4, %edi
-	callq	tig_print
-	movl	$1, 4(%rsp)
 	jmp	.LBB0_3
 .LBB0_2:                                # %else
 	movl	$.L__unnamed_5, %edi
-	callq	tig_print
-	movl	$0, 4(%rsp)
 .LBB0_3:                                # %merge
+	callq	tig_print
 	xorl	%eax, %eax
 	addq	$40, %rsp
 	retq

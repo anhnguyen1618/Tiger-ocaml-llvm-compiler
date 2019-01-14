@@ -337,20 +337,30 @@ let if_exp
   
   L.position_at_end else_block builder;
   let (if_else_type, else_val) = gen_else_val() in
-  
-  let addr = alloc_unesc_temp "if_result_addr" if_else_type in
-  L.position_at_end then_block builder;
-  assign_stm addr then_val;
-  ignore(L.build_br merge_block builder);
 
-  L.position_at_end else_block builder;
-  assign_stm addr else_val;
-  ignore(L.build_br merge_block builder);
+  let final_result = match if_else_type with
+    | T.NIL ->
+       L.position_at_end then_block builder;
+       ignore(L.build_br merge_block builder);
+       L.position_at_end else_block builder;
+       ignore(L.build_br merge_block builder);
+       L.position_at_end merge_block builder;
+       dummy_exp
 
+    | _ -> 
+       let addr = alloc_unesc_temp "if_result_addr" if_else_type in
+       L.position_at_end then_block builder;
+       assign_stm addr then_val;
+       ignore(L.build_br merge_block builder);
 
-  L.position_at_end merge_block builder;
-  L.build_load addr "if_result" builder
+       L.position_at_end else_block builder;
+       assign_stm addr else_val;
+       ignore(L.build_br merge_block builder);
 
+       L.position_at_end merge_block builder;
+       L.build_load addr "if_result" builder
+  in
+  final_result
 
 let func_dec
       (func_level: level)

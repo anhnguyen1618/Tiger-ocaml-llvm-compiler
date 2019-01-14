@@ -59,5 +59,7 @@ val build_return_main: unit -> unit
 
 val build_external_func: string -> Types.ty list -> Types.ty -> unit
 
+val build_bitcast_generic: exp -> exp
+
                                                                   
 

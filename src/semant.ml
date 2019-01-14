@@ -409,7 +409,11 @@ let rec trans_dec (
                                   Expect: '%s'. Received: '%s'"
                     (T.name ty) (T.name real_arg_type) in
 	U.assert_type_eq (ty, real_arg_type, pos, msg);
-        acc @ [argIr]
+        let casted_arg_ir = match ty with
+        | T.GENERIC -> Translate.build_bitcast_generic argIr
+        | _ -> argIr
+        in
+        acc @ [casted_arg_ir]
       in
       match S.look(v_env, func) with
       | Some ( E.FunEntry {formals; result; label; level = dec_level} ) ->

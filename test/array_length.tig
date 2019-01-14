@@ -1,0 +1,7 @@
+let
+	type arrtype = array of int
+	var arr1:arrtype := arrtype [100] of 6
+in
+	/*printInt(array_length(arr1))*/
+	1
+end

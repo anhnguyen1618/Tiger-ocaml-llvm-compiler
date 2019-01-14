@@ -7,11 +7,12 @@ type ty =
 | INT
 | STRING
 | ARRAY of ty * unique
+| ARRAY_POINTER of ty * unique
 | NAME of Symbol.symbol * ty option ref
 | INT_POINTER
 | RECORD_ALLOC of (Symbol.symbol * ty) list * unique
 | STRING_POINTER
-
+| GENERIC
   
 type comp = 
   LT
@@ -28,8 +29,12 @@ let leq = function
   | (ARRAY(_, unique1), ARRAY(_, unique2)) -> (unique1 = unique2)
   | (NIL, NIL) -> true
   | (NAME(sym1, _), NAME(sym2, _)) -> S.name(sym1) = S.name(sym2)
+  | (GENERIC, RECORD _) -> true
+  | (RECORD _, GENERIC) -> true                       
+  | (GENERIC, ARRAY _) -> true
+  | (ARRAY _, GENERIC) -> true
   | (_, _) -> false
-
+                      
 let comp (t1, t2) = 
   if leq(t1, t2) && leq(t2, t1)
   then EQ

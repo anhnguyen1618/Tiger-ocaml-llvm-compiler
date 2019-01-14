@@ -38,6 +38,12 @@ extern char *tig_chr(const int i)
    return s;
 }
 
+extern int tig_array_length(const char *s)
+{
+  int size = sizeof(s) / (sizeof(*s));
+  return sizeof(s) ;
+}
+
 extern int tig_size(const char *s)
 {
    return strlen(s);

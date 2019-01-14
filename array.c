@@ -13,9 +13,9 @@ struct Node *next;
 // list with 3 nodes 
 int main() 
 { 
-struct Node* head = NULL;
- struct Node* second = head;
- int a = second->data;
+  int a = 1;
+  int hello[a];
+  hello[0] = 1;
 
 return 0; 
 } 

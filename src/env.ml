@@ -22,6 +22,11 @@ let external_functions = [
                            label=Temp.namedlabel "tig_init_record";
                            formals=[T.INT];
                            result= T.INT_POINTER}));
+      ("array_length", FunEntry ({
+                           level=Translate.outermost;
+                           label=Temp.namedlabel "tig_array_length";
+                           formals=[T.GENERIC];
+                           result= T.INT}));
       ("exit", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_exit"; formals=[T.INT]; result=T.NIL}));
       ("flush", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_flush"; formals=[]; result=T.NIL}));
       ("getchar", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_getchar"; formals=[]; result=T.STRING}));

@@ -48,13 +48,20 @@ let dummy_access: access = (outermost, IN_FRAME(dummy_exp))
 let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
   | T.STRING -> string_type
+  | T.ARRAY_POINTER(arr_type, unique) ->
+     let array_type = L.pointer_type (get_llvm_type arr_type) in
+     L.struct_type context [| int_type; array_type |]
   | T.ARRAY(arr_type, unique) ->
-     L.pointer_type (get_llvm_type arr_type)
+     let array_type = arr_type |> get_llvm_type |> L.pointer_type in
+     let wrapper_type = L.struct_type context [| int_type; array_type |] in
+     wrapper_type |> L.pointer_type
+
   | T.RECORD(field_types, uniq) ->
      L.pointer_type (get_llvm_type (T.RECORD_ALLOC (field_types, uniq)))
   | T.RECORD_ALLOC (field_types, _) ->
      L.struct_type context ( (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list)
   | T.INT_POINTER -> int_pointer
+  | T.GENERIC -> string_type
   | _ -> L.void_type context
        
 let frame_pointer_stack = Stack.create()
@@ -246,7 +253,8 @@ let array_exp
       (size: exp)
       (init: exp)
       (typ: T.ty) =
-  let array_addr = L.build_array_malloc (get_llvm_type typ) size "array_init" builder in
+  let array_ele_type = get_llvm_type typ in
+  let array_addr = L.build_array_malloc array_ele_type size "array_init" builder in
   (* This code is to alloc counter -> add init value for array *)
   let counter_addr = alloc_unesc_temp "i" T.INT in
   assign_stm counter_addr (int_exp 0);
@@ -267,9 +275,17 @@ let array_exp
   in
   
   ignore(while_exp conditition body);
-  
+
+  let array_wrapper_type = L.struct_type context [| int_type; L.pointer_type(array_ele_type) |] in
   (*loop size; *)
-  array_addr
+  let wrapper_addr = L.build_malloc array_wrapper_type "array_wrapper" builder in
+  let save_to_array_wrapper index value =
+    let addr = L.build_gep wrapper_addr [| int_exp(0); int_exp(index) |] "array_info" builder in
+    ignore(L.build_store value addr builder)
+  in
+  save_to_array_wrapper 0 size;  
+  save_to_array_wrapper 1 array_addr;
+  wrapper_addr
 
 
 let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
@@ -427,8 +443,6 @@ let func_dec
   (* Validate the generated code, checking for consistency. *)
                  (*Llvm_analysis.assert_valid_function func_block;*)
 
-
-
 let build_external_func
       (name: string)
       (args: T.ty list)
@@ -436,6 +450,14 @@ let build_external_func
   let arg_types = (List.map get_llvm_type args) |> Array.of_list in
   let func_type = L.function_type (get_llvm_type result) arg_types in
   ignore(L.declare_function name func_type the_module)
+
+
+let build_bitcast_generic value =
+  (*  let addr = alloc_unesc_temp "" T.STRING in *)
+  let value = L.build_bitcast value string_type "" builder in
+  value
+(*  assign_stm addr value;
+  L.build_load addr "" builder*)
   
   
                     

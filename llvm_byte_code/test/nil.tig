@@ -11,6 +11,8 @@ declare i32* @tig_init_array(i32, i32)
 
 declare i32* @tig_init_record(i32)
 
+declare i32 @tig_array_length(i8*)
+
 declare void @tig_exit(i32)
 
 declare void @tig_flush()
@@ -20,6 +22,8 @@ declare i8* @tig_getchar()
 declare i32 @tig_ord(i8*)
 
 declare i8* @tig_chr(i32)
+
+declare i32 @tig_string_cmp(i8*, i8*)
 
 declare i32 @tig_size(i8*)
 
@@ -32,10 +36,11 @@ declare i32 @tig_not(i32)
 define i32 @main() {
 entry:
   %b = alloca { i8* }*
-  %record_init = alloca { i8* }
   %a = alloca { i8* }*
   %frame_pointer = alloca { i32 }
   store { i8* }* null, { i8* }** %a
+  %malloccall = tail call i8* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
+  %record_init = bitcast i8* %malloccall to { i8* }*
   %Element = getelementptr { i8* }, { i8* }* %record_init, i32 0, i32 0
   store i8* getelementptr inbounds ([12 x i8], [12 x i8]* @0, i32 0, i32 0), i8** %Element
   store { i8* }* %record_init, { i8* }** %b
@@ -49,3 +54,5 @@ entry:
 break_loop:                                       ; No predecessors!
   ret i32 0
 }
+
+declare noalias i8* @malloc(i32)

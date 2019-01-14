@@ -43,6 +43,11 @@ extern int tig_size(const char *s)
    return strlen(s);
 }
 
+extern int tig_string_cmp(const char *a, const char *b)
+{
+  return strcmp (a, b) == 0;
+}
+
 extern char *tig_substring(const char *s, const int start, const int len)
 {
    char *sub = malloc(sizeof(char) * (len + 1));

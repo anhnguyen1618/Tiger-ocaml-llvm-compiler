@@ -1,0 +1,75 @@
+; ModuleID = 'Tiger jit'
+source_filename = "Tiger jit"
+
+@0 = private unnamed_addr constant [8 x i8] c"string1\00"
+@1 = private unnamed_addr constant [8 x i8] c"string1\00"
+@2 = private unnamed_addr constant [5 x i8] c"true\00"
+@3 = private unnamed_addr constant [6 x i8] c"false\00"
+
+declare void @tig_print_int(i32)
+
+declare void @tig_print(i8*)
+
+declare i32* @tig_init_array(i32, i32)
+
+declare i32* @tig_init_record(i32)
+
+declare void @tig_exit(i32)
+
+declare void @tig_flush()
+
+declare i8* @tig_getchar()
+
+declare i32 @tig_ord(i8*)
+
+declare i8* @tig_chr(i32)
+
+declare i32 @tig_string_cmp(i8*, i8*)
+
+declare i32 @tig_size(i8*)
+
+declare i8* @tig_substring(i8*, i32, i32)
+
+declare i8* @tig_concat(i8*, i8*)
+
+declare i32 @tig_not(i32)
+
+define i32 @main() {
+entry:
+  %if_result_addr = alloca i32
+  %result = alloca i32
+  %b = alloca i8*
+  %a = alloca i8*
+  %frame_pointer = alloca { i32 }
+  store i8* getelementptr inbounds ([8 x i8], [8 x i8]* @0, i32 0, i32 0), i8** %a
+  store i8* getelementptr inbounds ([8 x i8], [8 x i8]* @1, i32 0, i32 0), i8** %b
+  %a1 = load i8*, i8** %a
+  %b2 = load i8*, i8** %b
+  %0 = call i32 @tig_string_cmp(i8* %a1, i8* %b2)
+  store i32 %0, i32* %result
+  %result3 = load i32, i32* %result
+  call void @tig_print_int(i32 %result3)
+  br label %test
+
+break_loop:                                       ; No predecessors!
+  ret i32 0
+
+test:                                             ; preds = %entry
+  %result4 = load i32, i32* %result
+  %cond = icmp eq i32 %result4, 1
+  br i1 %cond, label %then, label %else
+
+then:                                             ; preds = %test
+  call void @tig_print(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @2, i32 0, i32 0))
+  store i32 1, i32* %if_result_addr
+  br label %merge
+
+else:                                             ; preds = %test
+  call void @tig_print(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @3, i32 0, i32 0))
+  store i32 0, i32* %if_result_addr
+  br label %merge
+
+merge:                                            ; preds = %else, %then
+  %if_result = load i32, i32* %if_result_addr
+  ret i32 0
+}

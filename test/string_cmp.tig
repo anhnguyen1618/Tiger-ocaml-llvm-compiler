@@ -1,0 +1,8 @@
+let
+	var a := "string1"
+	var b := "string1"
+	var result := string_cmp(a,b)
+in
+	printInt(result);
+	if result then (print("true"); 1) else (print("false"); 0)
+end

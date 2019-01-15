@@ -12,7 +12,8 @@ type ty =
 | INT_POINTER
 | RECORD_ALLOC of (Symbol.symbol * ty) list * unique
 | STRING_POINTER
-| GENERIC
+| GENERIC_ARRAY
+| GENERIC_RECORD
   
 type comp = 
   LT
@@ -29,10 +30,10 @@ let leq = function
   | (ARRAY(_, unique1), ARRAY(_, unique2)) -> (unique1 = unique2)
   | (NIL, NIL) -> true
   | (NAME(sym1, _), NAME(sym2, _)) -> S.name(sym1) = S.name(sym2)
-  | (GENERIC, RECORD _) -> true
-  | (RECORD _, GENERIC) -> true                       
-  | (GENERIC, ARRAY _) -> true
-  | (ARRAY _, GENERIC) -> true
+  | (GENERIC_RECORD, RECORD _) -> true
+  | (RECORD _, GENERIC_RECORD) -> true                       
+  | (GENERIC_ARRAY, ARRAY _) -> true
+  | (ARRAY _, GENERIC_ARRAY) -> true
   | (_, _) -> false
                       
 let comp (t1, t2) = 

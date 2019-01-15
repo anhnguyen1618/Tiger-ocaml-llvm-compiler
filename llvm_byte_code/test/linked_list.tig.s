@@ -8,21 +8,12 @@ main:                                   # @main
 # %bb.0:                                # %entry
 	subq	$24, %rsp
 	.cfi_def_cfa_offset 32
-	movq	$0, 8(%rsp)
-	movl	$8, %edi
+	movl	$16, %edi
 	callq	malloc
-	movq	$.L__unnamed_1, (%rax)
-	movq	%rax, (%rsp)
-	movq	(%rax), %rdi
-	callq	tig_print
-	movq	(%rsp), %rdi
-	callq	tig_nillable
-	movl	%eax, %edi
-	callq	tig_print_int
-	movq	$0, (%rsp)
-	xorl	%edi, %edi
-	callq	tig_nillable
-	movl	%eax, %edi
+	movl	$3, (%rax)
+	movq	$0, 8(%rax)
+	movq	%rax, 8(%rsp)
+	movl	(%rax), %edi
 	callq	tig_print_int
 	xorl	%eax, %eax
 	addq	$24, %rsp
@@ -31,11 +22,5 @@ main:                                   # @main
 	.size	main, .Lfunc_end0-main
 	.cfi_endproc
                                         # -- End function
-	.type	.L__unnamed_1,@object   # @0
-	.section	.rodata.str1.1,"aMS",@progbits,1
-.L__unnamed_1:
-	.asciz	"hello world"
-	.size	.L__unnamed_1, 12
-
 
 	.section	".note.GNU-stack","",@progbits

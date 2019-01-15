@@ -25,8 +25,13 @@ let external_functions = [
       ("array_length", FunEntry ({
                            level=Translate.outermost;
                            label=Temp.namedlabel "tig_array_length";
-                           formals=[T.GENERIC];
+                           formals=[T.GENERIC_ARRAY];
                            result= T.INT}));
+      ("is_nil", FunEntry ({
+                             level=Translate.outermost;
+                             label=Temp.namedlabel "tig_nillable";
+                             formals=[T.GENERIC_RECORD];
+                             result= T.INT}));
       ("exit", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_exit"; formals=[T.INT]; result=T.NIL}));
       ("flush", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_flush"; formals=[]; result=T.NIL}));
       ("getchar", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_getchar"; formals=[]; result=T.STRING}));

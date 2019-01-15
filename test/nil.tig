@@ -4,5 +4,7 @@ let
 	var b := tree {result = "hello world"}
 in
 	print(b.result);
-	b := nil
+		printInt(is_nil(b));
+	b := nil;
+	printInt(is_nil(b))
 end

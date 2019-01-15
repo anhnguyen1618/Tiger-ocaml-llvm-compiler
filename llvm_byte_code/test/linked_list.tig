@@ -1,0 +1,57 @@
+; ModuleID = 'Tiger jit'
+source_filename = "Tiger jit"
+
+declare void @tig_print_int(i32)
+
+declare void @tig_print(i8*)
+
+declare i32* @tig_init_array(i32, i32)
+
+declare i32* @tig_init_record(i32)
+
+declare i32 @tig_array_length(i8*)
+
+declare i32 @tig_nillable(i8*)
+
+declare void @tig_exit(i32)
+
+declare void @tig_flush()
+
+declare i8* @tig_getchar()
+
+declare i32 @tig_ord(i8*)
+
+declare i8* @tig_chr(i32)
+
+declare i32 @tig_string_cmp(i8*, i8*)
+
+declare i32 @tig_size(i8*)
+
+declare i8* @tig_substring(i8*, i32, i32)
+
+declare i8* @tig_concat(i8*, i8*)
+
+declare i32 @tig_not(i32)
+
+define i32 @main() {
+entry:
+  %a = alloca { i32, { i32 }* }*
+  %frame_pointer = alloca { i32 }
+  %malloccall = tail call i8* @malloc(i32 ptrtoint ({ i32, { i32 }* }* getelementptr ({ i32, { i32 }* }, { i32, { i32 }* }* null, i32 1) to i32))
+  %record_init = bitcast i8* %malloccall to { i32, { i32 }* }*
+  %Element = getelementptr { i32, { i32 }* }, { i32, { i32 }* }* %record_init, i32 0, i32 0
+  store i32 3, i32* %Element
+  %Element1 = getelementptr { i32, { i32 }* }, { i32, { i32 }* }* %record_init, i32 0, i32 1
+  store { i32 }* null, { i32 }** %Element1
+  store { i32, { i32 }* }* %record_init, { i32, { i32 }* }** %a
+  %a2 = load { i32, { i32 }* }*, { i32, { i32 }* }** %a
+  %element = getelementptr { i32, { i32 }* }, { i32, { i32 }* }* %a2, i32 0, i32 0
+  %field_var = load i32, i32* %element
+  call void @tig_print_int(i32 %field_var)
+  ret i32 0
+
+break_loop:                                       ; No predecessors!
+  ret i32 0
+}
+
+declare noalias i8* @malloc(i32)

@@ -13,6 +13,8 @@ declare i32* @tig_init_record(i32)
 
 declare i32 @tig_array_length(i8*)
 
+declare i32 @tig_nillable(i8*)
+
 declare void @tig_exit(i32)
 
 declare void @tig_flush()
@@ -48,7 +50,15 @@ entry:
   %element = getelementptr { i8* }, { i8* }* %b1, i32 0, i32 0
   %field_var = load i8*, i8** %element
   call void @tig_print(i8* %field_var)
+  %b2 = load { i8* }*, { i8* }** %b
+  %0 = bitcast { i8* }* %b2 to i8*
+  %1 = call i32 @tig_nillable(i8* %0)
+  call void @tig_print_int(i32 %1)
   store { i8* }* null, { i8* }** %b
+  %b3 = load { i8* }*, { i8* }** %b
+  %2 = bitcast { i8* }* %b3 to i8*
+  %3 = call i32 @tig_nillable(i8* %2)
+  call void @tig_print_int(i32 %3)
   ret i32 0
 
 break_loop:                                       ; No predecessors!

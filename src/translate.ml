@@ -48,9 +48,6 @@ let dummy_access: access = (outermost, IN_FRAME(dummy_exp))
 let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT -> int_type
   | T.STRING -> string_type
-  | T.ARRAY_POINTER(arr_type, unique) ->
-     let array_type = L.pointer_type (get_llvm_type arr_type) in
-     L.struct_type context [| int_type; array_type |]
   | T.ARRAY(arr_type, unique) ->
      let array_type = arr_type |> get_llvm_type |> L.pointer_type in
      let wrapper_type = L.struct_type context [| int_type; array_type |] in
@@ -61,7 +58,8 @@ let rec get_llvm_type: T.ty -> L.lltype = function
   | T.RECORD_ALLOC (field_types, _) ->
      L.struct_type context ( (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list)
   | T.INT_POINTER -> int_pointer
-  | T.GENERIC -> string_type
+  | T.GENERIC_ARRAY -> string_type
+  | T.GENERIC_RECORD -> string_type
   | _ -> L.void_type context
        
 let frame_pointer_stack = Stack.create()
@@ -468,11 +466,8 @@ let build_external_func
 
 
 let build_bitcast_generic value =
-  (*  let addr = alloc_unesc_temp "" T.STRING in *)
-  let value = L.build_bitcast value string_type "" builder in
-  value
-(*  assign_stm addr value;
-  L.build_load addr "" builder*)
+  L.build_bitcast value string_type "" builder
+
   
   
                     

@@ -38,6 +38,11 @@ extern char *tig_chr(const int i)
    return s;
 }
 
+extern int tig_nillable(const char *s)
+{
+  return s == NULL;
+}
+
 extern int tig_array_length(const char *s)
 {
   return s[0];

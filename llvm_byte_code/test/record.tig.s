@@ -6,17 +6,23 @@
 main:                                   # @main
 	.cfi_startproc
 # %bb.0:                                # %entry
-	subq	$56, %rsp
-	.cfi_def_cfa_offset 64
-	movq	$.L__unnamed_1, 24(%rsp)
-	movl	$10, 32(%rsp)
-	leaq	24(%rsp), %rax
-	movq	%rax, 16(%rsp)
-	movq	$.L__unnamed_2, 40(%rsp)
-	movq	%rax, 48(%rsp)
-	leaq	40(%rsp), %rax
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	subq	$32, %rsp
+	.cfi_def_cfa_offset 48
+	.cfi_offset %rbx, -16
+	movl	$16, %edi
+	callq	malloc
+	movq	%rax, %rbx
+	movq	$.L__unnamed_1, (%rbx)
+	movl	$10, 8(%rbx)
+	movq	%rbx, 16(%rsp)
+	movl	$16, %edi
+	callq	malloc
+	movq	$.L__unnamed_2, (%rax)
+	movq	%rbx, 8(%rax)
 	movq	%rax, 8(%rsp)
-	movl	$.L__unnamed_2, %edi
+	movq	(%rax), %rdi
 	callq	tig_print
 	movq	8(%rsp), %rax
 	movq	8(%rax), %rax
@@ -33,7 +39,8 @@ main:                                   # @main
 	movq	(%rax), %rdi
 	callq	tig_print
 	xorl	%eax, %eax
-	addq	$56, %rsp
+	addq	$32, %rsp
+	popq	%rbx
 	retq
 .Lfunc_end0:
 	.size	main, .Lfunc_end0-main

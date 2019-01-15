@@ -410,8 +410,9 @@ let rec trans_dec (
                     (T.name ty) (T.name real_arg_type) in
 	U.assert_type_eq (ty, real_arg_type, pos, msg);
         let casted_arg_ir = match ty with
-        | T.GENERIC -> Translate.build_bitcast_generic argIr
-        | _ -> argIr
+          | T.GENERIC_RECORD -> Translate.build_bitcast_generic argIr
+          | T.GENERIC_ARRAY -> Translate.build_bitcast_generic argIr
+          | _ -> argIr
         in
         acc @ [casted_arg_ir]
       in
@@ -436,9 +437,6 @@ let rec trans_dec (
       let fields_with_name_types = List.map
                                      (fun (symbol, exp, pos) -> (symbol, tr_exp(exp), pos))
                                      fields in
-      let fieldLetsIR = List.map
-                          (fun (_, { exp; _ }, _) -> exp)
-                          fields_with_name_types in
       let field_exps = List.map
                         (fun (symbol, exp, pos) -> (symbol, actual_ty_exp exp, pos))
                         fields_with_name_types in
@@ -467,9 +465,15 @@ let rec trans_dec (
 	     then (Err.error pos ("RecordExp and record type '" ^ S.name(typ) ^ "' doesn't match");
 		   {exp = Translate.dummy_exp(*Translate.recordDec(fieldLetsIR)*); ty = T.RECORD (types, refer)})
 	     else
+               let proper_nil_fields (_, t) (_, {exp; ty}, _) =
+                 match ty with
+                 | T.NIL -> Translate.nil_exp t
+                 | _ -> exp
+               in
 	       let typesInCreateOrder = check_fields field_exps in
+               let field_irs = List.map2 proper_nil_fields types fields_with_name_types in
                print_string "run through here\n";
-	       {exp = (Translate.record_exp types fieldLetsIR) ; ty = T.RECORD (typesInCreateOrder, refer)}
+	       {exp = (Translate.record_exp types field_irs) ; ty = T.RECORD (typesInCreateOrder, refer)}
 			    
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not have type record");

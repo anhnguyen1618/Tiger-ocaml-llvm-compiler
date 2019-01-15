@@ -1,0 +1,20 @@
+let
+    type b = { a  : int}
+    type node = {data: int, next: b}
+    /*var c := b {a = 6}*/
+    var a := node {data = 3, next = nil}
+    
+    /*var b := node {data = 2, next = a}
+    var c := node {data = 1, next = b}*/
+    /*var current_node := c*/
+in
+    printInt(a.data)
+    /*a.next := nil*/
+    /*while is_nil(current_node) <> 0 
+    do
+        (
+            printInt(current_node.data);
+            current_node := current_node.next
+        );
+    print("end program")*/
+end

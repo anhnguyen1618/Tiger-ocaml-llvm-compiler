@@ -60,6 +60,7 @@ let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT_POINTER -> int_pointer
   | T.GENERIC_ARRAY -> string_type
   | T.GENERIC_RECORD -> string_type
+  | T.NAME _ -> string_type
   | _ -> L.void_type context
        
 let frame_pointer_stack = Stack.create()
@@ -104,8 +105,11 @@ let build_main_func (esc_vars: T.ty list): break_block =
   build_frame_pointer_alloc (stuff_static_link::esc_vars);
   exit_loop_block
 
+let build_bitcast_generic value =
+  L.build_bitcast value string_type "" builder
 
-
+let cast_generic_to_record value typ =
+  L.build_bitcast value (get_llvm_type typ) "" builder
 
 let point_to_func_entry_builder (): L.llbuilder =
   let current_block = L.insertion_block builder in
@@ -117,6 +121,7 @@ let alloc_unesc_temp (name: string) (typ: T.ty): exp =
   let builder = point_to_func_entry_builder() in
   let addr = L.build_alloca (get_llvm_type typ) name builder in
   addr
+
        
 let alloc_local
       (dec_level: level)
@@ -296,7 +301,11 @@ let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
     (* pointer to internal struct has to defer by first 0, pointer to external struct does not need *)
     let addr = L.build_gep record_addr [| int_exp(0); int_exp(index) |] "Element" builder in
     ignore(L.build_store exp addr builder) in
-  List.iteri alloc exps;
+  let casted_exps = List.map2 (fun (_, ty) exp -> match ty with
+                                           | T.NAME _ -> build_bitcast_generic exp
+                                           | _ -> exp
+                  ) tys exps in
+  List.iteri alloc casted_exps;
   record_addr
 
 let field_var_exp (arr_addr: exp) (index: exp) =
@@ -465,8 +474,7 @@ let build_external_func
   ignore(L.declare_function name func_type the_module)
 
 
-let build_bitcast_generic value =
-  L.build_bitcast value string_type "" builder
+
 
   
   

@@ -61,5 +61,7 @@ val build_external_func: string -> Types.ty list -> Types.ty -> unit
 
 val build_bitcast_generic: exp -> exp
 
+val cast_generic_to_record: exp -> Types.ty -> exp
+
                                                                   
 

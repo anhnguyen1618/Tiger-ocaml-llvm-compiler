@@ -21,7 +21,7 @@ type comp =
 | EQ
 | INCOMP (* incomparable *)
 
-let leq = function
+let rec leq = function
   | (NIL, RECORD(_)) -> true
   | (RECORD(_), NIL) -> true 
   | (INT, INT) -> true
@@ -30,6 +30,14 @@ let leq = function
   | (ARRAY(_, unique1), ARRAY(_, unique2)) -> (unique1 = unique2)
   | (NIL, NIL) -> true
   | (NAME(sym1, _), NAME(sym2, _)) -> S.name(sym1) = S.name(sym2)
+  | (NAME(_, real_type), (RECORD _ as t2)) ->
+     (match !real_type with
+     | Some t1 -> leq(t1, t2) && leq(t2, t1)
+     | None -> false)
+  | ((RECORD _ as t2), NAME(_, real_type)) ->
+     (match !real_type with
+     | Some t1 -> leq(t1, t2) && leq(t2, t1)
+     | None -> false)
   | (GENERIC_RECORD, RECORD _) -> true
   | (RECORD _, GENERIC_RECORD) -> true                       
   | (GENERIC_ARRAY, ARRAY _) -> true

@@ -277,12 +277,19 @@ let rec trans_dec (
                               (fun (symbol, _) -> (index := !index + 1; S.eq(s, symbol))) tys
          in
          (match matchedField with
-         | Some (_, ty) -> {exp = Translate.field_var_exp recExp (Translate.int_exp !index); ty = ty}
-         | None -> (
-           let msg = Printf.sprintf "Property '%s' does not exist on type '%s'\n"
-                       (S.name s) (T.name typeWithObj) in
-           Err.error pos msg;
-	   {exp = Translate.dummy_exp; ty = T.NIL}))
+          | Some (_, ty) ->
+             let actual_type = actual_ty ty in
+             let raw_val = Translate.field_var_exp recExp (Translate.int_exp !index) in
+             let casted_val = match ty with
+               | T.NAME _ -> Translate.cast_generic_to_record raw_val actual_type
+               | _ -> raw_val
+             in
+             {exp = casted_val; ty = actual_type}
+          | None -> (
+            let msg = Printf.sprintf "Property '%s' does not exist on type '%s'\n"
+                        (S.name s) (T.name typeWithObj) in
+            Err.error pos msg;
+	    {exp = Translate.dummy_exp; ty = T.NIL}))
       | _ ->
          Err.error pos ("Can't access property '"
 			^ S.name(s) ^ "' with type '"
@@ -503,7 +510,11 @@ let rec trans_dec (
         | T.NIL -> Translate.nil_exp left_type
         | _ -> rhs_value
       in
-      { exp = (Translate.assign_stm addr value; Translate.dummy_exp); ty=T.NIL }
+      let casted_value = match left_type with
+        | T.NAME _ -> Translate.build_bitcast_generic value
+        | _ -> value
+      in
+      { exp = (Translate.assign_stm addr casted_value; Translate.dummy_exp); ty=T.NIL }
 
     and check_if_exp (A.IfExp {test = test_exp; then' = then_exp; else' = else_option; pos}): expty =
       (* This is a hack to get type because we have to thunk code gen*)

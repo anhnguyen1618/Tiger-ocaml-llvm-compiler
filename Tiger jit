@@ -9,6 +9,10 @@ declare i32* @tig_init_array(i32, i32)
 
 declare i32* @tig_init_record(i32)
 
+declare i32 @tig_array_length(i8*)
+
+declare i32 @tig_nillable(i8*)
+
 declare void @tig_exit(i32)
 
 declare void @tig_flush()
@@ -18,6 +22,8 @@ declare i8* @tig_getchar()
 declare i32 @tig_ord(i8*)
 
 declare i8* @tig_chr(i32)
+
+declare i32 @tig_string_cmp(i8*, i8*)
 
 declare i32 @tig_size(i8*)
 
@@ -30,16 +36,15 @@ declare i32 @tig_not(i32)
 define i32 @main() {
 entry:
   %i = alloca i32
-  %a = alloca { i32 }*
-  %frame_pointer = alloca { i32, { i32 }** }
-  %malloccall = tail call i8* @malloc(i32 ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32))
-  %record_init = bitcast i8* %malloccall to { i32 }*
-  %Element = getelementptr { i32 }, { i32 }* %record_init, i32 0, i32 0
-  store i32 5, i32* %Element
-  store { i32 }* %record_init, { i32 }** %a
-  %a1 = load { i32 }*, { i32 }** %a
-  %malloccall2 = tail call i8* @malloc(i32 mul (i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32), i32 2))
-  %array_init = bitcast i8* %malloccall2 to { i32 }**
+  %x = alloca i32
+  %frame_pointer = alloca { i32, i32, { i32, i32* }* }
+  %var_dec = getelementptr { i32, i32, { i32, i32* }* }, { i32, i32, { i32, i32* }* }* %frame_pointer, i32 0, i32 1
+  store i32 5, i32* %var_dec
+  store i32 7, i32* %x
+  %x1 = load i32, i32* %x
+  %mallocsize = mul i32 %x1, ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32)
+  %malloccall = tail call i8* @malloc(i32 %mallocsize)
+  %array_init = bitcast i8* %malloccall to i32*
   store i32 0, i32* %i
   br label %test
 
@@ -47,48 +52,79 @@ break_loop:                                       ; No predecessors!
   ret i32 0
 
 test:                                             ; preds = %loop, %entry
-  %i3 = load i32, i32* %i
-  %lt_tmp = icmp slt i32 %i3, 2
+  %i2 = load i32, i32* %i
+  %lt_tmp = icmp slt i32 %i2, %x1
   %bool_tmp = zext i1 %lt_tmp to i32
   %cond = icmp eq i32 %bool_tmp, 1
   br i1 %cond, label %loop, label %end
 
 loop:                                             ; preds = %test
-  %i4 = load i32, i32* %i
-  %Element5 = getelementptr { i32 }*, { i32 }** %array_init, i32 %i4
-  store { i32 }* %a1, { i32 }** %Element5
-  %add_tmp = add i32 %i4, 1
+  %i3 = load i32, i32* %i
+  %Element = getelementptr i32, i32* %array_init, i32 %i3
+  store i32 4, i32* %Element
+  %add_tmp = add i32 %i3, 1
   store i32 %add_tmp, i32* %i
   br label %test
 
 end:                                              ; preds = %test
-  %var_dec = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %frame_pointer, i32 0, i32 1
-  store { i32 }** %array_init, { i32 }*** %var_dec
+  %malloccall4 = tail call i8* @malloc(i32 ptrtoint ({ i32, i32* }* getelementptr ({ i32, i32* }, { i32, i32* }* null, i32 1) to i32))
+  %array_wrapper = bitcast i8* %malloccall4 to { i32, i32* }*
+  %array_info = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 0
+  store i32 %x1, i32* %array_info
+  %array_info5 = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 1
+  store i32* %array_init, i32** %array_info5
+  %arr1 = getelementptr { i32, i32, { i32, i32* }* }, { i32, i32, { i32, i32* }* }* %frame_pointer, i32 0, i32 2
+  store { i32, i32* }* %array_wrapper, { i32, i32* }** %arr1
 }
 
 declare noalias i8* @malloc(i32)
 
-define { i32 }** @add({ i32, { i32 }** }*) {
+define i32 @x({ i32, i32, { i32, i32* }* }*) {
 entry:
-  %another_rec = alloca { i32 }*
-  %frame_pointer = alloca { { i32, { i32 }** }* }
-  %arg_address = getelementptr { { i32, { i32 }** }* }, { { i32, { i32 }** }* }* %frame_pointer, i32 0, i32 0
-  store { i32, { i32 }** }* %0, { i32, { i32 }** }** %arg_address
-  %malloccall = tail call i8* @malloc(i32 ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32))
-  %record_init = bitcast i8* %malloccall to { i32 }*
-  %Element = getelementptr { i32 }, { i32 }* %record_init, i32 0, i32 0
-  store i32 6, i32* %Element
-  store { i32 }* %record_init, { i32 }** %another_rec
-  %fp_addr_in_sl = getelementptr { { i32, { i32 }** }* }, { { i32, { i32 }** }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr = load { i32, { i32 }** }*, { i32, { i32 }** }** %fp_addr_in_sl
-  %arr = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %fp_addr, i32 0, i32 1
-  %load_left = load { i32 }**, { i32 }*** %arr
-  %element_left = getelementptr { i32 }*, { i32 }** %load_left, i32 1
-  %another_rec1 = load { i32 }*, { i32 }** %another_rec
-  store { i32 }* %another_rec1, { i32 }** %element_left
-  %fp_addr_in_sl2 = getelementptr { { i32, { i32 }** }* }, { { i32, { i32 }** }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr3 = load { i32, { i32 }** }*, { i32, { i32 }** }** %fp_addr_in_sl2
-  %arr4 = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %fp_addr3, i32 0, i32 1
-  %arr5 = load { i32 }**, { i32 }*** %arr4
-  ret { i32 }** %arr5
+  %frame_pointer = alloca { { i32, i32, { i32, i32* }* }*, i32 }
+  %arg_address = getelementptr { { i32, i32, { i32, i32* }* }*, i32 }, { { i32, i32, { i32, i32* }* }*, i32 }* %frame_pointer, i32 0, i32 0
+  store { i32, i32, { i32, i32* }* }* %0, { i32, i32, { i32, i32* }* }** %arg_address
+  %var_dec = getelementptr { { i32, i32, { i32, i32* }* }*, i32 }, { { i32, i32, { i32, i32* }* }*, i32 }* %frame_pointer, i32 0, i32 1
+  store i32 6, i32* %var_dec
+  %fp_addr_in_sl = getelementptr { { i32, i32, { i32, i32* }* }*, i32 }, { { i32, i32, { i32, i32* }* }*, i32 }* %frame_pointer, i32 0, i32 0
+  %fp_addr = load { i32, i32, { i32, i32* }* }*, { i32, i32, { i32, i32* }* }** %fp_addr_in_sl
+  %arr1 = getelementptr { i32, i32, { i32, i32* }* }, { i32, i32, { i32, i32* }* }* %fp_addr, i32 0, i32 2
+  %load_left = load { i32, i32* }*, { i32, i32* }** %arr1
+  %array_addr_ptr = getelementptr { i32, i32* }, { i32, i32* }* %load_left, i32 0, i32 1
+  %arr_addr = load i32*, i32** %array_addr_ptr
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 2
+  store i32 7, i32* %arr_ele_addr
+  %1 = call i32 @f({ { i32, i32, { i32, i32* }* }*, i32 }* %frame_pointer)
+  ret i32 %1
+}
+
+define i32 @f({ { i32, i32, { i32, i32* }* }*, i32 }*) {
+entry:
+  %frame_pointer = alloca { { { i32, i32, { i32, i32* }* }*, i32 }* }
+  %arg_address = getelementptr { { { i32, i32, { i32, i32* }* }*, i32 }* }, { { { i32, i32, { i32, i32* }* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  store { { i32, i32, { i32, i32* }* }*, i32 }* %0, { { i32, i32, { i32, i32* }* }*, i32 }** %arg_address
+  %fp_addr_in_sl = getelementptr { { { i32, i32, { i32, i32* }* }*, i32 }* }, { { { i32, i32, { i32, i32* }* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr = load { { i32, i32, { i32, i32* }* }*, i32 }*, { { i32, i32, { i32, i32* }* }*, i32 }** %fp_addr_in_sl
+  %fp_addr_in_sl1 = getelementptr { { i32, i32, { i32, i32* }* }*, i32 }, { { i32, i32, { i32, i32* }* }*, i32 }* %fp_addr, i32 0, i32 0
+  %fp_addr2 = load { i32, i32, { i32, i32* }* }*, { i32, i32, { i32, i32* }* }** %fp_addr_in_sl1
+  %a = getelementptr { i32, i32, { i32, i32* }* }, { i32, i32, { i32, i32* }* }* %fp_addr2, i32 0, i32 1
+  %a3 = load i32, i32* %a
+  %fp_addr_in_sl4 = getelementptr { { { i32, i32, { i32, i32* }* }*, i32 }* }, { { { i32, i32, { i32, i32* }* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr5 = load { { i32, i32, { i32, i32* }* }*, i32 }*, { { i32, i32, { i32, i32* }* }*, i32 }** %fp_addr_in_sl4
+  %b = getelementptr { { i32, i32, { i32, i32* }* }*, i32 }, { { i32, i32, { i32, i32* }* }*, i32 }* %fp_addr5, i32 0, i32 1
+  %b6 = load i32, i32* %b
+  %add_tmp = add i32 %a3, %b6
+  %fp_addr_in_sl7 = getelementptr { { { i32, i32, { i32, i32* }* }*, i32 }* }, { { { i32, i32, { i32, i32* }* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr8 = load { { i32, i32, { i32, i32* }* }*, i32 }*, { { i32, i32, { i32, i32* }* }*, i32 }** %fp_addr_in_sl7
+  %fp_addr_in_sl9 = getelementptr { { i32, i32, { i32, i32* }* }*, i32 }, { { i32, i32, { i32, i32* }* }*, i32 }* %fp_addr8, i32 0, i32 0
+  %fp_addr10 = load { i32, i32, { i32, i32* }* }*, { i32, i32, { i32, i32* }* }** %fp_addr_in_sl9
+  %arr1 = getelementptr { i32, i32, { i32, i32* }* }, { i32, i32, { i32, i32* }* }* %fp_addr10, i32 0, i32 2
+  %arr111 = load { i32, i32* }*, { i32, i32* }** %arr1
+  %array_addr_ptr = getelementptr { i32, i32* }, { i32, i32* }* %arr111, i32 0, i32 1
+  %arr_addr = load i32*, i32** %array_addr_ptr
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 2
+  %arr_ele = load i32, i32* %arr_ele_addr
+  %add_tmp12 = add i32 %add_tmp, %arr_ele
+  call void @tig_print_int(i32 %add_tmp12)
+  ret i32 4
 }

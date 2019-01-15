@@ -1,0 +1,24 @@
+let
+    type node = {data: int, left: node, right: node}
+
+    function eval_sum (root: node): int =
+        if is_nil (root)
+        then 0
+        else root.data + eval_sum(root.left) + eval_sum(root.right)
+
+    var root := node {data= 5, left = nil, right = nil }
+    var a := node {data= 1, left = nil, right = nil }
+    var b := node {data= 2, left = nil, right = nil }
+    var c := node {data= 3, left = nil, right = nil }
+    var d := node {data= 6, left = nil, right = nil }
+    var e := node {data= 8, left = nil, right = nil }
+    var f := node {data= 9, left = nil, right = nil }
+in
+    root.left := b;
+    root.right := e;
+    b.left := a;
+    b.right := c;
+    e.left := d;
+    e.right := f;
+    printInt(eval_sum (root))
+end

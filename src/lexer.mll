@@ -24,11 +24,10 @@ let id = alpha+ (alpha|digit|'_')*
 
 rule comment level = parse
     "*/" { match level with
-    	   | [] -> token lexbuf
-	   | [_] -> token lexbuf
-	   | _::level' -> comment level' lexbuf
+    	   | 0 -> token lexbuf
+	   | level -> comment (level - 1) lexbuf
 	 }
-  | "/*" { comment (lexbuf.Lexing.lex_start_p :: level) lexbuf }
+  | "/*" { comment (level + 1) lexbuf }
   | '\n' { incr_linenum lexbuf;
            comment level lexbuf
          }
@@ -64,7 +63,7 @@ and string pos buf = parse
 and token = parse
     [' ' '\t']    { token lexbuf }
   | '\n'	  { incr_linenum lexbuf; token lexbuf }
-  | "/*"          { comment [lexbuf.Lexing.lex_start_p] lexbuf }
+  | "/*"          { comment 0 lexbuf }
   | '"'           { string lexbuf.Lexing.lex_start_p "" lexbuf }
   | "array"	  { P.ARRAY }
   | "break"	  { P.BREAK }

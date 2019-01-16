@@ -9,6 +9,10 @@ declare i32* @tig_init_array(i32, i32)
 
 declare i32* @tig_init_record(i32)
 
+declare i32 @tig_array_length(i8*)
+
+declare i32 @tig_nillable(i8*)
+
 declare void @tig_exit(i32)
 
 declare void @tig_flush()
@@ -18,6 +22,8 @@ declare i8* @tig_getchar()
 declare i32 @tig_ord(i8*)
 
 declare i8* @tig_chr(i32)
+
+declare i32 @tig_string_cmp(i8*, i8*)
 
 declare i32 @tig_size(i8*)
 

@@ -7,11 +7,7 @@ exception Eof
 let incr_linenum lexbuf =
   let pos = lexbuf.Lexing.lex_curr_p in
     Error.line_num := !Error.line_num + 1;
-    Error.line_pos := lexbuf.Lexing.lex_start_pos :: (!(Error.line_pos));
-    lexbuf.Lexing.lex_curr_p <- { pos with
-				    Lexing.pos_lnum = pos.Lexing.pos_lnum + 1;
-				    Lexing.pos_bol = pos.Lexing.pos_cnum - 1;
-				}
+    Error.line_pos := lexbuf.Lexing.lex_start_pos :: (!(Error.line_pos))
 
 let str_incr_linenum str lexbuf =
   String.iter (function '\n' -> incr_linenum lexbuf

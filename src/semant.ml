@@ -128,8 +128,19 @@ let rec trans_dec (
     let f { v_env; t_env } (A.Type {name; ty; pos}) =
       {t_env = S.enter(t_env, name, trans_type(t_env, ty)); v_env = v_env }
     in
+
+    let resolve_dummy_type { v_env; t_env } (A.Type {name; ty; pos}) =
+      let actual_type = match S.look (t_env, name) with
+        | Some t -> U.actual_ty t_env t
+        | None ->
+           Error.Error.error pos ("Type " ^S.name(name) ^ " can't be resolved!");
+           T.NIL
+      in
+      {t_env = S.enter(t_env, name, actual_type); v_env = v_env }
+    in
     U.check_circular types;
-    List.fold_left f {v_env = v_env; t_env = dumb_t_env } types
+    let dummy_env = List.fold_left f {v_env = v_env; t_env = dumb_t_env } types in
+    List.fold_left resolve_dummy_type dummy_env types
   in
 
   let check_func_dec (

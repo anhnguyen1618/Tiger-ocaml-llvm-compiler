@@ -28,11 +28,10 @@ let reset_global_state () =
 
 
 let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
-
   let look_up_type ((s: S.symbol), (p: int)): T.ty =
     match S.look(t_env, s) with
       Some t -> t
-    | None -> (Err.error p ("Type " ^ S.name(s) ^ " has not been declared\n"); T.NIL) in
+    | None -> T.NIL in
 
   let map_field_to_record (A.Field {name; typ; pos; escape = _}): S.symbol * T.ty =
     (name, look_up_type(typ, pos)) in

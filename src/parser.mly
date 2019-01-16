@@ -12,7 +12,7 @@ let addFuncDec  = function
                     | (_, dec) -> Absyn.FunctionDec([dec])
 
 let addTypeDec x = match x with
-                  | (Absyn.TypeDec(nextTypes), curType) -> Absyn.TypeDec(curType :: nextTypes)
+                  | (Absyn.TypeDec(nextTypes), curType) -> Absyn.TypeDec(nextTypes @ [curType])
                   | (_, curType) -> Absyn.TypeDec([curType])
 
 let dumb_order = -1
@@ -31,11 +31,12 @@ let dumb_order = -1
 %token          ASSIGN
 %token          EOF
 
-%nonassoc FUNCTION TYPE DO OF ASSIGN 
+%nonassoc FUNCTION DO OF ASSIGN 
 %left OR
 %left AND
 %right THEN
 %right ELSE
+%right TYPE
 
 %nonassoc EQ NEQ LT LE GT GE
 %left PLUS MINUS
@@ -159,7 +160,7 @@ functionDec:
 
 typeDec:
   TYPE ID EQ ty                                    { Absyn.TypeDec([Absyn.Type { name = Symbol.symbol($2); ty = $4; pos = $startofs }]) }
-| TYPE ID EQ ty typeDec                            { addTypeDec ($5, Absyn.Type { name = Symbol.symbol($2); ty = $4; pos = $startofs }) }
+| typeDec TYPE ID EQ ty                             { addTypeDec ($1, Absyn.Type { name = Symbol.symbol($3); ty = $5; pos = $startofs }) }
 ;
 
 

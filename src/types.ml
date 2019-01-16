@@ -30,11 +30,11 @@ let rec leq = function
   | (ARRAY(_, unique1), ARRAY(_, unique2)) -> (unique1 = unique2)
   | (NIL, NIL) -> true
   | (NAME(sym1, _), NAME(sym2, _)) -> S.name(sym1) = S.name(sym2)
-  | (NAME(_, real_type), (RECORD _ as t2)) ->
+  | (NAME(_, real_type), t2) ->
      (match !real_type with
      | Some t1 -> leq(t1, t2) && leq(t2, t1)
-     | None -> false)
-  | ((RECORD _ as t2), NAME(_, real_type)) ->
+     | None -> print_string "run here";false)
+  | (t2, NAME(_, real_type)) ->
      (match !real_type with
      | Some t1 -> leq(t1, t2) && leq(t2, t1)
      | None -> false)

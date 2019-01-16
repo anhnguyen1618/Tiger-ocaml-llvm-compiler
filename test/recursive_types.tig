@@ -1,0 +1,7 @@
+let
+    type a = b
+    type b = int
+    var node:a := 6
+in
+    printInt(node + 5 )
+end

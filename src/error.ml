@@ -27,8 +27,8 @@ module Error: Error = struct
     look(!line_pos, !line_num);
     print_string ":";
     print_string msg;
-    print_string "\n";
-    exit 1
+    print_string "\n"
+    (*exit 1*)
 
 
   let impossible msg =

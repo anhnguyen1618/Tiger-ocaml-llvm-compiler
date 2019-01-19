@@ -1,0 +1,6 @@
+let
+	var a := "hello\nworld"
+in
+	print (a);
+	f
+end

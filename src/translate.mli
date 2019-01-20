@@ -51,6 +51,8 @@ val while_exp : (unit -> exp) -> (break_block -> unit) -> exp
 
 val if_exp: (unit -> exp) -> (unit -> exp * (unit -> Types.ty * exp)) -> exp
 
+val add_func_header: string -> Types.ty -> Types.ty list -> unit
+  
 val func_dec: level -> string -> Types.ty -> Types.ty list -> arg_name_type_map list -> (access list -> unit -> exp) -> unit
 
 val build_main_func: Types.ty list -> break_block

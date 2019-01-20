@@ -176,11 +176,12 @@ let rec trans_dec (
       let type_list = List.map f params in
       let result_type = get_type_for_result result in
       let label = Temp.newlabel in (* add label here later to avoid duplicate name*)
+      Translate.add_func_header (S.name name) result_type type_list;
       S.enter(acc, name, E.FunEntry{
                              formals = type_list;
                              result = result_type;
                              label = name;
-                             level = level})
+                             level = level});
     in
     
 						
@@ -241,7 +242,7 @@ let rec trans_dec (
          Err.error pos msg);
        cur_v_env
     in
-
+    print_string ("number of function: "^ string_of_int(List.length(fs)));
     let base_env = List.fold_left add_func_header v_env fs in
     let newv_env = List.fold_left add_new_func_entry base_env fs in
     {v_env = newv_env; t_env = t_env}

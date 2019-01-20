@@ -235,15 +235,17 @@ let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: break_block -> unit):
 
 
 exception Func_not_found of string
+let lookup_function_block name =
+  match L.lookup_function name the_module with
+  | None -> raise (Func_not_found "Function not found")
+  | Some x -> x
+            
 let func_call_exp
       (dec_level: level)
       (call_level: level)
       (name: string)
       (vals: exp list): exp =
-  let callee = match L.lookup_function name the_module with
-    | Some fn -> fn
-    | None -> raise (Func_not_found "not found")
-  in
+  let callee = lookup_function_block name in
   match dec_level with
   | TOP -> print_string "run to top call\n"; L.build_call callee (Array.of_list vals) "" builder
   | _ ->
@@ -400,6 +402,22 @@ let if_exp
   in
   final_result
 
+let add_func_header
+      (name: string)
+      (typ: T.ty)
+      (arg_types: T.ty list) =
+  let (parent_fp_type, _) = get_current_fp() in
+  let arg_types =
+    get_llvm_type(parent_fp_type)
+    :: (List.map get_llvm_type arg_types)
+    |> Array.of_list
+  in
+  let func_type = L.function_type (get_llvm_type typ) arg_types in
+  ignore(
+      match L.lookup_function name the_module with
+      | None -> L.declare_function name func_type the_module
+      | Some x -> x)
+
 let func_dec
       (func_level: level)
       (name: string)
@@ -408,47 +426,51 @@ let func_dec
       (args: arg_name_type_map list)
       (add_arg_bindings: access list -> unit -> exp) =
   let (parent_fp_type, _) = get_current_fp() in
-  
-  let add_esc_arg arg acc = if arg.esc_order <> -1 then (arg.ty :: acc) else acc in
-  let esc_arg_types = List.fold_right add_esc_arg args [] in
-  let next_fp_type = parent_fp_type::(esc_vars @ esc_arg_types) in
 
-  let arg_types =
-    get_llvm_type(parent_fp_type)
-    :: (List.map (fun (e: arg_name_type_map) -> get_llvm_type e.ty) args)
-    |> Array.of_list
+  let create_fp_type () =
+    let add_esc_arg arg acc = if arg.esc_order <> -1 then (arg.ty :: acc) else acc in
+    let esc_arg_types = List.fold_right add_esc_arg args [] in
+    parent_fp_type::(esc_vars @ esc_arg_types)
   in
-  let func_type = L.function_type (get_llvm_type typ) arg_types in
-  let func_block =
-    match L.lookup_function name the_module with
-    | None -> L.declare_function name func_type the_module
-    | Some x -> raise (Func_not_found "Function already exist") (*This will not happen*)
-  in
-  
+
+  let fp_type = create_fp_type() in
+
   let previous_block = L.insertion_block builder in
-  
-  let entry_block = L.append_block context "entry" func_block in
-  L.position_at_end entry_block builder;
-  build_frame_pointer_alloc next_fp_type;
-  let (cur_fp_type, cur_fp_addr) = get_current_fp() in
-  let alloc_arg {name; ty; esc_order}: access = alloc_local func_level esc_order (Symbol.name name) ty in
-  let assign_val arg_to_alloc arg_val: access =
-    let (level, address) = alloc_arg arg_to_alloc in
-    let final_addr = match address with
-      | IN_STATIC_LINK offset -> L.build_gep cur_fp_addr
-                                   [| int_exp(0); offset |]
-                                   "arg_address" builder
-      | IN_FRAME addr -> addr
-    in
-    (* in the same level, no need to build static link *)
-    assign_stm final_addr arg_val;
-    (level, address)
+  let func_block = lookup_function_block name in
+
+  let create_entry_block_and_build_fp () =
+    let entry_block = L.append_block context "entry" func_block in
+    L.position_at_end entry_block builder;
+    build_frame_pointer_alloc fp_type;
+    entry_block
   in
-  print_string "run through here\n";
-  print_string ("args length: " ^ string_of_int (List.length args));
-  let arg_mappings = {name = Symbol.symbol "static_link";
-                      ty= parent_fp_type; esc_order = 0 } :: args in
-  let addresses = List.map2 assign_val arg_mappings (L.params func_block |> Array.to_list) in
+
+  let entry_block = create_entry_block_and_build_fp() in
+
+  let alloc_function_args () = 
+    let (_, fp_addr) = get_current_fp() in
+    
+    let alloc_arg {name; ty; esc_order}: access = alloc_local func_level esc_order (Symbol.name name) ty in
+    let assign_val arg_to_alloc arg_val: access =
+      let (level, address) = alloc_arg arg_to_alloc in
+      let final_addr = match address with
+        | IN_STATIC_LINK offset -> L.build_gep fp_addr
+                                     [| int_exp(0); offset |]
+                                     "arg_address" builder
+        | IN_FRAME addr -> addr
+      in
+      (* in the same level, no need to build static link *)
+      assign_stm final_addr arg_val;
+      (level, address)
+    in
+    let arg_mappings = {name = Symbol.symbol "static_link";
+                        ty= parent_fp_type; esc_order = 0 } :: args in
+    let addresses = List.map2 assign_val arg_mappings (L.params func_block |> Array.to_list) in
+    addresses
+  in
+
+  let addresses = alloc_function_args() in
+  
   let gen_body = add_arg_bindings addresses in
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;

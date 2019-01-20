@@ -1,0 +1,6 @@
+let
+	function a(): int = b()
+	function b(): int = 4
+in
+	printInt(a())
+end

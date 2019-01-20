@@ -8,7 +8,7 @@ let parse_error msg =
        
 
 let addFuncDec  = function
-                    | (Absyn.FunctionDec(nextDecs), curDec) -> Absyn.FunctionDec(curDec :: nextDecs)
+                    | (Absyn.FunctionDec(prevDecs), curDec) -> Absyn.FunctionDec(prevDecs @ [curDec] )
                     | (_, dec) -> Absyn.FunctionDec([dec])
 
 let addTypeDec x = match x with
@@ -70,7 +70,7 @@ exp:
 | exp OR exp                                       { Absyn.IfExp({ test = $1; then' = Absyn.IntExp(1); else' = Some($3); pos = $startofs}) }
 | exp AND exp                                      { Absyn.IfExp({ test = $1; then' = $3; else' = Some(Absyn.IntExp(0)); pos = $startofs}) }
 | exp EQ exp                                       { Absyn.OpExp({ left=$1; oper= Absyn.EqOp; right= $3; pos= $startofs}) }
-| exp NEQ exp                                       { Absyn.OpExp({ left=$1; oper= Absyn.NeqOp; right= $3; pos= $startofs}) }
+| exp NEQ exp                                      { Absyn.OpExp({ left=$1; oper= Absyn.NeqOp; right= $3; pos= $startofs}) }
 | exp LT exp                                       { Absyn.OpExp({ left=$1; oper= Absyn.LtOp; right= $3; pos= $startofs}) }
 | exp LE exp                                       { Absyn.OpExp({ left=$1; oper= Absyn.LeOp; right= $3; pos= $startofs}) }
 | exp GT exp                                       { Absyn.OpExp({ left=$1; oper= Absyn.GtOp; right= $3; pos= $startofs}) }
@@ -78,7 +78,7 @@ exp:
 | exp PLUS exp                                     { Absyn.OpExp({ left=$1; oper= Absyn.PlusOp; right= $3; pos= $startofs}) }
 | exp MINUS exp                                    { Absyn.OpExp({ left=$1; oper= Absyn.MinusOp; right= $3; pos= $startofs}) }
 | exp TIMES exp                                    { Absyn.OpExp({ left=$1; oper= Absyn.TimesOp; right= $3; pos= $startofs}) }
-| exp DIVIDE exp                                      { Absyn.OpExp({ left=$1; oper= Absyn.DivideOp; right= $3; pos= $startofs}) }
+| exp DIVIDE exp                                   { Absyn.OpExp({ left=$1; oper= Absyn.DivideOp; right= $3; pos= $startofs}) }
 | MINUS exp %prec UMINUS                           { Absyn.OpExp({ left=Absyn.IntExp(0); oper=Absyn.MinusOp; right=$2; pos= $startofs}) }
 
 | IF exp THEN exp ELSE exp                         { Absyn.IfExp({ test = $2; then' = $4; else' = Some $6; pos = $startofs}) }
@@ -153,9 +153,9 @@ varDec:
 functionDec:
   FUNCTION ID LPAREN fields RPAREN type_opt EQ exp { Absyn.FunctionDec([Absyn.Func { name = Symbol.symbol($2); params = $4;
                                                       result = $6; body = $8; pos = $startofs}]) }
-| FUNCTION ID LPAREN fields RPAREN type_opt EQ exp functionDec {  addFuncDec ($9, 
-                                                                  Absyn.Func { name = Symbol.symbol($2); params = $4;
-                                                                        result = $6; body = $8; pos = $startofs}) }
+| functionDec FUNCTION ID LPAREN fields RPAREN type_opt EQ exp { addFuncDec ($1, 
+                                                                  Absyn.Func { name = Symbol.symbol($3); params = $5;
+                                                                        result = $7; body = $9; pos = $startofs($2)}) }
 ;
 
 typeDec:

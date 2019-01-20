@@ -1,16 +1,54 @@
 ; ModuleID = 'Tiger jit'
 source_filename = "Tiger jit"
 
+declare void @tig_print_int(i32)
+
+declare void @tig_print(i8*)
+
+declare i32* @tig_init_array(i32, i32)
+
+declare i32* @tig_init_record(i32)
+
+declare i32 @tig_array_length(i8*)
+
+declare i32 @tig_nillable(i8*)
+
+declare void @tig_exit(i32)
+
+declare void @tig_flush()
+
+declare i8* @tig_getchar()
+
+declare i32 @tig_ord(i8*)
+
+declare i8* @tig_chr(i32)
+
+declare i32 @tig_string_cmp(i8*, i8*)
+
+declare i32 @tig_size(i8*)
+
+declare i8* @tig_substring(i8*, i32, i32)
+
+declare i8* @tig_concat(i8*, i8*)
+
+declare i32 @tig_not(i32)
+
 define i32 @main() {
 entry:
-  %arr1 = alloca i32*
+  %arr1 = alloca { i32, i32* }*
   %i = alloca i32
   %x = alloca i32
+  %frame_pointer = alloca { i32 }
   store i32 5, i32* %x
   %x1 = load i32, i32* %x
-  %array_init = alloca i32, i32 %x1
+  %mallocsize = mul i32 %x1, ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32)
+  %malloccall = tail call i8* @malloc(i32 %mallocsize)
+  %array_init = bitcast i8* %malloccall to i32*
   store i32 0, i32* %i
   br label %test
+
+break_loop:                                       ; No predecessors!
+  ret i32 0
 
 test:                                             ; preds = %loop, %entry
   %i2 = load i32, i32* %i
@@ -28,56 +66,49 @@ loop:                                             ; preds = %test
   br label %test
 
 end:                                              ; preds = %test
-  store i32* %array_init, i32** %arr1
-  %load_left = load i32*, i32** %arr1
-  %element_left = getelementptr i32, i32* %load_left, i32 2
-  store i32 10, i32* %element_left
-  %arr14 = load i32*, i32** %arr1
-  %element = getelementptr i32, i32* %arr14, i32 4
-  %lol = load i32, i32* %element
-  call void @tig_print_int(i32 %lol)
-  %arr15 = load i32*, i32** %arr1
-  %0 = call i32 @f(i32* %arr15)
-  %arr16 = load i32*, i32** %arr1
-  %element7 = getelementptr i32, i32* %arr16, i32 2
-  %lol8 = load i32, i32* %element7
-  call void @tig_print_int(i32 %lol8)
+  %malloccall4 = tail call i8* @malloc(i32 ptrtoint ({ i32, i32* }* getelementptr ({ i32, i32* }, { i32, i32* }* null, i32 1) to i32))
+  %array_wrapper = bitcast i8* %malloccall4 to { i32, i32* }*
+  %array_info = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 0
+  store i32 %x1, i32* %array_info
+  %array_info5 = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 1
+  store i32* %array_init, i32** %array_info5
+  store { i32, i32* }* %array_wrapper, { i32, i32* }** %arr1
+  %load_left = load { i32, i32* }*, { i32, i32* }** %arr1
+  %array_addr_ptr = getelementptr { i32, i32* }, { i32, i32* }* %load_left, i32 0, i32 1
+  %arr_addr = load i32*, i32** %array_addr_ptr
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 2
+  store i32 10, i32* %arr_ele_addr
+  %arr16 = load { i32, i32* }*, { i32, i32* }** %arr1
+  %array_addr_ptr7 = getelementptr { i32, i32* }, { i32, i32* }* %arr16, i32 0, i32 1
+  %arr_addr8 = load i32*, i32** %array_addr_ptr7
+  %arr_ele_addr9 = getelementptr i32, i32* %arr_addr8, i32 4
+  %arr_ele = load i32, i32* %arr_ele_addr9
+  call void @tig_print_int(i32 %arr_ele)
+  %arr110 = load { i32, i32* }*, { i32, i32* }** %arr1
+  %0 = call i32 @f({ i32 }* %frame_pointer, { i32, i32* }* %arr110)
+  %arr111 = load { i32, i32* }*, { i32, i32* }** %arr1
+  %array_addr_ptr12 = getelementptr { i32, i32* }, { i32, i32* }* %arr111, i32 0, i32 1
+  %arr_addr13 = load i32*, i32** %array_addr_ptr12
+  %arr_ele_addr14 = getelementptr i32, i32* %arr_addr13, i32 2
+  %arr_ele15 = load i32, i32* %arr_ele_addr14
+  call void @tig_print_int(i32 %arr_ele15)
   ret i32 0
 }
 
-declare void @tig_print_int(i32)
+declare noalias i8* @malloc(i32)
 
-declare void @tig_print(i8*)
-
-declare i32* @tig_init_array(i32, i32)
-
-declare i32* @tig_init_record(i32)
-
-declare void @tig_flush()
-
-declare i8* @tig_getchar()
-
-declare i32 @tig_ord(i8*)
-
-declare i8* @tig_chr(i32)
-
-declare i32 @tig_size(i8*)
-
-declare i8* @tig_substring(i8*, i32, i32)
-
-declare i8* @tig_concat(i8*, i8*)
-
-declare i32 @tig_not(i32)
-
-declare void @tig_exit(i32)
-
-define i32 @f(i32*) {
+define i32 @f({ i32 }*, { i32, i32* }*) {
 entry:
-  %n = alloca i32*
-  store i32* %0, i32** %n
-  %n1 = load i32*, i32** %n
-  %element = getelementptr i32, i32* %n1, i32 2
-  %lol = load i32, i32* %element
-  call void @tig_print_int(i32 %lol)
+  %n = alloca { i32, i32* }*
+  %frame_pointer = alloca { { i32 }* }
+  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
+  store { i32 }* %0, { i32 }** %arg_address
+  store { i32, i32* }* %1, { i32, i32* }** %n
+  %n1 = load { i32, i32* }*, { i32, i32* }** %n
+  %array_addr_ptr = getelementptr { i32, i32* }, { i32, i32* }* %n1, i32 0, i32 1
+  %arr_addr = load i32*, i32** %array_addr_ptr
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 2
+  %arr_ele = load i32, i32* %arr_ele_addr
+  call void @tig_print_int(i32 %arr_ele)
   ret i32 1
 }

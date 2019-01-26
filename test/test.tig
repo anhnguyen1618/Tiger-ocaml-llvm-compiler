@@ -3,6 +3,9 @@ let
     if n = 0 then 0
     else if n = 1 then 1
     else fib(n-1) + fib(n-2)
+
+  function a() = 1
 in
-  printInt(fib (30))
+  printInt(fib (30));
+  a()
 end

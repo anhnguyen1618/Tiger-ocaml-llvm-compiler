@@ -252,7 +252,7 @@ let func_call_exp
      let (_, current_fp) = get_current_fp() in
      let dec_fp_addr = gen_static_link (dec_level, call_level, current_fp) in
      let final_args = (dec_fp_addr :: vals) |> Array.of_list in
-     L.build_call callee final_args "" builder
+     L.build_call callee final_args "call_result" builder
 
 let array_exp
       (size: exp)
@@ -374,26 +374,29 @@ let if_exp
 
   L.position_at_end then_block builder;
   let (then_val, gen_else_val) = gen_then_else() in
+  let new_then_block = L.insertion_block builder in
+
   
   L.position_at_end else_block builder;
   let (if_else_type, else_val) = gen_else_val() in
+  let new_else_block = L.insertion_block builder in
 
   let final_result = match if_else_type with
     | T.NIL ->
-       L.position_at_end then_block builder;
+       L.position_at_end new_then_block builder;
        ignore(L.build_br merge_block builder);
-       L.position_at_end else_block builder;
+       L.position_at_end new_else_block builder;
        ignore(L.build_br merge_block builder);
        L.position_at_end merge_block builder;
        dummy_exp
 
     | _ -> 
        let addr = alloc_unesc_temp "if_result_addr" if_else_type in
-       L.position_at_end then_block builder;
+       L.position_at_end new_then_block builder;
        assign_stm addr then_val;
        ignore(L.build_br merge_block builder);
 
-       L.position_at_end else_block builder;
+       L.position_at_end new_else_block builder;
        assign_stm addr else_val;
        ignore(L.build_br merge_block builder);
 

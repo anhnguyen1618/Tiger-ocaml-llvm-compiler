@@ -137,8 +137,8 @@ entry:
   %5 = bitcast { i32, i8*, i8* }* %f48 to i8*
   store i8* %5, i8** %element_left47
   %root49 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root
-  %6 = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %root49)
-  call void @tig_print_int(i32 %6)
+  %call_result = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %root49)
+  call void @tig_print_int(i32 %call_result)
   ret i32 0
 
 break_loop:                                       ; No predecessors!
@@ -176,17 +176,17 @@ else:                                             ; preds = %test
   %4 = bitcast i8* %field_var5 to { i32, i8*, i8* }*
   %fp_addr_in_sl = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
   %fp_addr = load { i32 }*, { i32 }** %fp_addr_in_sl
-  %5 = call i32 @eval_sum({ i32 }* %fp_addr, { i32, i8*, i8* }* %4)
-  %add_tmp = add i32 %field_var, %5
+  %call_result = call i32 @eval_sum({ i32 }* %fp_addr, { i32, i8*, i8* }* %4)
+  %add_tmp = add i32 %field_var, %call_result
   %root6 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root
   %element7 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %root6, i32 0, i32 2
   %field_var8 = load i8*, i8** %element7
-  %6 = bitcast i8* %field_var8 to { i32, i8*, i8* }*
+  %5 = bitcast i8* %field_var8 to { i32, i8*, i8* }*
   %fp_addr_in_sl9 = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
   %fp_addr10 = load { i32 }*, { i32 }** %fp_addr_in_sl9
-  %7 = call i32 @eval_sum({ i32 }* %fp_addr10, { i32, i8*, i8* }* %6)
-  %add_tmp11 = add i32 %add_tmp, %7
-  store i32 %add_tmp11, i32* %if_result_addr
+  %call_result11 = call i32 @eval_sum({ i32 }* %fp_addr10, { i32, i8*, i8* }* %5)
+  %add_tmp12 = add i32 %add_tmp, %call_result11
+  store i32 %add_tmp12, i32* %if_result_addr
   br label %merge
 
 merge:                                            ; preds = %else, %then

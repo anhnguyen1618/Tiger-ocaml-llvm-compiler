@@ -44,14 +44,14 @@ main:                                   # @main
 print_array:                            # @print_array
 	.cfi_startproc
 # %bb.0:                                # %entry
-	pushq	%rbp
+	pushq	%r14
 	.cfi_def_cfa_offset 16
 	pushq	%rbx
 	.cfi_def_cfa_offset 24
 	subq	$40, %rsp
 	.cfi_def_cfa_offset 64
 	.cfi_offset %rbx, -24
-	.cfi_offset %rbp, -16
+	.cfi_offset %r14, -16
 	movq	%rdi, 32(%rsp)
 	movq	%rsi, 16(%rsp)
 	movl	$.L__unnamed_4, %edi
@@ -65,39 +65,31 @@ print_array:                            # @print_array
 	movl	%eax, 28(%rsp)
 	jmp	.LBB1_1
 	.p2align	4, 0x90
-.LBB1_4:                                # %continue
+.LBB1_2:                                # %loop
                                         #   in Loop: Header=BB1_1 Depth=1
+	movq	16(%rsp), %rbx
+	movslq	12(%rsp), %r14
+	movl	$.L__unnamed_5, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movslq	%ebp, %rcx
-	movl	(%rax,%rcx,4), %edi
+	movl	(%rax,%r14,4), %edi
 	callq	print_arr_int_ele
 	incl	12(%rsp)
 .LBB1_1:                                # %test
                                         # =>This Inner Loop Header: Depth=1
 	movl	28(%rsp), %eax
 	cmpl	12(%rsp), %eax
-	jl	.LBB1_5
-# %bb.2:                                # %loop
-                                        #   in Loop: Header=BB1_1 Depth=1
-	movq	16(%rsp), %rbx
-	movl	12(%rsp), %ebp
-	cmpl	(%rbx), %ebp
-	jl	.LBB1_4
-# %bb.3:                                # %error
-                                        #   in Loop: Header=BB1_1 Depth=1
-	movl	$.L__unnamed_5, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-	jmp	.LBB1_4
-.LBB1_5:                                # %end
+	jge	.LBB1_2
+# %bb.3:                                # %end
 	movl	$.L__unnamed_6, %edi
 	callq	tig_print
 	movl	$.L__unnamed_7, %edi
 	callq	tig_print
 	addq	$40, %rsp
 	popq	%rbx
-	popq	%rbp
+	popq	%r14
 	retq
 .Lfunc_end1:
 	.size	print_array, .Lfunc_end1-print_array
@@ -111,72 +103,68 @@ create_array:                           # @create_array
 # %bb.0:                                # %entry
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 24
-	subq	$40, %rsp
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	subq	$32, %rsp
 	.cfi_def_cfa_offset 64
-	.cfi_offset %rbx, -24
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
 	.cfi_offset %rbp, -16
-	movq	%rdi, 32(%rsp)
-	movl	$8, 16(%rsp)
+	movq	%rdi, 24(%rsp)
+	movl	$8, 8(%rsp)
 	movl	$8, %ebp
 	movl	$32, %edi
 	callq	malloc
 	movq	%rax, %rbx
-	movl	$0, 8(%rsp)
-	cmpl	%ebp, 8(%rsp)
+	movl	$0, (%rsp)
+	cmpl	%ebp, (%rsp)
 	jge	.LBB2_3
 	.p2align	4, 0x90
 .LBB2_2:                                # %loop
                                         # =>This Inner Loop Header: Depth=1
-	movslq	8(%rsp), %rax
+	movslq	(%rsp), %rax
 	movl	$1, (%rbx,%rax,4)
 	leal	1(%rax), %eax
-	movl	%eax, 8(%rsp)
-	cmpl	%ebp, 8(%rsp)
+	movl	%eax, (%rsp)
+	cmpl	%ebp, (%rsp)
 	jl	.LBB2_2
 .LBB2_3:                                # %end
 	movl	$16, %edi
 	callq	malloc
 	movl	%ebp, (%rax)
 	movq	%rbx, 8(%rax)
-	movq	%rax, 24(%rsp)
-	movl	$0, 12(%rsp)
-	movl	16(%rsp), %eax
+	movq	%rax, 16(%rsp)
+	movl	$0, 4(%rsp)
+	movl	8(%rsp), %eax
 	decl	%eax
-	movl	%eax, 20(%rsp)
+	movl	%eax, 12(%rsp)
 	jmp	.LBB2_4
 	.p2align	4, 0x90
-.LBB2_7:                                # %continue
+.LBB2_5:                                # %loop11
                                         #   in Loop: Header=BB2_4 Depth=1
-	movq	8(%rbp), %rbp
-	movslq	%ebx, %rbx
+	movslq	4(%rsp), %r14
+	movq	16(%rsp), %rbx
+	movl	$.L__unnamed_8, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
+	movq	8(%rbx), %rbx
 	movl	$50, %edi
 	callq	tig_random
-	movl	%eax, (%rbp,%rbx,4)
-	incl	12(%rsp)
+	movl	%eax, (%rbx,%r14,4)
+	incl	4(%rsp)
 .LBB2_4:                                # %test10
                                         # =>This Inner Loop Header: Depth=1
-	movl	20(%rsp), %eax
-	cmpl	12(%rsp), %eax
-	jl	.LBB2_8
-# %bb.5:                                # %loop11
-                                        #   in Loop: Header=BB2_4 Depth=1
-	movl	12(%rsp), %ebx
-	movq	24(%rsp), %rbp
-	cmpl	(%rbp), %ebx
-	jl	.LBB2_7
-# %bb.6:                                # %error
-                                        #   in Loop: Header=BB2_4 Depth=1
-	movl	$.L__unnamed_8, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-	jmp	.LBB2_7
-.LBB2_8:                                # %end12
-	movq	24(%rsp), %rax
-	addq	$40, %rsp
+	movl	12(%rsp), %eax
+	cmpl	4(%rsp), %eax
+	jge	.LBB2_5
+# %bb.6:                                # %end12
+	movq	16(%rsp), %rax
+	addq	$32, %rsp
 	popq	%rbx
+	popq	%r14
 	popq	%rbp
 	retq
 .Lfunc_end2:
@@ -191,127 +179,105 @@ bubble_sort:                            # @bubble_sort
 # %bb.0:                                # %entry
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 24
-	subq	$56, %rsp
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	subq	$48, %rsp
 	.cfi_def_cfa_offset 80
-	.cfi_offset %rbx, -24
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
 	.cfi_offset %rbp, -16
-	movq	%rdi, 48(%rsp)
-	movq	%rsi, 24(%rsp)
-	movl	$0, 12(%rsp)
+	movq	%rdi, 40(%rsp)
+	movq	%rsi, 16(%rsp)
+	movl	$0, 4(%rsp)
 	movq	%rsi, %rdi
 	callq	tig_array_length
-	movl	%eax, 32(%rsp)
+	movl	%eax, 24(%rsp)
 	jmp	.LBB3_1
 	.p2align	4, 0x90
-.LBB3_16:                               # %end8
+.LBB3_4:                                # %end8
                                         #   in Loop: Header=BB3_1 Depth=1
-	movl	16(%rsp), %eax
-	movl	%eax, 12(%rsp)
+	movl	8(%rsp), %eax
+	movl	%eax, 4(%rsp)
 .LBB3_1:                                # %test
                                         # =>This Loop Header: Depth=1
                                         #     Child Loop BB3_3 Depth 2
-	movl	12(%rsp), %edi
+	movl	4(%rsp), %edi
 	callq	tig_not
 	cmpl	$1, %eax
-	jne	.LBB3_15
+	jne	.LBB3_8
 # %bb.2:                                # %loop
                                         #   in Loop: Header=BB3_1 Depth=1
-	movl	$1, 16(%rsp)
-	movl	$0, 8(%rsp)
-	movl	32(%rsp), %eax
+	movl	$1, 8(%rsp)
+	movl	$0, (%rsp)
+	movl	24(%rsp), %eax
 	addl	$-2, %eax
-	movl	%eax, 36(%rsp)
+	movl	%eax, 28(%rsp)
 	jmp	.LBB3_3
 	.p2align	4, 0x90
-.LBB3_14:                               # %else
+.LBB3_7:                                # %else
                                         #   in Loop: Header=BB3_3 Depth=2
-	movl	$0, 44(%rsp)
-	incl	8(%rsp)
+	movl	$0, 36(%rsp)
+	incl	(%rsp)
 .LBB3_3:                                # %test6
                                         #   Parent Loop BB3_1 Depth=1
                                         # =>  This Inner Loop Header: Depth=2
-	movl	36(%rsp), %eax
-	cmpl	8(%rsp), %eax
-	jl	.LBB3_16
-# %bb.4:                                # %loop7
+	movl	28(%rsp), %eax
+	cmpl	(%rsp), %eax
+	jl	.LBB3_4
+# %bb.5:                                # %test20
                                         #   in Loop: Header=BB3_3 Depth=2
-	movq	24(%rsp), %rbx
-	movl	8(%rsp), %ebp
-	cmpl	(%rbx), %ebp
-	jl	.LBB3_6
-# %bb.5:                                # %error
-                                        #   in Loop: Header=BB3_3 Depth=2
-	movl	$.L__unnamed_9, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB3_6:                                # %continue
-                                        #   in Loop: Header=BB3_3 Depth=2
+	movq	16(%rsp), %rbx
+	movslq	(%rsp), %r14
+	movl	$.L__unnamed_9, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movslq	%ebp, %rcx
-	movl	(%rax,%rcx,4), %eax
-	movl	%eax, 20(%rsp)
-	movq	24(%rsp), %rbx
-	movl	8(%rsp), %ebp
+	movl	(%rax,%r14,4), %eax
+	movl	%eax, 12(%rsp)
+	movq	16(%rsp), %rbx
+	movl	(%rsp), %ebp
 	incl	%ebp
-	cmpl	(%rbx), %ebp
-	jl	.LBB3_8
-# %bb.7:                                # %error20
-                                        #   in Loop: Header=BB3_3 Depth=2
-	movl	$.L__unnamed_10, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB3_8:                                # %test27
-                                        #   in Loop: Header=BB3_3 Depth=2
+	movl	$.L__unnamed_10, %edx
+	movq	%rbx, %rdi
+	movl	%ebp, %esi
+	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
 	movslq	%ebp, %rcx
 	movl	(%rax,%rcx,4), %eax
-	movl	%eax, 40(%rsp)
-	cmpl	%eax, 20(%rsp)
-	jle	.LBB3_14
-# %bb.9:                                # %then
+	movl	%eax, 32(%rsp)
+	cmpl	%eax, 12(%rsp)
+	jle	.LBB3_7
+# %bb.6:                                # %then
                                         #   in Loop: Header=BB3_3 Depth=2
-	movl	8(%rsp), %ebx
-	movq	24(%rsp), %rbp
-	cmpl	(%rbp), %ebx
-	jl	.LBB3_11
-# %bb.10:                               # %error35
-                                        #   in Loop: Header=BB3_3 Depth=2
-	movl	$.L__unnamed_11, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB3_11:                               # %continue36
-                                        #   in Loop: Header=BB3_3 Depth=2
+	movslq	(%rsp), %rbx
+	movq	16(%rsp), %rbp
+	movl	$.L__unnamed_11, %edx
+	movq	%rbp, %rdi
+	movl	%ebx, %esi
+	callq	tig_check_array_bound
 	movq	8(%rbp), %rax
-	movslq	%ebx, %rcx
-	movl	40(%rsp), %edx
-	movl	%edx, (%rax,%rcx,4)
-	movl	8(%rsp), %ebx
+	movl	32(%rsp), %ecx
+	movl	%ecx, (%rax,%rbx,4)
+	movl	(%rsp), %ebx
 	incl	%ebx
-	movq	24(%rsp), %rbp
-	cmpl	(%rbp), %ebx
-	jl	.LBB3_13
-# %bb.12:                               # %error46
-                                        #   in Loop: Header=BB3_3 Depth=2
-	movl	$.L__unnamed_12, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB3_13:                               # %continue47
-                                        #   in Loop: Header=BB3_3 Depth=2
+	movq	16(%rsp), %rbp
+	movl	$.L__unnamed_12, %edx
+	movq	%rbp, %rdi
+	movl	%ebx, %esi
+	callq	tig_check_array_bound
 	movq	8(%rbp), %rax
 	movslq	%ebx, %rcx
-	movl	20(%rsp), %edx
+	movl	12(%rsp), %edx
 	movl	%edx, (%rax,%rcx,4)
-	movl	$0, 16(%rsp)
-	jmp	.LBB3_14
-.LBB3_15:                               # %end
-	addq	$56, %rsp
+	movl	$0, 8(%rsp)
+	jmp	.LBB3_7
+.LBB3_8:                                # %end
+	addq	$48, %rsp
 	popq	%rbx
+	popq	%r14
 	popq	%rbp
 	retq
 .Lfunc_end3:

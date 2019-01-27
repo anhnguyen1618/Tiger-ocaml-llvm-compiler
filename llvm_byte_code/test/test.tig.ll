@@ -42,6 +42,10 @@ declare i32 @tig_not(i32)
 define i32 @main() {
 entry:
   %frame_pointer = alloca { i32 }
+  %0 = call i32 @fib({ i32 }* %frame_pointer, i32 30)
+  call void @tig_print_int(i32 %0)
+  call void @a({ i32 }* %frame_pointer)
+  ret i32 0
 
 break_loop:                                       ; No predecessors!
   ret i32 0

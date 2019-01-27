@@ -15,7 +15,7 @@ int main()
 { 
   int a = 1;
   int hello[a];
-  hello[0] = 1;
+  hello[1000];
 
 return 0; 
 } 

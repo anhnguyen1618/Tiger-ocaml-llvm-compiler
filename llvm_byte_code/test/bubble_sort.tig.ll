@@ -6,6 +6,8 @@ source_filename = "Tiger jit"
 @2 = private unnamed_addr constant [49 x i8] c"test/bubble_sort.tig::41.484: Array out of bound\00"
 @3 = private unnamed_addr constant [49 x i8] c"test/bubble_sort.tig::41.635: Array out of bound\00"
 @4 = private unnamed_addr constant [49 x i8] c"test/bubble_sort.tig::41.683: Array out of bound\00"
+@5 = private unnamed_addr constant [49 x i8] c"test/bubble_sort.tig::41.996: Array out of bound\00"
+@6 = private unnamed_addr constant [10 x i8] c"something\00"
 
 declare void @tig_print_int(i32)
 
@@ -41,10 +43,64 @@ declare i32 @tig_not(i32)
 
 define i32 @main() {
 entry:
+  %_limit = alloca i32
+  %i = alloca i32
+  %arr = alloca { i32, i32* }*
   %frame_pointer = alloca { i32 }
+  %0 = call { i32, i32* }* @create_array({ i32 }* %frame_pointer)
+  store { i32, i32* }* %0, { i32, i32* }** %arr
+  %arr1 = load { i32, i32* }*, { i32, i32* }** %arr
+  call void @bubble_sort({ i32 }* %frame_pointer, { i32, i32* }* %arr1)
+  %arr2 = load { i32, i32* }*, { i32, i32* }** %arr
+  %1 = bitcast { i32, i32* }* %arr2 to i8*
+  %2 = call i32 @tig_array_length(i8* %1)
+  %minus_tmp = sub i32 %2, 1
+  store i32 0, i32* %i
+  %arr3 = load { i32, i32* }*, { i32, i32* }** %arr
+  %3 = bitcast { i32, i32* }* %arr3 to i8*
+  %4 = call i32 @tig_array_length(i8* %3)
+  %minus_tmp4 = sub i32 %4, 1
+  store i32 %minus_tmp4, i32* %_limit
+  br label %test
 
 break_loop:                                       ; No predecessors!
   ret i32 0
+
+test:                                             ; preds = %continue, %entry
+  %_limit5 = load i32, i32* %_limit
+  %i6 = load i32, i32* %i
+  %ge_tmp = icmp sge i32 %_limit5, %i6
+  %bool_tmp = zext i1 %ge_tmp to i32
+  %cond = icmp eq i32 %bool_tmp, 1
+  br i1 %cond, label %loop, label %end
+
+loop:                                             ; preds = %test
+  %arr7 = load { i32, i32* }*, { i32, i32* }** %arr
+  %i8 = load i32, i32* %i
+  %array_size_ptr = getelementptr { i32, i32* }, { i32, i32* }* %arr7, i32 0, i32 0
+  %arr_size = load i32, i32* %array_size_ptr
+  %cond9 = icmp sge i32 %i8, %arr_size
+  br i1 %cond9, label %error, label %continue
+
+end:                                              ; preds = %test
+  call void @tig_print(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @6, i32 0, i32 0))
+  ret i32 0
+
+error:                                            ; preds = %loop
+  call void @tig_print(i8* getelementptr inbounds ([49 x i8], [49 x i8]* @5, i32 0, i32 0))
+  call void @tig_exit(i32 1)
+  br label %continue
+
+continue:                                         ; preds = %error, %loop
+  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %arr7, i32 0, i32 1
+  %arr_addr = load i32*, i32** %array_pointer
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 %i8
+  %arr_ele = load i32, i32* %arr_ele_addr
+  call void @tig_print_int(i32 %arr_ele)
+  %i10 = load i32, i32* %i
+  %add_tmp = add i32 %i10, 1
+  store i32 %add_tmp, i32* %i
+  br label %test
 }
 
 define { i32, i32* }* @create_array({ i32 }*) {

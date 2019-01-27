@@ -4,6 +4,7 @@ sig
     val line_num : int ref
     val line_pos : int list ref
     val error : int -> string -> unit
+    val gen_err_message: int -> string -> string
     exception Error
     val impossible : string -> 'a   (* raises Error *)
 end
@@ -15,19 +16,19 @@ module Error: Error = struct
 
   exception Error
 
-  let error pos (msg: string) =
+  let gen_err_message pos msg =
     let rec look  = function
       | (a::rest, n) -> if a < pos
-                        then print_string(":" ^ string_of_int(n) ^ "." ^ string_of_int(pos - a))
+                        then (":" ^ string_of_int(n) ^ "." ^ string_of_int(pos - a))
                         else look(rest, n -1)
-      | _ -> print_string "0.0"
+      | _ -> "0.0"
     in
+    let location = !file_name ^ ":" ^(look(!line_pos, !line_num)) in
+    location ^ ": " ^ msg
+    
 
-    print_string(!file_name);
-    look(!line_pos, !line_num);
-    print_string ":";
-    print_string msg;
-    print_string "\n";
+  let error pos (msg: string) =
+    print_string (gen_err_message pos msg);
     exit 1
 
 

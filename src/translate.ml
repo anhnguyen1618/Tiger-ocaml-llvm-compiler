@@ -237,7 +237,7 @@ let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: break_block -> unit):
 exception Func_not_found of string
 let lookup_function_block name =
   match L.lookup_function name the_module with
-  | None -> raise (Func_not_found "Function not found")
+  | None -> raise (Func_not_found ("Function not found: "^name))
   | Some x -> x
             
 let func_call_exp
@@ -324,12 +324,39 @@ let field_var_exp_left (arr_addr: exp ) (index: exp) =
   let addr = L.build_load arr_addr "load_left" builder in
   L.build_gep addr [| int_exp(0);index |] "element_left" builder
 
-let subscript_exp (arr_wrapper_addr: exp) (index: exp) =
+let check_bound_array (arr_wrapper_addr: exp) (index_exp: exp) (pos: int)=
+  let get_array_info (index_exp: exp) (name: string) =
+    L.build_gep arr_wrapper_addr
+      [| int_exp(0); index_exp |] name builder
+  in
+
+  let size_arr_index = int_exp(0) in
+  let array_size_ptr = get_array_info size_arr_index "array_size_ptr" in
+  let array_size_exp = L.build_load array_size_ptr "arr_size" builder in
+
+  let current_block = L.insertion_block builder in
+  let function_block = L.block_parent current_block in
+
+  let error_block = L.append_block context "error" function_block in
+  let continue_block = L.append_block context "continue" function_block in
+
+  let cond_val = L.build_icmp L.Icmp.Sge index_exp array_size_exp "cond" builder in
+  ignore(L.build_cond_br cond_val error_block continue_block builder);
+
+  L.position_at_end error_block builder;
+  let error_msg = Err.gen_err_message pos "Array out of bound" in
+  ignore(func_call_exp TOP TOP "tig_print" [string_exp error_msg]);
+  ignore(func_call_exp TOP TOP "tig_exit" [int_exp 1]);
+  ignore(L.build_br continue_block builder);
+  L.position_at_end continue_block builder
+
+let subscript_exp (arr_wrapper_addr: exp) (index: exp) (pos: int) =
+  check_bound_array arr_wrapper_addr index pos;
   (* address of array is in the second position in struct*)
   let struct_arr_index = int_exp(1) in
   (*L.build_load arr_addr "zz" builder  *)
   let array_addr_ptr = L.build_gep arr_wrapper_addr
-                         [| int_exp(0); struct_arr_index |] "array_addr_ptr" builder in
+                         [| int_exp(0); struct_arr_index |] "array_pointer" builder in
   (* have to load when getting data from struct *)
   let array_addr = L.build_load array_addr_ptr "arr_addr" builder in
   
@@ -337,13 +364,14 @@ let subscript_exp (arr_wrapper_addr: exp) (index: exp) =
   
   L.build_load ele_addr "arr_ele" builder
 
-let subscript_exp_left (arr_wrapper_addr_ptr: exp ) (index: exp) =
+let subscript_exp_left (arr_wrapper_addr_ptr: exp ) (index: exp) (pos: int)=
   (* we have to load here becase 
      RHS exp: arr := malloc() => arr has int* type and is saved to int**
      ,when calling transVar(simple) => return int* type 
      LHS exp: arr := malloc() => arr has int* type and is saved to int**
-     HOWEVER when calling transVar_left(simple) => return int** (address that contain int* type*)
+     HOWEVER when calling transVar_left(simple) => return int** (address that contain int* type) *)
   let arr_wrapper_addr = L.build_load arr_wrapper_addr_ptr "load_left" builder in
+  check_bound_array arr_wrapper_addr index pos;
   let struct_arr_index = int_exp(1) in
   let array_addr_ptr = L.build_gep arr_wrapper_addr
                          [| int_exp(0); struct_arr_index |] "array_addr_ptr" builder in

@@ -192,10 +192,16 @@ let rec trans_dec (
       let label = match S.look(cur_v_env, name) with
 	| Some(E.FunEntry {label; _}) -> label
 	| _ -> Temp.newlabel() in
-					       
       let func_level = Translate.new_level level in
 
       let body_type = ref T.NIL in
+
+      let get_dumb_venv_to_compute_esc () =
+        let f v_env {name; ty} =
+          S.enter (v_env, name, E.VarEntry{ ty = ty; access = Translate.dummy_access})
+        in
+        List.fold_left f cur_v_env param_name_type
+      in
 
       let add_arg_bindings ((_:: alloc_addrs): Translate.access list) =
         let f v_env {name; ty} access =
@@ -210,12 +216,11 @@ let rec trans_dec (
         translate_body
       in
       
-      print_string "print esc-----------------\n";
-      let esc_vars = Link.extract_esc(v_env, t_env, body) in
+      let dumb_v_esc_venv = get_dumb_venv_to_compute_esc() in
+      let esc_vars = Link.extract_esc(dumb_v_esc_venv, t_env, body) in
       let next_esc_order = 1 + List.length esc_vars in
       
       List.iter T.printTy esc_vars;
-      print_string "-------------------\n";
       
       let gen_arg_mappings
             (result, index)
@@ -227,7 +232,6 @@ let rec trans_dec (
         (new_result, new_index)
       in
       let (args, _) = List.fold_left gen_arg_mappings ([], next_esc_order) params in
-      
       Translate.func_dec
         func_level
         (S.name name)
@@ -242,7 +246,6 @@ let rec trans_dec (
          Err.error pos msg);
        cur_v_env
     in
-    print_string ("number of function: "^ string_of_int(List.length(fs)));
     let base_env = List.fold_left add_func_header v_env fs in
     let newv_env = List.fold_left add_new_func_entry base_env fs in
     {v_env = newv_env; t_env = t_env}
@@ -272,7 +275,7 @@ let rec trans_dec (
         Some (E.VarEntry({ty; access})) ->
          {exp = Translate.simple_var access (S.name s) level; ty = actual_ty ty}
       | Some _ ->
-         Err.error pos ("Tiger does not support function closure yet!\n");
+         Err.error pos ("Tiger does not support function closure yet!\n" ^ S.name(s) ^ "\n");
          {exp = Translate.int_exp 0; ty = T.NIL}
       | None ->
          Err.error pos ("variable '" ^ S.name(s) ^"' has not been declared\n");
@@ -315,7 +318,7 @@ let rec trans_dec (
       | T.ARRAY (ty, _) ->
 	 let  {exp = sizeIrExp; ty = size_type} = trans_exp(v_env, t_env, level, size_exp, break) in
          if T.eq(size_type, T.INT)
-         then {exp = Translate.subscript_exp arrayExp sizeIrExp; ty = ty}
+         then {exp = Translate.subscript_exp arrayExp sizeIrExp pos; ty = ty}
          else (
            Err.error pos "index with array is not int";
            {exp = Translate.dummy_exp; ty = T.NIL}
@@ -383,7 +386,7 @@ let rec trans_dec (
       | T.ARRAY (ty, _) ->
 	 let  {exp = size_exp; ty = size_type} = trans_exp(v_env, t_env, level, size_exp, break) in
          if T.eq(size_type, T.INT)
-         then {exp = Translate.subscript_exp_left array_access size_exp ; ty = ty}
+         then {exp = Translate.subscript_exp_left array_access size_exp pos; ty = ty}
          else (
            Err.error pos "index with array is not int";
            {exp = Translate.dummy_exp; ty = T.NIL}

@@ -39,9 +39,9 @@ val field_var_exp: exp -> exp -> exp
 
 val field_var_exp_left: exp -> exp -> exp
 
-val subscript_exp: exp -> exp -> exp
+val subscript_exp: exp -> exp -> int -> exp
 
-val subscript_exp_left: exp -> exp -> exp
+val subscript_exp_left: exp -> exp -> int -> exp
 
 val func_call_exp: level -> level -> string -> exp list -> exp
       

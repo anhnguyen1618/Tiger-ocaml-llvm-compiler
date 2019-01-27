@@ -1,0 +1,41 @@
+let
+    type int_array = array of int
+    function create_array(): int_array = 
+        let
+            var size := 8 
+            var arr := int_array [size] of 1
+        in
+            for i := 0 to size - 1 do arr[i] := size - i;
+            arr
+        end
+     function bubble_sort(arr: int_array) =
+        let
+            var should_stop := 0
+            var arr_size := array_length(arr)
+        in
+            while not(should_stop) do
+                let
+                    var is_sorted := 1
+                in
+                    for i := 0 to (arr_size - 2) do
+                        let
+                            var current := arr[i]
+                            var next := arr[i + 1]
+                        in
+                            if current > next
+                            then (
+                                arr[i] := next;
+                                arr[i + 1] := current;
+                                is_sorted := 0
+                            )
+                        end;
+                    should_stop := is_sorted
+
+                end
+        end
+    var arr := create_array()
+in
+    bubble_sort(arr);
+    for i:= 0 to array_length(arr) - 1 do printInt(arr[i]);
+    print("something")
+end

@@ -15,6 +15,9 @@ source_filename = "Tiger jit"
 @11 = private unnamed_addr constant [47 x i8] c"test/quick_sort.tig::39.43: Array out of bound\00"
 @12 = private unnamed_addr constant [47 x i8] c"test/quick_sort.tig::40.23: Array out of bound\00"
 @13 = private unnamed_addr constant [47 x i8] c"test/quick_sort.tig::41.23: Array out of bound\00"
+@14 = private unnamed_addr constant [15 x i8] c"Before sorting\00"
+@15 = private unnamed_addr constant [15 x i8] c"==============\00"
+@16 = private unnamed_addr constant [14 x i8] c"After sorting\00"
 
 declare void @tig_print_int(i32)
 
@@ -54,7 +57,20 @@ declare i32 @tig_not(i32)
 
 define i32 @main() {
 entry:
+  %arr = alloca { i32, i32* }*
   %frame_pointer = alloca { i32 }
+  %0 = call { i32, i32* }* @create_array({ i32 }* %frame_pointer)
+  store { i32, i32* }* %0, { i32, i32* }** %arr
+  call void @tig_print(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @14, i32 0, i32 0))
+  %arr1 = load { i32, i32* }*, { i32, i32* }** %arr
+  call void @print_array({ i32 }* %frame_pointer, { i32, i32* }* %arr1)
+  call void @tig_print(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @15, i32 0, i32 0))
+  %arr2 = load { i32, i32* }*, { i32, i32* }** %arr
+  call void @quick_sort({ i32 }* %frame_pointer, { i32, i32* }* %arr2)
+  call void @tig_print(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @16, i32 0, i32 0))
+  %arr3 = load { i32, i32* }*, { i32, i32* }** %arr
+  call void @print_array({ i32 }* %frame_pointer, { i32, i32* }* %arr3)
+  ret i32 0
 
 break_loop:                                       ; No predecessors!
   ret i32 0

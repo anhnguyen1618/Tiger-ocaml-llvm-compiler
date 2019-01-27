@@ -1,0 +1,64 @@
+let
+    type int_array = array of int
+    function print_array (arr: int_array) =
+        (
+            print("[");
+            for i:= 0 to array_length(arr) - 1 do print_arr_ele(arr[i]);
+            print("");
+            print("]")
+        )
+
+    function create_array(): int_array = 
+        let
+            var size := 8 
+            var arr := int_array [size] of 1
+        in
+            for i := 0 to size - 1 do arr[i] := random(50);
+            arr
+        end
+     function quick_sort(arr: int_array) =
+        let
+            function partition(first: int, last: int): int =
+                let
+                    var wall_index := first
+                    var pivot := arr[last]
+                    var final_wall_value := arr[wall_index]
+                in
+                    for i := first to last -1 do 
+                        let
+                            var current := arr[i]
+                            var wall_item := arr[wall_index]
+                        in
+                            if current < pivot
+                            then (
+                                arr[wall_index] := current;
+                                arr[i] := wall_item;
+                                wall_index := wall_index + 1
+                            )
+                        end;
+                    final_wall_value := arr[wall_index];
+                    arr[wall_index] := pivot;
+                    arr[last] := final_wall_value;
+                    wall_index
+                end
+            function sort(first: int, last: int) =
+                if first < last
+                then
+                    let
+                        var pivot_index := partition(first, last)
+                    in
+                        sort (first, pivot_index -1);
+                        sort (pivot_index + 1, last)
+                    end
+        in
+           sort(0, array_length(arr) - 1)
+        end
+    var arr := create_array()
+in
+    print("Before sorting");
+    print_array(arr);
+    print("==============");
+    quick_sort(arr);
+    print("After sorting");
+    print_array(arr)
+end

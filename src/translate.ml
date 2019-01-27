@@ -247,7 +247,7 @@ let func_call_exp
       (vals: exp list): exp =
   let callee = lookup_function_block name in
   match dec_level with
-  | TOP -> print_string "run to top call\n"; L.build_call callee (Array.of_list vals) "" builder
+  | TOP -> L.build_call callee (Array.of_list vals) "" builder
   | _ ->
      let (_, current_fp) = get_current_fp() in
      let dec_fp_addr = gen_static_link (dec_level, call_level, current_fp) in

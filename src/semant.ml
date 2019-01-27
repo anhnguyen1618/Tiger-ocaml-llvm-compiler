@@ -342,7 +342,6 @@ let rec trans_dec (
 
     let actual_ty = U.actual_ty t_env in
     let check_simple_var ((s: S.symbol), (pos: int)): expty =
-      print_string ("run here" ^ S.name(s));
       match S.look(v_env, s) with
         Some (E.VarEntry({ty; access})) ->
          let abs_addr = Translate.simple_var_left access (S.name s) level in
@@ -442,7 +441,6 @@ let rec trans_dec (
                 ("Function requires "^  (args |> List.length |> string_of_int) ^ " arguments");
          let arg_formal_pairs = List.map2 (fun a b -> (a, b)) args formals in
 	 let args = List.fold_left check_param [] arg_formal_pairs in
-         print_string ("translate code for" ^ (S.name label) ^ "\n");
          {exp = Translate.func_call_exp dec_level level (S.name label) args; ty = result}
 
       | Some _ ->
@@ -491,7 +489,6 @@ let rec trans_dec (
                in
 	       let typesInCreateOrder = check_fields field_exps in
                let field_irs = List.map2 proper_nil_fields types fields_with_name_types in
-               print_string "run through here\n";
 	       {exp = (Translate.record_exp types field_irs) ; ty = T.RECORD (typesInCreateOrder, refer)}
 			    
       | Some _ ->
@@ -638,7 +635,6 @@ let rec trans_dec (
     in	    
     tr_exp exp
 
-exception Foo of string
 let trans_prog ((my_exp: A.exp), (output_name: string)) =
   let build_external_func = function
     | (_, Env.FunEntry {formals; result; label}) -> Translate.build_external_func (S.name label) formals result
@@ -646,51 +642,18 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   in
   
   List.iter build_external_func Env.external_functions;
-  (*ignore (Llvm_executionengine.initialize());*)
   Escape.find_escape(my_exp);
   
-  print_string "print this shit esc-----------------\n";
   let escs = Link.extract_esc (Env.base_venv, Env.base_tenv, my_exp) in
   List.iter T.printTy escs;
 
   let outermost_break_block = Translate.build_main_func escs in
-    
-  print_string "-------------------\n";
 
   let main_level = Translate.new_level Translate.outermost in
   ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, outermost_break_block)); 
   Translate.build_return_main();
-  (*let the_execution_engine = Llvm_executionengine.create Translate.the_module in*)
-  (*let ct = Ctypes.p
-  Llvm_executionengine.get_function_address "main" ct the_execution_engine; *)
-  print_string "the module\n";
   dump_module Translate.the_module;
-  print_string ("llvm_byte_code/"^ output_name);
-  print_module ("llvm_byte_code/"^ output_name) Translate.the_module;
+  print_module ("llvm_byte_code/"^ output_name ^ ".ll") Translate.the_module;
 
-  
-(*
-    let transProg (my_exp : A.exp): F.frag list = 
-	let
-	    let mainlabel = Temp.newlabel()
-	    let mainlevel = Translate.newLevel {parent=Translate.outermost, name=mainlabel, formals=[]}
-	    let _ = FindEscape.findEscape my_exp
-	    (* The reason that we have to use mainlevel instead with outermost here is that we can't alloc local on outermost *)
-	    (* See alloclocal letction in translate.sml*)
-	    let {exp = mainexp, ty = _} = transExp(Env.base_venv, Env.base_tenv, mainlevel, my_exp, mainlabel)
-	    let _ = Translate.procEntryExit {level=mainlevel, body=mainexp};
-	    let resultIR = Translate.getResult()
-					      
-	    let printFn = fn exp -> Printtree.printtree (TextIO.stdOut, exp)
-	in
-	    Translate.convertToStm mainexp;
-	    resultIR
-	end
-
-    let testIR (name: string) =
-	transProg(Parse.parse name)
-   
- *)  
-    
 
 

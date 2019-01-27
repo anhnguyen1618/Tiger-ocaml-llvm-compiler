@@ -33,7 +33,7 @@ let rec leq = function
   | (NAME(_, real_type), t2) ->
      (match !real_type with
      | Some t1 -> leq(t1, t2) && leq(t2, t1)
-     | None -> print_string "run here";false)
+     | None -> false)
   | (t2, NAME(_, real_type)) ->
      (match !real_type with
      | Some t1 -> leq(t1, t2) && leq(t2, t1)

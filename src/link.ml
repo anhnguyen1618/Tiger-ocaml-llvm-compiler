@@ -66,11 +66,8 @@ let rec trans_dec (
       begin
         escape_vars := rhs_type :: !escape_vars;
         order := !current_counter;
-        print_string ("hello world: " ^ Symbol.name(name));
         increase_counter()
-      end
-    else
-      print_string (Symbol.name(name) ^" not escape\n");
+      end;
     match typ with
       Some (s, p) ->
        begin

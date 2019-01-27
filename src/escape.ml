@@ -7,10 +7,6 @@ type esc_env = (depth * bool ref) Symbol.table
 (* looks through the variable references to the underlying var *)
 let rec traverse_var: esc_env * depth * A.var -> unit = function
   | (env, d, (A.SimpleVar(id, pos))) ->
-     print_string ("run into var\n");
-     print_string ("var :" ^ Symbol.name(id) ^"\n");
-     print_string (string_of_int d);
-     print_string "\n";
      (match Symbol.look (env,id) with
       | Some (depth, escape) -> if not(!escape) then escape := depth < d (* have to check here because esc = false can override prev true*)
       | None -> ())

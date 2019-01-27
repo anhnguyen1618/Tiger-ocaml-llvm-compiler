@@ -325,30 +325,9 @@ let field_var_exp_left (arr_addr: exp ) (index: exp) =
   L.build_gep addr [| int_exp(0);index |] "element_left" builder
 
 let check_bound_array (arr_wrapper_addr: exp) (index_exp: exp) (pos: int)=
-  let get_array_info (index_exp: exp) (name: string) =
-    L.build_gep arr_wrapper_addr
-      [| int_exp(0); index_exp |] name builder
-  in
-
-  let size_arr_index = int_exp(0) in
-  let array_size_ptr = get_array_info size_arr_index "array_size_ptr" in
-  let array_size_exp = L.build_load array_size_ptr "arr_size" builder in
-
-  let current_block = L.insertion_block builder in
-  let function_block = L.block_parent current_block in
-
-  let error_block = L.append_block context "error" function_block in
-  let continue_block = L.append_block context "continue" function_block in
-
-  let cond_val = L.build_icmp L.Icmp.Sge index_exp array_size_exp "cond" builder in
-  ignore(L.build_cond_br cond_val error_block continue_block builder);
-
-  L.position_at_end error_block builder;
   let error_msg = Err.gen_err_message pos "Array out of bound" in
-  ignore(func_call_exp TOP TOP "tig_print" [string_exp error_msg]);
-  ignore(func_call_exp TOP TOP "tig_exit" [int_exp 1]);
-  ignore(L.build_br continue_block builder);
-  L.position_at_end continue_block builder
+  let casted_array = build_bitcast_generic arr_wrapper_addr in
+  ignore(func_call_exp TOP TOP "tig_check_array_bound" [casted_array; index_exp; string_exp(error_msg)])
 
 let subscript_exp (arr_wrapper_addr: exp) (index: exp) (pos: int) =
   check_bound_array arr_wrapper_addr index pos;

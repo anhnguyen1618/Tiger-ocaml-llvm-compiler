@@ -6,33 +6,44 @@
 main:                                   # @main
 	.cfi_startproc
 # %bb.0:                                # %entry
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 16
-	subq	$16, %rsp
-	.cfi_def_cfa_offset 32
-	.cfi_offset %rbx, -16
-	leaq	8(%rsp), %rbx
-	movq	%rbx, %rdi
+	pushq	%rbx
+	.cfi_def_cfa_offset 24
+	subq	$24, %rsp
+	.cfi_def_cfa_offset 48
+	.cfi_offset %rbx, -24
+	.cfi_offset %r14, -16
+	leaq	16(%rsp), %r14
+	movq	%r14, %rdi
 	callq	create_array
-	movq	%rax, (%rsp)
-	movl	$.L__unnamed_1, %edi
-	callq	tig_print
-	movq	(%rsp), %rsi
+	movq	%rax, %rbx
+	movq	%rbx, 8(%rsp)
+	movl	$100, %esi
+	movl	$.L__unnamed_1, %edx
 	movq	%rbx, %rdi
-	callq	print_array
+	callq	tig_check_array_bound
+	movq	8(%rbx), %rax
+	movl	$10, 400(%rax)
 	movl	$.L__unnamed_2, %edi
 	callq	tig_print
-	movq	(%rsp), %rsi
-	movq	%rbx, %rdi
-	callq	quick_sort
+	movq	8(%rsp), %rsi
+	movq	%r14, %rdi
+	callq	print_array
 	movl	$.L__unnamed_3, %edi
 	callq	tig_print
-	movq	(%rsp), %rsi
-	movq	%rbx, %rdi
+	movq	8(%rsp), %rsi
+	movq	%r14, %rdi
+	callq	quick_sort
+	movl	$.L__unnamed_4, %edi
+	callq	tig_print
+	movq	8(%rsp), %rsi
+	movq	%r14, %rdi
 	callq	print_array
 	xorl	%eax, %eax
-	addq	$16, %rsp
+	addq	$24, %rsp
 	popq	%rbx
+	popq	%r14
 	retq
 .Lfunc_end0:
 	.size	main, .Lfunc_end0-main
@@ -44,17 +55,17 @@ main:                                   # @main
 print_array:                            # @print_array
 	.cfi_startproc
 # %bb.0:                                # %entry
-	pushq	%rbp
+	pushq	%r14
 	.cfi_def_cfa_offset 16
 	pushq	%rbx
 	.cfi_def_cfa_offset 24
 	subq	$40, %rsp
 	.cfi_def_cfa_offset 64
 	.cfi_offset %rbx, -24
-	.cfi_offset %rbp, -16
+	.cfi_offset %r14, -16
 	movq	%rdi, 32(%rsp)
 	movq	%rsi, 16(%rsp)
-	movl	$.L__unnamed_4, %edi
+	movl	$.L__unnamed_5, %edi
 	callq	tig_print
 	movq	16(%rsp), %rdi
 	callq	tig_array_length
@@ -65,39 +76,31 @@ print_array:                            # @print_array
 	movl	%eax, 28(%rsp)
 	jmp	.LBB1_1
 	.p2align	4, 0x90
-.LBB1_4:                                # %continue
+.LBB1_2:                                # %loop
                                         #   in Loop: Header=BB1_1 Depth=1
+	movq	16(%rsp), %rbx
+	movslq	12(%rsp), %r14
+	movl	$.L__unnamed_6, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movslq	%ebp, %rcx
-	movl	(%rax,%rcx,4), %edi
+	movl	(%rax,%r14,4), %edi
 	callq	print_arr_int_ele
 	incl	12(%rsp)
 .LBB1_1:                                # %test
                                         # =>This Inner Loop Header: Depth=1
 	movl	28(%rsp), %eax
 	cmpl	12(%rsp), %eax
-	jl	.LBB1_5
-# %bb.2:                                # %loop
-                                        #   in Loop: Header=BB1_1 Depth=1
-	movq	16(%rsp), %rbx
-	movl	12(%rsp), %ebp
-	cmpl	(%rbx), %ebp
-	jl	.LBB1_4
-# %bb.3:                                # %error
-                                        #   in Loop: Header=BB1_1 Depth=1
-	movl	$.L__unnamed_5, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-	jmp	.LBB1_4
-.LBB1_5:                                # %end
-	movl	$.L__unnamed_6, %edi
-	callq	tig_print
+	jge	.LBB1_2
+# %bb.3:                                # %end
 	movl	$.L__unnamed_7, %edi
+	callq	tig_print
+	movl	$.L__unnamed_8, %edi
 	callq	tig_print
 	addq	$40, %rsp
 	popq	%rbx
-	popq	%rbp
+	popq	%r14
 	retq
 .Lfunc_end1:
 	.size	print_array, .Lfunc_end1-print_array
@@ -111,72 +114,68 @@ create_array:                           # @create_array
 # %bb.0:                                # %entry
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 24
-	subq	$40, %rsp
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	subq	$32, %rsp
 	.cfi_def_cfa_offset 64
-	.cfi_offset %rbx, -24
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
 	.cfi_offset %rbp, -16
-	movq	%rdi, 32(%rsp)
-	movl	$8, 16(%rsp)
+	movq	%rdi, 24(%rsp)
+	movl	$8, 8(%rsp)
 	movl	$8, %ebp
 	movl	$32, %edi
 	callq	malloc
 	movq	%rax, %rbx
-	movl	$0, 8(%rsp)
-	cmpl	%ebp, 8(%rsp)
+	movl	$0, (%rsp)
+	cmpl	%ebp, (%rsp)
 	jge	.LBB2_3
 	.p2align	4, 0x90
 .LBB2_2:                                # %loop
                                         # =>This Inner Loop Header: Depth=1
-	movslq	8(%rsp), %rax
+	movslq	(%rsp), %rax
 	movl	$1, (%rbx,%rax,4)
 	leal	1(%rax), %eax
-	movl	%eax, 8(%rsp)
-	cmpl	%ebp, 8(%rsp)
+	movl	%eax, (%rsp)
+	cmpl	%ebp, (%rsp)
 	jl	.LBB2_2
 .LBB2_3:                                # %end
 	movl	$16, %edi
 	callq	malloc
 	movl	%ebp, (%rax)
 	movq	%rbx, 8(%rax)
-	movq	%rax, 24(%rsp)
-	movl	$0, 12(%rsp)
-	movl	16(%rsp), %eax
+	movq	%rax, 16(%rsp)
+	movl	$0, 4(%rsp)
+	movl	8(%rsp), %eax
 	decl	%eax
-	movl	%eax, 20(%rsp)
+	movl	%eax, 12(%rsp)
 	jmp	.LBB2_4
 	.p2align	4, 0x90
-.LBB2_7:                                # %continue
+.LBB2_5:                                # %loop11
                                         #   in Loop: Header=BB2_4 Depth=1
-	movq	8(%rbp), %rbp
-	movslq	%ebx, %rbx
+	movslq	4(%rsp), %r14
+	movq	16(%rsp), %rbx
+	movl	$.L__unnamed_9, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
+	movq	8(%rbx), %rbx
 	movl	$50, %edi
 	callq	tig_random
-	movl	%eax, (%rbp,%rbx,4)
-	incl	12(%rsp)
+	movl	%eax, (%rbx,%r14,4)
+	incl	4(%rsp)
 .LBB2_4:                                # %test10
                                         # =>This Inner Loop Header: Depth=1
-	movl	20(%rsp), %eax
-	cmpl	12(%rsp), %eax
-	jl	.LBB2_8
-# %bb.5:                                # %loop11
-                                        #   in Loop: Header=BB2_4 Depth=1
-	movl	12(%rsp), %ebx
-	movq	24(%rsp), %rbp
-	cmpl	(%rbp), %ebx
-	jl	.LBB2_7
-# %bb.6:                                # %error
-                                        #   in Loop: Header=BB2_4 Depth=1
-	movl	$.L__unnamed_8, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-	jmp	.LBB2_7
-.LBB2_8:                                # %end12
-	movq	24(%rsp), %rax
-	addq	$40, %rsp
+	movl	12(%rsp), %eax
+	cmpl	4(%rsp), %eax
+	jge	.LBB2_5
+# %bb.6:                                # %end12
+	movq	16(%rsp), %rax
+	addq	$32, %rsp
 	popq	%rbx
+	popq	%r14
 	popq	%rbp
 	retq
 .Lfunc_end2:
@@ -212,190 +211,137 @@ quick_sort:                             # @quick_sort
 partition:                              # @partition
 	.cfi_startproc
 # %bb.0:                                # %entry
-	pushq	%rbp
+	pushq	%r14
 	.cfi_def_cfa_offset 16
 	pushq	%rbx
 	.cfi_def_cfa_offset 24
 	subq	$56, %rsp
 	.cfi_def_cfa_offset 80
 	.cfi_offset %rbx, -24
-	.cfi_offset %rbp, -16
-	movl	%edx, %ebx
+	.cfi_offset %r14, -16
 	movq	%rdi, 16(%rsp)
 	movl	%esi, 40(%rsp)
-	movl	%ebx, 24(%rsp)
+	movl	%edx, 24(%rsp)
 	movl	%esi, 8(%rsp)
-	movq	8(%rdi), %rbp
-	cmpl	(%rbp), %ebx
-	jl	.LBB4_2
-# %bb.1:                                # %error
-	movl	$.L__unnamed_9, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB4_2:                                # %continue
-	movq	8(%rbp), %rax
-	movslq	%ebx, %rcx
-	movl	(%rax,%rcx,4), %eax
+	movq	8(%rdi), %rbx
+	movslq	24(%rsp), %r14
+	movl	$.L__unnamed_10, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
+	movq	8(%rbx), %rax
+	movl	(%rax,%r14,4), %eax
 	movl	%eax, 28(%rsp)
 	movq	16(%rsp), %rax
 	movq	8(%rax), %rbx
-	movl	8(%rsp), %ebp
-	cmpl	(%rbx), %ebp
-	jl	.LBB4_4
-# %bb.3:                                # %error11
-	movl	$.L__unnamed_10, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB4_4:                                # %continue12
+	movslq	8(%rsp), %r14
+	movl	$.L__unnamed_11, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movslq	%ebp, %rcx
-	movl	(%rax,%rcx,4), %eax
+	movl	(%rax,%r14,4), %eax
 	movl	%eax, 32(%rsp)
 	movl	40(%rsp), %eax
 	movl	%eax, 12(%rsp)
 	movl	24(%rsp), %eax
 	decl	%eax
 	movl	%eax, 44(%rsp)
-	jmp	.LBB4_5
+	jmp	.LBB4_1
 	.p2align	4, 0x90
-.LBB4_16:                               # %else
-                                        #   in Loop: Header=BB4_5 Depth=1
+.LBB4_4:                                # %else
+                                        #   in Loop: Header=BB4_1 Depth=1
 	movl	$0, 52(%rsp)
 	incl	12(%rsp)
-.LBB4_5:                                # %test
+.LBB4_1:                                # %test
                                         # =>This Inner Loop Header: Depth=1
 	movl	44(%rsp), %eax
 	cmpl	12(%rsp), %eax
-	jl	.LBB4_17
-# %bb.6:                                # %loop
-                                        #   in Loop: Header=BB4_5 Depth=1
+	jl	.LBB4_5
+# %bb.2:                                # %test38
+                                        #   in Loop: Header=BB4_1 Depth=1
 	movq	16(%rsp), %rax
 	movq	8(%rax), %rbx
-	movl	12(%rsp), %ebp
-	cmpl	(%rbx), %ebp
-	jl	.LBB4_8
-# %bb.7:                                # %error33
-                                        #   in Loop: Header=BB4_5 Depth=1
-	movl	$.L__unnamed_11, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB4_8:                                # %continue34
-                                        #   in Loop: Header=BB4_5 Depth=1
+	movslq	12(%rsp), %r14
+	movl	$.L__unnamed_12, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movslq	%ebp, %rcx
-	movl	(%rax,%rcx,4), %eax
+	movl	(%rax,%r14,4), %eax
 	movl	%eax, 36(%rsp)
 	movq	16(%rsp), %rax
 	movq	8(%rax), %rbx
-	movl	8(%rsp), %ebp
-	cmpl	(%rbx), %ebp
-	jl	.LBB4_10
-# %bb.9:                                # %error47
-                                        #   in Loop: Header=BB4_5 Depth=1
-	movl	$.L__unnamed_12, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB4_10:                               # %test54
-                                        #   in Loop: Header=BB4_5 Depth=1
+	movslq	8(%rsp), %r14
+	movl	$.L__unnamed_13, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movslq	%ebp, %rcx
-	movl	(%rax,%rcx,4), %eax
+	movl	(%rax,%r14,4), %eax
 	movl	%eax, 48(%rsp)
 	movl	36(%rsp), %eax
 	cmpl	28(%rsp), %eax
-	jge	.LBB4_16
-# %bb.11:                               # %then
-                                        #   in Loop: Header=BB4_5 Depth=1
+	jge	.LBB4_4
+# %bb.3:                                # %then
+                                        #   in Loop: Header=BB4_1 Depth=1
 	movq	16(%rsp), %rax
-	movl	8(%rsp), %ebx
-	movq	8(%rax), %rbp
-	cmpl	(%rbp), %ebx
-	jl	.LBB4_13
-# %bb.12:                               # %error65
-                                        #   in Loop: Header=BB4_5 Depth=1
-	movl	$.L__unnamed_13, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB4_13:                               # %continue66
-                                        #   in Loop: Header=BB4_5 Depth=1
-	movq	8(%rbp), %rax
-	movslq	%ebx, %rcx
-	movl	36(%rsp), %edx
-	movl	%edx, (%rax,%rcx,4)
+	movslq	8(%rsp), %r14
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_14, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
+	movq	8(%rbx), %rax
+	movl	36(%rsp), %ecx
+	movl	%ecx, (%rax,%r14,4)
 	movq	16(%rsp), %rax
-	movl	12(%rsp), %ebx
-	movq	8(%rax), %rbp
-	cmpl	(%rbp), %ebx
-	jl	.LBB4_15
-# %bb.14:                               # %error78
-                                        #   in Loop: Header=BB4_5 Depth=1
-	movl	$.L__unnamed_14, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB4_15:                               # %continue79
-                                        #   in Loop: Header=BB4_5 Depth=1
-	movq	8(%rbp), %rax
-	movslq	%ebx, %rcx
-	movl	48(%rsp), %edx
-	movl	%edx, (%rax,%rcx,4)
+	movslq	12(%rsp), %r14
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_15, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
+	movq	8(%rbx), %rax
+	movl	48(%rsp), %ecx
+	movl	%ecx, (%rax,%r14,4)
 	incl	8(%rsp)
-	jmp	.LBB4_16
-.LBB4_17:                               # %end
+	jmp	.LBB4_4
+.LBB4_5:                                # %end
 	movq	16(%rsp), %rax
 	movq	8(%rax), %rbx
-	movl	8(%rsp), %ebp
-	cmpl	(%rbx), %ebp
-	jl	.LBB4_19
-# %bb.18:                               # %error95
-	movl	$.L__unnamed_15, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB4_19:                               # %continue96
+	movslq	8(%rsp), %r14
+	movl	$.L__unnamed_16, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movslq	%ebp, %rcx
-	movl	(%rax,%rcx,4), %eax
+	movl	(%rax,%r14,4), %eax
 	movl	%eax, 32(%rsp)
 	movq	16(%rsp), %rax
-	movl	8(%rsp), %ebx
-	movq	8(%rax), %rbp
-	cmpl	(%rbp), %ebx
-	jl	.LBB4_21
-# %bb.20:                               # %error109
-	movl	$.L__unnamed_16, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB4_21:                               # %continue110
-	movq	8(%rbp), %rax
-	movslq	%ebx, %rcx
-	movl	28(%rsp), %edx
-	movl	%edx, (%rax,%rcx,4)
+	movslq	8(%rsp), %r14
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_17, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
+	movq	8(%rbx), %rax
+	movl	28(%rsp), %ecx
+	movl	%ecx, (%rax,%r14,4)
 	movq	16(%rsp), %rax
-	movl	24(%rsp), %ebx
-	movq	8(%rax), %rbp
-	cmpl	(%rbp), %ebx
-	jl	.LBB4_23
-# %bb.22:                               # %error123
-	movl	$.L__unnamed_17, %edi
-	callq	tig_print
-	movl	$1, %edi
-	callq	tig_exit
-.LBB4_23:                               # %continue124
-	movq	8(%rbp), %rax
-	movslq	%ebx, %rcx
-	movl	32(%rsp), %edx
-	movl	%edx, (%rax,%rcx,4)
+	movslq	24(%rsp), %r14
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_18, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
+	movq	8(%rbx), %rax
+	movl	32(%rsp), %ecx
+	movl	%ecx, (%rax,%r14,4)
 	movl	8(%rsp), %eax
 	addq	$56, %rsp
 	popq	%rbx
-	popq	%rbp
+	popq	%r14
 	retq
 .Lfunc_end4:
 	.size	partition, .Lfunc_end4-partition
@@ -438,106 +384,112 @@ sort:                                   # @sort
 	.size	sort, .Lfunc_end5-sort
 	.cfi_endproc
                                         # -- End function
-	.type	.L__unnamed_4,@object   # @0
+	.type	.L__unnamed_5,@object   # @0
 	.section	.rodata.str1.1,"aMS",@progbits,1
-.L__unnamed_4:
-	.asciz	"["
-	.size	.L__unnamed_4, 2
-
-	.type	.L__unnamed_5,@object   # @1
-	.section	.rodata.str1.16,"aMS",@progbits,1
-	.p2align	4
 .L__unnamed_5:
-	.asciz	"test/quick_sort.tig::6.67: Array out of bound"
-	.size	.L__unnamed_5, 46
+	.asciz	"["
+	.size	.L__unnamed_5, 2
 
-	.type	.L__unnamed_6,@object   # @2
-	.section	.rodata.str1.1,"aMS",@progbits,1
-.L__unnamed_6:
-	.zero	1
-	.size	.L__unnamed_6, 1
-
-	.type	.L__unnamed_7,@object   # @3
-.L__unnamed_7:
-	.asciz	"]"
-	.size	.L__unnamed_7, 2
-
-	.type	.L__unnamed_8,@object   # @4
+	.type	.L__unnamed_6,@object   # @1
 	.section	.rodata.str1.16,"aMS",@progbits,1
 	.p2align	4
-.L__unnamed_8:
-	.asciz	"test/quick_sort.tig::16.41: Array out of bound"
-	.size	.L__unnamed_8, 47
+.L__unnamed_6:
+	.asciz	"test/quick_sort.tig::6.67: Array out of bound"
+	.size	.L__unnamed_6, 46
 
-	.type	.L__unnamed_9,@object   # @5
+	.type	.L__unnamed_7,@object   # @2
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.L__unnamed_7:
+	.zero	1
+	.size	.L__unnamed_7, 1
+
+	.type	.L__unnamed_8,@object   # @3
+.L__unnamed_8:
+	.asciz	"]"
+	.size	.L__unnamed_8, 2
+
+	.type	.L__unnamed_9,@object   # @4
+	.section	.rodata.str1.16,"aMS",@progbits,1
 	.p2align	4
 .L__unnamed_9:
-	.asciz	"test/quick_sort.tig::24.36: Array out of bound"
+	.asciz	"test/quick_sort.tig::16.41: Array out of bound"
 	.size	.L__unnamed_9, 47
 
-	.type	.L__unnamed_10,@object  # @6
+	.type	.L__unnamed_10,@object  # @5
 	.p2align	4
 .L__unnamed_10:
-	.asciz	"test/quick_sort.tig::25.47: Array out of bound"
+	.asciz	"test/quick_sort.tig::24.36: Array out of bound"
 	.size	.L__unnamed_10, 47
 
-	.type	.L__unnamed_11,@object  # @7
+	.type	.L__unnamed_11,@object  # @6
 	.p2align	4
 .L__unnamed_11:
-	.asciz	"test/quick_sort.tig::29.46: Array out of bound"
+	.asciz	"test/quick_sort.tig::25.47: Array out of bound"
 	.size	.L__unnamed_11, 47
 
-	.type	.L__unnamed_12,@object  # @8
+	.type	.L__unnamed_12,@object  # @7
 	.p2align	4
 .L__unnamed_12:
-	.asciz	"test/quick_sort.tig::30.48: Array out of bound"
+	.asciz	"test/quick_sort.tig::29.46: Array out of bound"
 	.size	.L__unnamed_12, 47
 
-	.type	.L__unnamed_13,@object  # @9
+	.type	.L__unnamed_13,@object  # @8
 	.p2align	4
 .L__unnamed_13:
-	.asciz	"test/quick_sort.tig::34.35: Array out of bound"
+	.asciz	"test/quick_sort.tig::30.48: Array out of bound"
 	.size	.L__unnamed_13, 47
 
-	.type	.L__unnamed_14,@object  # @10
+	.type	.L__unnamed_14,@object  # @9
 	.p2align	4
 .L__unnamed_14:
-	.asciz	"test/quick_sort.tig::35.35: Array out of bound"
+	.asciz	"test/quick_sort.tig::34.35: Array out of bound"
 	.size	.L__unnamed_14, 47
 
-	.type	.L__unnamed_15,@object  # @11
+	.type	.L__unnamed_15,@object  # @10
 	.p2align	4
 .L__unnamed_15:
-	.asciz	"test/quick_sort.tig::39.43: Array out of bound"
+	.asciz	"test/quick_sort.tig::35.35: Array out of bound"
 	.size	.L__unnamed_15, 47
 
-	.type	.L__unnamed_16,@object  # @12
+	.type	.L__unnamed_16,@object  # @11
 	.p2align	4
 .L__unnamed_16:
-	.asciz	"test/quick_sort.tig::40.23: Array out of bound"
+	.asciz	"test/quick_sort.tig::39.43: Array out of bound"
 	.size	.L__unnamed_16, 47
 
-	.type	.L__unnamed_17,@object  # @13
+	.type	.L__unnamed_17,@object  # @12
 	.p2align	4
 .L__unnamed_17:
-	.asciz	"test/quick_sort.tig::41.23: Array out of bound"
+	.asciz	"test/quick_sort.tig::40.23: Array out of bound"
 	.size	.L__unnamed_17, 47
 
+	.type	.L__unnamed_18,@object  # @13
+	.p2align	4
+.L__unnamed_18:
+	.asciz	"test/quick_sort.tig::41.23: Array out of bound"
+	.size	.L__unnamed_18, 47
+
 	.type	.L__unnamed_1,@object   # @14
-	.section	.rodata.str1.1,"aMS",@progbits,1
+	.p2align	4
 .L__unnamed_1:
-	.asciz	"Before sorting"
-	.size	.L__unnamed_1, 15
+	.asciz	"test/quick_sort.tig::59.7: Array out of bound"
+	.size	.L__unnamed_1, 46
 
 	.type	.L__unnamed_2,@object   # @15
+	.section	.rodata.str1.1,"aMS",@progbits,1
 .L__unnamed_2:
-	.asciz	"=============="
+	.asciz	"Before sorting"
 	.size	.L__unnamed_2, 15
 
 	.type	.L__unnamed_3,@object   # @16
 .L__unnamed_3:
+	.asciz	"=============="
+	.size	.L__unnamed_3, 15
+
+	.type	.L__unnamed_4,@object   # @17
+.L__unnamed_4:
 	.asciz	"After sorting"
-	.size	.L__unnamed_3, 14
+	.size	.L__unnamed_4, 14
 
 
 	.section	".note.GNU-stack","",@progbits

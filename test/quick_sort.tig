@@ -41,6 +41,7 @@ let
                     arr[last] := final_wall_value;
                     wall_index
                 end
+
             function sort(first: int, last: int) =
                 if first < last
                 then

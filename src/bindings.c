@@ -63,6 +63,15 @@ extern int tig_array_length(const char *s)
   return s[0];
 }
 
+extern void tig_check_array_bound(const char *s, const int index, const char *msg)
+{
+  int size = s[0];
+  if (index >= size) {
+    tig_print(msg);
+    exit(1);
+  }
+}
+
 extern void print_arr_int_ele(const int s)
 {
   printf("%d, ", s);

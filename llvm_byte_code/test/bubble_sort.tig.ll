@@ -1,17 +1,24 @@
 ; ModuleID = 'Tiger jit'
 source_filename = "Tiger jit"
 
-@0 = private unnamed_addr constant [47 x i8] c"test/bubble_sort.tig::41.4: Array out of bound\00"
-@1 = private unnamed_addr constant [49 x i8] c"test/bubble_sort.tig::41.437: Array out of bound\00"
-@2 = private unnamed_addr constant [49 x i8] c"test/bubble_sort.tig::41.484: Array out of bound\00"
-@3 = private unnamed_addr constant [49 x i8] c"test/bubble_sort.tig::41.635: Array out of bound\00"
-@4 = private unnamed_addr constant [49 x i8] c"test/bubble_sort.tig::41.683: Array out of bound\00"
-@5 = private unnamed_addr constant [49 x i8] c"test/bubble_sort.tig::41.996: Array out of bound\00"
-@6 = private unnamed_addr constant [10 x i8] c"something\00"
+@0 = private unnamed_addr constant [2 x i8] c"[\00"
+@1 = private unnamed_addr constant [47 x i8] c"test/bubble_sort.tig::6.67: Array out of bound\00"
+@2 = private unnamed_addr constant [1 x i8] zeroinitializer
+@3 = private unnamed_addr constant [2 x i8] c"]\00"
+@4 = private unnamed_addr constant [48 x i8] c"test/bubble_sort.tig::16.41: Array out of bound\00"
+@5 = private unnamed_addr constant [48 x i8] c"test/bubble_sort.tig::30.46: Array out of bound\00"
+@6 = private unnamed_addr constant [48 x i8] c"test/bubble_sort.tig::31.43: Array out of bound\00"
+@7 = private unnamed_addr constant [48 x i8] c"test/bubble_sort.tig::35.35: Array out of bound\00"
+@8 = private unnamed_addr constant [48 x i8] c"test/bubble_sort.tig::36.35: Array out of bound\00"
+@9 = private unnamed_addr constant [15 x i8] c"Before sorting\00"
+@10 = private unnamed_addr constant [15 x i8] c"==============\00"
+@11 = private unnamed_addr constant [14 x i8] c"After sorting\00"
 
 declare void @tig_print_int(i32)
 
 declare void @tig_print(i8*)
+
+declare void @print_arr_int_ele(i32)
 
 declare i32* @tig_init_array(i32, i32)
 
@@ -20,6 +27,8 @@ declare i32* @tig_init_record(i32)
 declare i32 @tig_array_length(i8*)
 
 declare i32 @tig_nillable(i8*)
+
+declare i32 @tig_random(i32)
 
 declare void @tig_exit(i32)
 
@@ -43,62 +52,81 @@ declare i32 @tig_not(i32)
 
 define i32 @main() {
 entry:
-  %_limit = alloca i32
-  %i = alloca i32
   %arr = alloca { i32, i32* }*
   %frame_pointer = alloca { i32 }
   %0 = call { i32, i32* }* @create_array({ i32 }* %frame_pointer)
   store { i32, i32* }* %0, { i32, i32* }** %arr
+  call void @tig_print(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @9, i32 0, i32 0))
   %arr1 = load { i32, i32* }*, { i32, i32* }** %arr
-  call void @bubble_sort({ i32 }* %frame_pointer, { i32, i32* }* %arr1)
+  call void @print_array({ i32 }* %frame_pointer, { i32, i32* }* %arr1)
+  call void @tig_print(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @10, i32 0, i32 0))
   %arr2 = load { i32, i32* }*, { i32, i32* }** %arr
-  %1 = bitcast { i32, i32* }* %arr2 to i8*
-  %2 = call i32 @tig_array_length(i8* %1)
-  %minus_tmp = sub i32 %2, 1
-  store i32 0, i32* %i
+  call void @bubble_sort({ i32 }* %frame_pointer, { i32, i32* }* %arr2)
+  call void @tig_print(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @11, i32 0, i32 0))
   %arr3 = load { i32, i32* }*, { i32, i32* }** %arr
-  %3 = bitcast { i32, i32* }* %arr3 to i8*
-  %4 = call i32 @tig_array_length(i8* %3)
-  %minus_tmp4 = sub i32 %4, 1
-  store i32 %minus_tmp4, i32* %_limit
-  br label %test
+  call void @print_array({ i32 }* %frame_pointer, { i32, i32* }* %arr3)
+  ret i32 0
 
 break_loop:                                       ; No predecessors!
   ret i32 0
+}
+
+define void @print_array({ i32 }*, { i32, i32* }*) {
+entry:
+  %_limit = alloca i32
+  %i = alloca i32
+  %arr = alloca { i32, i32* }*
+  %frame_pointer = alloca { { i32 }* }
+  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
+  store { i32 }* %0, { i32 }** %arg_address
+  store { i32, i32* }* %1, { i32, i32* }** %arr
+  call void @tig_print(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  %arr1 = load { i32, i32* }*, { i32, i32* }** %arr
+  %2 = bitcast { i32, i32* }* %arr1 to i8*
+  %3 = call i32 @tig_array_length(i8* %2)
+  %minus_tmp = sub i32 %3, 1
+  store i32 0, i32* %i
+  %arr2 = load { i32, i32* }*, { i32, i32* }** %arr
+  %4 = bitcast { i32, i32* }* %arr2 to i8*
+  %5 = call i32 @tig_array_length(i8* %4)
+  %minus_tmp3 = sub i32 %5, 1
+  store i32 %minus_tmp3, i32* %_limit
+  br label %test
 
 test:                                             ; preds = %continue, %entry
-  %_limit5 = load i32, i32* %_limit
-  %i6 = load i32, i32* %i
-  %ge_tmp = icmp sge i32 %_limit5, %i6
+  %_limit4 = load i32, i32* %_limit
+  %i5 = load i32, i32* %i
+  %ge_tmp = icmp sge i32 %_limit4, %i5
   %bool_tmp = zext i1 %ge_tmp to i32
   %cond = icmp eq i32 %bool_tmp, 1
   br i1 %cond, label %loop, label %end
 
 loop:                                             ; preds = %test
-  %arr7 = load { i32, i32* }*, { i32, i32* }** %arr
-  %i8 = load i32, i32* %i
-  %array_size_ptr = getelementptr { i32, i32* }, { i32, i32* }* %arr7, i32 0, i32 0
+  %arr6 = load { i32, i32* }*, { i32, i32* }** %arr
+  %i7 = load i32, i32* %i
+  %array_size_ptr = getelementptr { i32, i32* }, { i32, i32* }* %arr6, i32 0, i32 0
   %arr_size = load i32, i32* %array_size_ptr
-  %cond9 = icmp sge i32 %i8, %arr_size
-  br i1 %cond9, label %error, label %continue
+  %cond8 = icmp sge i32 %i7, %arr_size
+  br i1 %cond8, label %error, label %continue
 
 end:                                              ; preds = %test
-  call void @tig_print(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @6, i32 0, i32 0))
-  ret i32 0
+  call void @tig_print(i8* getelementptr inbounds ([1 x i8], [1 x i8]* @2, i32 0, i32 0))
+  call void @tig_print(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
+  ret void
 
 error:                                            ; preds = %loop
-  call void @tig_print(i8* getelementptr inbounds ([49 x i8], [49 x i8]* @5, i32 0, i32 0))
+  call void @tig_print(i8* getelementptr inbounds ([47 x i8], [47 x i8]* @1, i32 0, i32 0))
   call void @tig_exit(i32 1)
   br label %continue
 
 continue:                                         ; preds = %error, %loop
-  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %arr7, i32 0, i32 1
+  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %arr6, i32 0, i32 1
   %arr_addr = load i32*, i32** %array_pointer
-  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 %i8
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 %i7
   %arr_ele = load i32, i32* %arr_ele_addr
-  call void @tig_print_int(i32 %arr_ele)
-  %i10 = load i32, i32* %i
-  %add_tmp = add i32 %i10, 1
+  call void @print_arr_int_ele(i32 %arr_ele)
+  %i9 = load i32, i32* %i
+  %add_tmp = add i32 %i9, 1
   store i32 %add_tmp, i32* %i
   br label %test
 }
@@ -169,11 +197,11 @@ loop11:                                           ; preds = %test10
   br i1 %cond18, label %error, label %continue
 
 end12:                                            ; preds = %test10
-  %arr24 = load { i32, i32* }*, { i32, i32* }** %arr
-  ret { i32, i32* }* %arr24
+  %arr21 = load { i32, i32* }*, { i32, i32* }** %arr
+  ret { i32, i32* }* %arr21
 
 error:                                            ; preds = %loop11
-  call void @tig_print(i8* getelementptr inbounds ([47 x i8], [47 x i8]* @0, i32 0, i32 0))
+  call void @tig_print(i8* getelementptr inbounds ([48 x i8], [48 x i8]* @4, i32 0, i32 0))
   call void @tig_exit(i32 1)
   br label %continue
 
@@ -181,13 +209,11 @@ continue:                                         ; preds = %error, %loop11
   %array_addr_ptr = getelementptr { i32, i32* }, { i32, i32* }* %load_left, i32 0, i32 1
   %arr_addr = load i32*, i32** %array_addr_ptr
   %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 %i17
-  %size19 = load i32, i32* %size
-  %i20 = load i32, i32* %i7
-  %minus_tmp21 = sub i32 %size19, %i20
-  store i32 %minus_tmp21, i32* %arr_ele_addr
-  %i22 = load i32, i32* %i7
-  %add_tmp23 = add i32 %i22, 1
-  store i32 %add_tmp23, i32* %i7
+  %1 = call i32 @tig_random(i32 50)
+  store i32 %1, i32* %arr_ele_addr
+  %i19 = load i32, i32* %i7
+  %add_tmp20 = add i32 %i19, 1
+  store i32 %add_tmp20, i32* %i7
   br label %test10
 }
 
@@ -254,7 +280,7 @@ end8:                                             ; preds = %test6
   br label %test
 
 error:                                            ; preds = %loop7
-  call void @tig_print(i8* getelementptr inbounds ([49 x i8], [49 x i8]* @1, i32 0, i32 0))
+  call void @tig_print(i8* getelementptr inbounds ([48 x i8], [48 x i8]* @5, i32 0, i32 0))
   call void @tig_exit(i32 1)
   br label %continue
 
@@ -273,7 +299,7 @@ continue:                                         ; preds = %error, %loop7
   br i1 %cond22, label %error20, label %continue21
 
 error20:                                          ; preds = %continue
-  call void @tig_print(i8* getelementptr inbounds ([49 x i8], [49 x i8]* @2, i32 0, i32 0))
+  call void @tig_print(i8* getelementptr inbounds ([48 x i8], [48 x i8]* @6, i32 0, i32 0))
   call void @tig_exit(i32 1)
   br label %continue21
 
@@ -313,7 +339,7 @@ merge:                                            ; preds = %else, %continue47
   br label %test6
 
 error35:                                          ; preds = %then
-  call void @tig_print(i8* getelementptr inbounds ([49 x i8], [49 x i8]* @3, i32 0, i32 0))
+  call void @tig_print(i8* getelementptr inbounds ([48 x i8], [48 x i8]* @7, i32 0, i32 0))
   call void @tig_exit(i32 1)
   br label %continue36
 
@@ -332,7 +358,7 @@ continue36:                                       ; preds = %error35, %then
   br i1 %cond48, label %error46, label %continue47
 
 error46:                                          ; preds = %continue36
-  call void @tig_print(i8* getelementptr inbounds ([49 x i8], [49 x i8]* @4, i32 0, i32 0))
+  call void @tig_print(i8* getelementptr inbounds ([48 x i8], [48 x i8]* @8, i32 0, i32 0))
   call void @tig_exit(i32 1)
   br label %continue47
 

@@ -6,8 +6,9 @@ exception Eof
 
 let incr_linenum lexbuf =
   let pos = lexbuf.Lexing.lex_curr_p in
-    Error.line_num := !Error.line_num + 1;
-    Error.line_pos := lexbuf.Lexing.lex_start_pos :: (!(Error.line_pos))
+  Error.line_num := !Error.line_num + 1;
+  Error.line_pos := pos.Lexing.pos_cnum :: (!(Error.line_pos));
+  print_string ("pos: " ^ string_of_int(pos.Lexing.pos_cnum) ^ "\n")
 
 let str_incr_linenum str lexbuf =
   String.iter (function '\n' -> incr_linenum lexbuf

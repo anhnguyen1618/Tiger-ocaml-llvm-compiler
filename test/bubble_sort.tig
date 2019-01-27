@@ -1,11 +1,19 @@
 let
     type int_array = array of int
+    function print_array (arr: int_array) =
+        (
+            print("[");
+            for i:= 0 to array_length(arr) - 1 do print_arr_ele(arr[i]);
+            print("");
+            print("]")
+        )
+
     function create_array(): int_array = 
         let
             var size := 8 
             var arr := int_array [size] of 1
         in
-            for i := 0 to size - 1 do arr[i] := size - i;
+            for i := 0 to size - 1 do arr[i] := random(50);
             arr
         end
      function bubble_sort(arr: int_array) =
@@ -35,7 +43,10 @@ let
         end
     var arr := create_array()
 in
+    print("Before sorting");
+    print_array(arr);
+    print("==============");
     bubble_sort(arr);
-    for i:= 0 to array_length(arr) - 1 do printInt(arr[i]);
-    print("something")
+    print("After sorting");
+    print_array(arr)
 end

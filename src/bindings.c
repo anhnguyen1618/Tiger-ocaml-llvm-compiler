@@ -1,11 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
+int yield_seed = 0;
 
 extern void tig_print(const char *s)
 {
    puts(s);
 }
+
+extern int tig_random(const int upper)
+{
+  /* Intializes random number generator */
+  if(yield_seed == 0) {
+    srand(time(NULL));
+    yield_seed = 1;
+  }
+
+  return rand() % upper;
+}
+
 
 extern void tig_print_int(const int i)
 {
@@ -46,6 +61,11 @@ extern int tig_nillable(const char *s)
 extern int tig_array_length(const char *s)
 {
   return s[0];
+}
+
+extern void print_arr_int_ele(const int s)
+{
+  printf("%d, ", s);
 }
 
 extern int tig_size(const char *s)

@@ -2,4 +2,4 @@
 
 cd ../ && \
 
-make -f Makefile parse f=$1
+python test.py -s $1

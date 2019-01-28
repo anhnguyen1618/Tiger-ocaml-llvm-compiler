@@ -3,10 +3,17 @@ open Lexing
 open Lexer
 open Error
 
+let get_error_context lexbuf =
+  let rec range a b result = if b >= a then range a (b-1) (b::result) else result in
+  let indexes = range 0 5 [] in
+  let context = List.map (fun i -> i |> Lexing.lexeme_char lexbuf |> Printf.sprintf "%c") indexes |> String.concat "" in
+  context
+  
 let print_position lexbuf =
   let pos = lexbuf.Lexing.lex_curr_p in
-  print_string (Printf.sprintf "Syntax error %C at: %s:%d:%d" (Lexing.lexeme_char lexbuf 0) pos.pos_fname
-  pos.Lexing.pos_lnum (pos.pos_cnum - pos.pos_bol + 1))
+  let error_context = get_error_context lexbuf in
+  let error_message = Printf.sprintf "Syntax error %C at '%s'\n" (Lexing.lexeme_char lexbuf 5) error_context in
+  Error.error pos.pos_cnum error_message
 
 let display_ast lexbuf =
   try

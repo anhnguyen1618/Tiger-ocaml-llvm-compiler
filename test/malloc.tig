@@ -4,7 +4,7 @@ let
 	type arr = array of rec
 	var arr := arr [2] of a
 
-	function add (): arr =
+	function create_rec (): arr =
 		 let
 			var another_rec := rec {a = 6}
 		 in
@@ -12,8 +12,14 @@ let
 			arr
 		 end
 
-	var b := add()
+	var b := create_rec ()
 in
 	printInt (arr[0].a);
-	printInt (b[1].a)
+	assert_equal_int("malloc.tig", arr[0].a, 5);
+	
+	printInt (b[1].a);
+	assert_equal_int("malloc.tig", b[1].a, 6);
+
+	arr[1].a := 5;
+	assert_equal_int("malloc.tig", b[1].a, 5)
 end

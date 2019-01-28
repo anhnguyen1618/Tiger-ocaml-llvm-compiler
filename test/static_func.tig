@@ -12,14 +12,23 @@ let
 				 printInt(b);
 				 printInt(c);
 				 printInt(d);
-				 rec.label := "nha ba thin";
+				 rec.label := "foo bar";
 				 rec.result := a + b + c + d + e + arr1[4]
 				 )
 		 in
 			g(4)
 		 end
+	
+	function assert_string(actual: string, expected: string) =
+		assert_equal_string("static_func.tig", actual, expected)
+	
+	function assert_int(actual: int, expected: int) = 
+		assert_equal_int("static_func.tig", actual, expected)
 in
 	f(1,2,3,4);
 	printInt(rec.result);
-	print(rec.label)
+	print(rec.label);
+
+	assert_int(rec.result, 28);
+	assert_string(rec.label, "foo bar")
 end

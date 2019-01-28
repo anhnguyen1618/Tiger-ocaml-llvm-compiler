@@ -2,6 +2,9 @@
 source_filename = "Tiger jit"
 
 @0 = private unnamed_addr constant [12 x i8] c"hello world\00"
+@1 = private unnamed_addr constant [8 x i8] c"nil.tig\00"
+@2 = private unnamed_addr constant [8 x i8] c"nil.tig\00"
+@3 = private unnamed_addr constant [12 x i8] c"hello world\00"
 
 declare void @tig_print_int(i32)
 
@@ -41,6 +44,10 @@ declare i8* @tig_concat(i8*, i8*)
 
 declare i32 @tig_not(i32)
 
+declare void @assert_equal_int(i8*, i32, i32)
+
+declare void @assert_equal_string(i8*, i8*, i8*)
+
 define i32 @main() {
 entry:
   %b = alloca { i8* }*
@@ -57,14 +64,26 @@ entry:
   %field_var = load i8*, i8** %element
   call void @tig_print(i8* %field_var)
   %b2 = load { i8* }*, { i8* }** %b
-  %0 = bitcast { i8* }* %b2 to i8*
+  %element3 = getelementptr { i8* }, { i8* }* %b2, i32 0, i32 0
+  %field_var4 = load i8*, i8** %element3
+  call void @assert_string({ i32 }* %frame_pointer, i8* %field_var4, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @3, i32 0, i32 0))
+  %b5 = load { i8* }*, { i8* }** %b
+  %0 = bitcast { i8* }* %b5 to i8*
   %1 = call i32 @tig_nillable(i8* %0)
   call void @tig_print_int(i32 %1)
-  store { i8* }* null, { i8* }** %b
-  %b3 = load { i8* }*, { i8* }** %b
-  %2 = bitcast { i8* }* %b3 to i8*
+  %b6 = load { i8* }*, { i8* }** %b
+  %2 = bitcast { i8* }* %b6 to i8*
   %3 = call i32 @tig_nillable(i8* %2)
-  call void @tig_print_int(i32 %3)
+  call void @assert_int({ i32 }* %frame_pointer, i32 %3, i32 0)
+  store { i8* }* null, { i8* }** %b
+  %b7 = load { i8* }*, { i8* }** %b
+  %4 = bitcast { i8* }* %b7 to i8*
+  %5 = call i32 @tig_nillable(i8* %4)
+  call void @tig_print_int(i32 %5)
+  %b8 = load { i8* }*, { i8* }** %b
+  %6 = bitcast { i8* }* %b8 to i8*
+  %7 = call i32 @tig_nillable(i8* %6)
+  call void @assert_int({ i32 }* %frame_pointer, i32 %7, i32 1)
   ret i32 0
 
 break_loop:                                       ; No predecessors!
@@ -72,3 +91,33 @@ break_loop:                                       ; No predecessors!
 }
 
 declare noalias i8* @malloc(i32)
+
+define void @assert_string({ i32 }*, i8*, i8*) {
+entry:
+  %expected = alloca i8*
+  %actual = alloca i8*
+  %frame_pointer = alloca { { i32 }* }
+  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
+  store { i32 }* %0, { i32 }** %arg_address
+  store i8* %1, i8** %actual
+  store i8* %2, i8** %expected
+  %actual1 = load i8*, i8** %actual
+  %expected2 = load i8*, i8** %expected
+  call void @assert_equal_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @1, i32 0, i32 0), i8* %actual1, i8* %expected2)
+  ret void
+}
+
+define void @assert_int({ i32 }*, i32, i32) {
+entry:
+  %expected = alloca i32
+  %actual = alloca i32
+  %frame_pointer = alloca { { i32 }* }
+  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
+  store { i32 }* %0, { i32 }** %arg_address
+  store i32 %1, i32* %actual
+  store i32 %2, i32* %expected
+  %actual1 = load i32, i32* %actual
+  %expected2 = load i32, i32* %expected
+  call void @assert_equal_int(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @2, i32 0, i32 0), i32 %actual1, i32 %expected2)
+  ret void
+}

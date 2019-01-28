@@ -51,7 +51,15 @@ let external_functions = [
       ("substring", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_substring"; formals=[T.STRING; T.INT; T.INT]; result=T.STRING}));
       ("str_concat", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_concat"; formals=[T.STRING; T.STRING]; result=T.STRING}));
       ("not", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_not"; formals=[T.INT]; result=T.INT}));
-      ("exit", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_exit"; formals=[T.INT]; result=T.NIL}))
+      ("exit", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_exit"; formals=[T.INT]; result=T.NIL}));
+      ("assert_equal_int", FunEntry ({
+                                 level=Translate.outermost;
+                                 label=Temp.namedlabel "assert_equal_int";
+                                 formals=[T.STRING; T.INT; T.INT]; result=T.NIL}));
+      ("assert_equal_string", FunEntry ({
+                                 level=Translate.outermost;
+                                 label=Temp.namedlabel "assert_equal_string";
+                                 formals=[T.STRING; T.STRING; T.STRING]; result=T.NIL}));
     ] 
 
 let base_tenv =

@@ -2,9 +2,20 @@ let
 	type tree = {result: string}
 	var a: tree := nil
 	var b := tree {result = "hello world"}
+
+	function assert_string(actual: string, expected: string) =
+		assert_equal_string("nil.tig", actual, expected)
+	
+	function assert_int(actual: int, expected: int) = 
+		assert_equal_int("nil.tig", actual, expected)
 in
 	print(b.result);
-		printInt(is_nil(b));
+	assert_string(b.result, "hello world");
+
+	printInt(is_nil(b));
+	assert_int(is_nil(b), 0);
+
 	b := nil;
-	printInt(is_nil(b))
+	printInt(is_nil(b));
+	assert_int(is_nil(b), 1)
 end

@@ -1,16 +1,20 @@
 let
 	var a := 5
 in
-	a := if a = 5 then (
-	let
-	var b := 6
-	in
-	b		
-	end) else (
-	let
-	var c := 7
-	in
-	c		
-	end);
-	printInt(a)
+	a := if a = 6 
+	then (
+		let
+			var b := 6
+		in
+			b		
+		end
+	) else (
+		let
+			var a := 7
+		in
+			-8		
+		end
+	);
+	printInt(a);
+	assert_equal_int("nested_dec.tig", a, -8)
 end

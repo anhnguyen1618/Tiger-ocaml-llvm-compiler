@@ -1,17 +1,23 @@
 let
 	var a:= 5
-	type myint = int	
-	type arrtype = array of myint
+	type arr_type = array of int
 	var x := 7
-	var arr1:arrtype := arrtype [x] of 4
-	function x (): int =
+	var arr := arr_type [x] of 4
+
+	function nested_function (d: int): int =
 		 let
 			var b := 6
-			function f (): int = (printInt(a + b + arr1[2]); 4)
+			function f (): int = a + b + arr[2] + d
 		 in
-			arr1[2] := 7;
+			arr[2] := 7;
 			f()
 		 end
+	
+	function assert_int(actual: int, expected: int) = 
+		assert_equal_int("staticlink.tig", actual, expected)
 in
-	x()
+	assert_int(nested_function(0), 18);
+	assert_int(nested_function(-5), 13);
+	assert_int(nested_function(-18), 0);
+	print ("staticlink.tig: Passed!")
 end

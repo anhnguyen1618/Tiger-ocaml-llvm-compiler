@@ -1,6 +1,11 @@
 ; ModuleID = 'Tiger jit'
 source_filename = "Tiger jit"
 
+@0 = private unnamed_addr constant [19 x i8] c"Test file: fig.tig\00"
+@1 = private unnamed_addr constant [7 x i8] c"Expect\00"
+@2 = private unnamed_addr constant [9 x i8] c"To equal\00"
+@3 = private unnamed_addr constant [17 x i8] c"fib.tig: Passed!\00"
+
 declare void @tig_print_int(i32)
 
 declare void @tig_print(i8*)
@@ -41,10 +46,33 @@ declare i32 @tig_not(i32)
 
 define i32 @main() {
 entry:
+  %fib30 = alloca i32
+  %fib14 = alloca i32
+  %fib5 = alloca i32
+  %fib1 = alloca i32
+  %fib0 = alloca i32
   %frame_pointer = alloca { i32 }
-  %0 = call i32 @fib({ i32 }* %frame_pointer, i32 30)
-  call void @tig_print_int(i32 %0)
-  call void @a({ i32 }* %frame_pointer)
+  %0 = call i32 @fib({ i32 }* %frame_pointer, i32 0)
+  store i32 %0, i32* %fib0
+  %1 = call i32 @fib({ i32 }* %frame_pointer, i32 1)
+  store i32 %1, i32* %fib1
+  %2 = call i32 @fib({ i32 }* %frame_pointer, i32 5)
+  store i32 %2, i32* %fib5
+  %3 = call i32 @fib({ i32 }* %frame_pointer, i32 14)
+  store i32 %3, i32* %fib14
+  %4 = call i32 @fib({ i32 }* %frame_pointer, i32 30)
+  store i32 %4, i32* %fib30
+  %fib01 = load i32, i32* %fib0
+  call void @assert_int({ i32 }* %frame_pointer, i32 %fib01, i32 0)
+  %fib12 = load i32, i32* %fib1
+  call void @assert_int({ i32 }* %frame_pointer, i32 %fib12, i32 1)
+  %fib53 = load i32, i32* %fib5
+  call void @assert_int({ i32 }* %frame_pointer, i32 %fib53, i32 9)
+  %fib144 = load i32, i32* %fib14
+  call void @assert_int({ i32 }* %frame_pointer, i32 %fib144, i32 377)
+  %fib305 = load i32, i32* %fib30
+  call void @assert_int({ i32 }* %frame_pointer, i32 %fib305, i32 832040)
+  call void @tig_print(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @3, i32 0, i32 0))
   ret i32 0
 
 break_loop:                                       ; No predecessors!
@@ -112,10 +140,44 @@ merge5:                                           ; preds = %else4, %then3
   br label %merge
 }
 
-define void @a({ i32 }*) {
+define void @assert_int({ i32 }*, i32, i32) {
 entry:
+  %if_result_addr = alloca i32
+  %expected = alloca i32
+  %actual = alloca i32
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
   store { i32 }* %0, { i32 }** %arg_address
+  store i32 %1, i32* %actual
+  store i32 %2, i32* %expected
+  br label %test
+
+test:                                             ; preds = %entry
+  %actual1 = load i32, i32* %actual
+  %expected2 = load i32, i32* %expected
+  %eq_tmp = icmp eq i32 %actual1, %expected2
+  %bool_tmp = zext i1 %eq_tmp to i32
+  %3 = call i32 @tig_not(i32 %bool_tmp)
+  %cond = icmp eq i32 %3, 1
+  br i1 %cond, label %then, label %else
+
+then:                                             ; preds = %test
+  call void @tig_print(i8* getelementptr inbounds ([19 x i8], [19 x i8]* @0, i32 0, i32 0))
+  call void @tig_print(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @1, i32 0, i32 0))
+  %actual3 = load i32, i32* %actual
+  call void @tig_print_int(i32 %actual3)
+  call void @tig_print(i8* getelementptr inbounds ([9 x i8], [9 x i8]* @2, i32 0, i32 0))
+  %expected4 = load i32, i32* %expected
+  call void @tig_print_int(i32 %expected4)
+  call void @tig_exit(i32 1)
+  store i32 0, i32* %if_result_addr
+  br label %merge
+
+else:                                             ; preds = %test
+  store i32 0, i32* %if_result_addr
+  br label %merge
+
+merge:                                            ; preds = %else, %then
+  %if_result = load i32, i32* %if_result_addr
   ret void
 }

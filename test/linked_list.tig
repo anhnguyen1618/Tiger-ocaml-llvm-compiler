@@ -1,10 +1,14 @@
 let
     type node = {data: int, next: node}
-    var k:node := nil
+
     var a := node {data = 3, next = nil}
     var b := node {data = 2, next = nil}
     var c := node {data = 1, next = b}
-    var current_node := c    
+    var current_node := c
+    var index := 1    
+
+    function assert_int(actual: int, expected: int) = 
+		assert_equal_int("linked_list.tig", actual, expected)
 in
     b.next := a;
     printInt(is_nil(current_node));
@@ -12,7 +16,10 @@ in
     do
         (
             printInt(current_node.data);
-            current_node := current_node.next
+            assert_int(current_node.data, index);
+            current_node := current_node.next;
+            index := index +1
         );
-    print("end program")
+    print("end program");
+    assert_int(index, 4)
 end

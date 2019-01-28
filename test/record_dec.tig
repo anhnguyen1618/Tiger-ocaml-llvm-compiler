@@ -1,6 +1,0 @@
-let
-	type rec = {result : string}
-	var a := rec {result = "hello world"}
-in
-	a
-end

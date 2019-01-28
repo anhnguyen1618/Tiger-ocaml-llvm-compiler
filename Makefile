@@ -21,6 +21,6 @@ test: test.native
 	llc llvm_byte_code/test/$(f)-opt.ll
 
 	echo "================= LINKING ============================\n"
-	clang llvm_byte_code/test/$(f).s src/bindings.c -o run_prog
+	clang llvm_byte_code/test/$(f)-opt.s src/bindings.c -o run_prog
 
 .PHONY: test default

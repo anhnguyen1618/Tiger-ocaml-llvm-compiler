@@ -1,5 +1,0 @@
-let
-  function fib (): int = if 5 > 3 then 5 else 0
-in
-  fib ()
-end

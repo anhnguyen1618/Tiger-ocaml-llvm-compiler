@@ -20,5 +20,7 @@ in
     b.right := c;
     e.left := d;
     e.right := f;
-    printInt(eval_sum (root))
+
+    printInt(eval_sum (root));
+    assert_equal_int("binary_tree.tig", eval_sum(root), 34)
 end

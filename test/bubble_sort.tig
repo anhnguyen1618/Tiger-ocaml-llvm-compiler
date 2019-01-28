@@ -42,11 +42,39 @@ let
                 end
         end
     var arr := create_array()
+
+    /* This is for testing */
+    function create_array_test(): int_array = 
+        let
+            var size := 5 
+            var arr := int_array [size] of 1
+        in
+            for i := 0 to size - 1 do arr[i] := size-i-1;
+            arr
+        end
+    function assert_int(actual: int, expected: int) = 
+		assert_equal_int("bubble_sort.tig", actual, expected)
+    var arr_test := create_array_test()
 in
     print("Before sorting");
     print_array(arr);
     print("==============");
     bubble_sort(arr);
     print("After sorting");
-    print_array(arr)
+    print_array(arr);
+
+    /* Testing start here */
+    assert_int(arr_test[0], 4);
+    assert_int(arr_test[1], 3);
+    assert_int(arr_test[2], 2);
+    assert_int(arr_test[3], 1);
+    assert_int(arr_test[4], 0);
+
+    bubble_sort(arr_test);
+
+    assert_int(arr_test[0], 0);
+    assert_int(arr_test[1], 1);
+    assert_int(arr_test[2], 2);
+    assert_int(arr_test[3], 3);
+    assert_int(arr_test[4], 4)
 end

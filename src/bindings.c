@@ -4,6 +4,8 @@
 #include <time.h>
 
 int yield_seed = 0;
+#define Color_Red "\x1b[31m"
+#define Color_end "\x1b[0m"
 
 extern void tig_print(const char *s)
 {
@@ -131,4 +133,24 @@ extern int *tig_init_record (int size)
   int i;
   int *a = (int *)malloc(size*sizeof(int));
   return a;
+}
+
+extern void assert_equal_int(const char *fileName, const int actual, const int expected)
+{
+  if (actual != expected) {
+    printf("Test file: %s\n", fileName);
+    printf("Expect %d to be %d\n", actual, expected);
+    printf("%s%s%s", Color_Red, "===> Test failed!\n", Color_end);
+    exit(1);
+  }
+}
+
+extern void assert_equal_string(const char *fileName, const char *actual, const char *expected)
+{
+  if (tig_string_cmp(actual, expected) == 0) {
+    printf("Test file: %s\n", fileName);
+    printf("Expect \"%s\" to be \"%s\"\n", actual, expected);
+    printf("%s%s%s", Color_Red, "===> Test failed!\n", Color_end);
+    exit(1);
+  }
 }

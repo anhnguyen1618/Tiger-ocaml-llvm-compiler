@@ -39,6 +39,10 @@ declare i8* @tig_concat(i8*, i8*)
 
 declare i32 @tig_not(i32)
 
+declare void @assert_equal_int(i8*, i32, i32)
+
+declare void @assert_equal_string(i8*, i8*, i8*)
+
 define i32 @main() {
 entry:
   %frame_pointer = alloca { i32 }
@@ -47,71 +51,51 @@ break_loop:                                       ; No predecessors!
   ret i32 0
 }
 
-define i32 @fib({ i32 }*, i32) {
+define i32 @eval_sum({ i32 }*, { i32, i8*, i8* }*) {
 entry:
-  %if_result_addr15 = alloca i32
   %if_result_addr = alloca i32
-  %n = alloca i32
+  %root = alloca { i32, i8*, i8* }*
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
   store { i32 }* %0, { i32 }** %arg_address
-  store i32 %1, i32* %n
+  store { i32, i8*, i8* }* %1, { i32, i8*, i8* }** %root
   br label %test
 
 test:                                             ; preds = %entry
-  %n1 = load i32, i32* %n
-  %eq_tmp = icmp eq i32 %n1, 0
-  %bool_tmp = zext i1 %eq_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
+  %root1 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root
+  %2 = bitcast { i32, i8*, i8* }* %root1 to i8*
+  %3 = call i32 @tig_nillable(i8* %2)
+  %cond = icmp eq i32 %3, 1
   br i1 %cond, label %then, label %else
 
 then:                                             ; preds = %test
-  store i32 0, i32* %if_result_addr15
+  store i32 0, i32* %if_result_addr
   br label %merge
 
 else:                                             ; preds = %test
-  br label %test2
-
-merge:                                            ; preds = %merge5, %then
-  %if_result16 = load i32, i32* %if_result_addr15
-  ret i32 %if_result16
-
-test2:                                            ; preds = %else
-  %n6 = load i32, i32* %n
-  %eq_tmp7 = icmp eq i32 %n6, 1
-  %bool_tmp8 = zext i1 %eq_tmp7 to i32
-  %cond9 = icmp eq i32 %bool_tmp8, 1
-  br i1 %cond9, label %then3, label %else4
-
-then3:                                            ; preds = %test2
-  store i32 1, i32* %if_result_addr
-  br label %merge5
-
-else4:                                            ; preds = %test2
-  %n10 = load i32, i32* %n
-  %minus_tmp = sub i32 %n10, 1
+  %root2 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root
+  %element = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %root2, i32 0, i32 0
+  %field_var = load i32, i32* %element
+  %root3 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root
+  %element4 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %root3, i32 0, i32 1
+  %field_var5 = load i8*, i8** %element4
+  %4 = bitcast i8* %field_var5 to { i32, i8*, i8* }*
   %fp_addr_in_sl = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
   %fp_addr = load { i32 }*, { i32 }** %fp_addr_in_sl
-  %2 = call i32 @fib({ i32 }* %fp_addr, i32 %minus_tmp)
-  %n11 = load i32, i32* %n
-  %minus_tmp12 = sub i32 %n11, 2
-  %fp_addr_in_sl13 = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr14 = load { i32 }*, { i32 }** %fp_addr_in_sl13
-  %3 = call i32 @fib({ i32 }* %fp_addr14, i32 %minus_tmp12)
-  %add_tmp = add i32 %2, %3
-  store i32 %add_tmp, i32* %if_result_addr
-  br label %merge5
-
-merge5:                                           ; preds = %else4, %then3
-  %if_result = load i32, i32* %if_result_addr
-  store i32 %if_result, i32* %if_result_addr15
+  %5 = call i32 @eval_sum({ i32 }* %fp_addr, { i32, i8*, i8* }* %4)
+  %add_tmp = add i32 %field_var, %5
+  %root6 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root
+  %element7 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %root6, i32 0, i32 2
+  %field_var8 = load i8*, i8** %element7
+  %6 = bitcast i8* %field_var8 to { i32, i8*, i8* }*
+  %fp_addr_in_sl9 = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr10 = load { i32 }*, { i32 }** %fp_addr_in_sl9
+  %7 = call i32 @eval_sum({ i32 }* %fp_addr10, { i32, i8*, i8* }* %6)
+  %add_tmp11 = add i32 %add_tmp, %7
+  store i32 %add_tmp11, i32* %if_result_addr
   br label %merge
-}
 
-define void @a({ i32 }*) {
-entry:
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
-  ret void
+merge:                                            ; preds = %else, %then
+  %if_result = load i32, i32* %if_result_addr
+  ret i32 %if_result
 }

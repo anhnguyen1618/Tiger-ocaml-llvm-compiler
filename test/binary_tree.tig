@@ -22,5 +22,5 @@ in
     e.right := f;
 
     printInt(eval_sum (root));
-    assert_equal_int("binary_tree.tig", eval_sum(root), 34)
+    assert_int(eval_sum(root), 34)
 end

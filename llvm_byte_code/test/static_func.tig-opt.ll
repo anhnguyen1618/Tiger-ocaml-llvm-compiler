@@ -3,8 +3,7 @@ source_filename = "Tiger jit"
 
 @0 = private unnamed_addr constant [12 x i8] c"hello world\00"
 @1 = private unnamed_addr constant [48 x i8] c"test/static_func.tig::16.43: Array out of bound\00"
-@2 = private unnamed_addr constant [16 x i8] c"static_func.tig\00"
-@3 = private unnamed_addr constant [8 x i8] c"foo bar\00"
+@2 = private unnamed_addr constant [8 x i8] c"foo bar\00"
 
 declare void @tig_print_int(i32) local_unnamed_addr
 
@@ -12,9 +11,9 @@ declare void @tig_print(i8*) local_unnamed_addr
 
 declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr
 
-declare void @assert_equal_int(i8*, i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr
 
-declare void @assert_equal_string(i8*, i8*, i8*) local_unnamed_addr
+declare void @assert_equal_string(i8*, i8*) local_unnamed_addr
 
 define i32 @main() local_unnamed_addr {
 entry:
@@ -68,12 +67,12 @@ end:                                              ; preds = %test
   %rec15 = load { i32, i8* }*, { i32, i8* }** %rec14
   %element16 = getelementptr { i32, i8* }, { i32, i8* }* %rec15, i32 0, i32 0
   %field_var17 = load i32, i32* %element16
-  call void @assert_int({ i32, { i32, i32* }*, { i32, i8* }* }* %frame_pointer, i32 %field_var17, i32 28)
+  call void @assert_equal_int(i32 %field_var17, i32 28)
   %rec18 = getelementptr { i32, { i32, i32* }*, { i32, i8* }* }, { i32, { i32, i32* }*, { i32, i8* }* }* %frame_pointer, i32 0, i32 2
   %rec19 = load { i32, i8* }*, { i32, i8* }** %rec18
   %element20 = getelementptr { i32, i8* }, { i32, i8* }* %rec19, i32 0, i32 1
   %field_var21 = load i8*, i8** %element20
-  call void @assert_string({ i32, { i32, i32* }*, { i32, i8* }* }* %frame_pointer, i8* %field_var21, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @3, i32 0, i32 0))
+  call void @assert_equal_string(i8* %field_var21, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @2, i32 0, i32 0))
   ret i32 0
 }
 
@@ -93,24 +92,6 @@ entry:
   %var_dec = getelementptr { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }, { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }* %frame_pointer, i32 0, i32 1
   store i32 7, i32* %var_dec
   call void @g({ { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }* %frame_pointer, i32 4)
-  ret void
-}
-
-define void @assert_string({ i32, { i32, i32* }*, { i32, i8* }* }*, i8*, i8*) local_unnamed_addr {
-entry:
-  %frame_pointer = alloca { { i32, { i32, i32* }*, { i32, i8* }* }* }
-  %arg_address = getelementptr { { i32, { i32, i32* }*, { i32, i8* }* }* }, { { i32, { i32, i32* }*, { i32, i8* }* }* }* %frame_pointer, i32 0, i32 0
-  store { i32, { i32, i32* }*, { i32, i8* }* }* %0, { i32, { i32, i32* }*, { i32, i8* }* }** %arg_address
-  call void @assert_equal_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @2, i32 0, i32 0), i8* %1, i8* %2)
-  ret void
-}
-
-define void @assert_int({ i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32) local_unnamed_addr {
-entry:
-  %frame_pointer = alloca { { i32, { i32, i32* }*, { i32, i8* }* }* }
-  %arg_address = getelementptr { { i32, { i32, i32* }*, { i32, i8* }* }* }, { { i32, { i32, i32* }*, { i32, i8* }* }* }* %frame_pointer, i32 0, i32 0
-  store { i32, { i32, i32* }*, { i32, i8* }* }* %0, { i32, { i32, i32* }*, { i32, i8* }* }** %arg_address
-  call void @assert_equal_int(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @2, i32 0, i32 0), i32 %1, i32 %2)
   ret void
 }
 
@@ -142,7 +123,7 @@ entry:
   %rec = getelementptr { i32, { i32, i32* }*, { i32, i8* }* }, { i32, { i32, i32* }*, { i32, i8* }* }* %fp_addr12, i32 0, i32 2
   %load_left = load { i32, i8* }*, { i32, i8* }** %rec
   %element_left = getelementptr { i32, i8* }, { i32, i8* }* %load_left, i32 0, i32 1
-  store i8* getelementptr inbounds ([8 x i8], [8 x i8]* @3, i32 0, i32 0), i8** %element_left
+  store i8* getelementptr inbounds ([8 x i8], [8 x i8]* @2, i32 0, i32 0), i8** %element_left
   %fp_addr_in_sl13 = getelementptr { { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }* }, { { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }* }* %frame_pointer, i32 0, i32 0
   %fp_addr14 = load { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }*, { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }** %fp_addr_in_sl13
   %fp_addr_in_sl15 = getelementptr { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }, { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }* %fp_addr14, i32 0, i32 0

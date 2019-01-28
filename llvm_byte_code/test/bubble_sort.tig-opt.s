@@ -44,46 +44,41 @@ main:                                   # @main
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movl	(%rax), %esi
-	movl	$4, %edx
-	movq	%r14, %rdi
-	callq	assert_int
+	movl	(%rax), %edi
+	movl	$4, %esi
+	callq	assert_equal_int
 	movl	$1, %esi
 	movl	$.L__unnamed_5, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movl	4(%rax), %esi
-	movl	$3, %edx
-	movq	%r14, %rdi
-	callq	assert_int
+	movl	4(%rax), %edi
+	movl	$3, %esi
+	callq	assert_equal_int
 	movl	$2, %esi
 	movl	$.L__unnamed_6, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movl	8(%rax), %esi
-	movl	$2, %edx
-	movq	%r14, %rdi
-	callq	assert_int
+	movl	8(%rax), %edi
+	movl	$2, %esi
+	callq	assert_equal_int
 	movl	$3, %esi
 	movl	$.L__unnamed_7, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movl	12(%rax), %esi
-	movl	$1, %edx
-	movq	%r14, %rdi
-	callq	assert_int
+	movl	12(%rax), %edi
+	movl	$1, %esi
+	callq	assert_equal_int
 	movl	$4, %esi
 	movl	$.L__unnamed_8, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movl	16(%rax), %esi
-	xorl	%edx, %edx
-	movq	%r14, %rdi
-	callq	assert_int
+	movl	16(%rax), %edi
+	xorl	%esi, %esi
+	callq	assert_equal_int
 	movq	%r14, %rdi
 	movq	%rbx, %rsi
 	callq	bubble_sort
@@ -92,46 +87,41 @@ main:                                   # @main
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movl	(%rax), %esi
-	xorl	%edx, %edx
-	movq	%r14, %rdi
-	callq	assert_int
+	movl	(%rax), %edi
+	xorl	%esi, %esi
+	callq	assert_equal_int
 	movl	$1, %esi
 	movl	$.L__unnamed_10, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movl	4(%rax), %esi
-	movl	$1, %edx
-	movq	%r14, %rdi
-	callq	assert_int
+	movl	4(%rax), %edi
+	movl	$1, %esi
+	callq	assert_equal_int
 	movl	$2, %esi
 	movl	$.L__unnamed_11, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movl	8(%rax), %esi
-	movl	$2, %edx
-	movq	%r14, %rdi
-	callq	assert_int
+	movl	8(%rax), %edi
+	movl	$2, %esi
+	callq	assert_equal_int
 	movl	$3, %esi
 	movl	$.L__unnamed_12, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movl	12(%rax), %esi
-	movl	$3, %edx
-	movq	%r14, %rdi
-	callq	assert_int
+	movl	12(%rax), %edi
+	movl	$3, %esi
+	callq	assert_equal_int
 	movl	$4, %esi
 	movl	$.L__unnamed_13, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movl	16(%rax), %esi
-	movl	$4, %edx
-	movq	%r14, %rdi
-	callq	assert_int
+	movl	16(%rax), %edi
+	movl	$4, %esi
+	callq	assert_equal_int
 	xorl	%eax, %eax
 	addq	$16, %rsp
 	popq	%rbx
@@ -441,23 +431,6 @@ create_array_test:                      # @create_array_test
 	.size	create_array_test, .Lfunc_end4-create_array_test
 	.cfi_endproc
                                         # -- End function
-	.globl	assert_int              # -- Begin function assert_int
-	.p2align	4, 0x90
-	.type	assert_int,@function
-assert_int:                             # @assert_int
-	.cfi_startproc
-# %bb.0:                                # %entry
-	pushq	%rax
-	.cfi_def_cfa_offset 16
-	movq	%rdi, (%rsp)
-	movl	$.L__unnamed_24, %edi
-	callq	assert_equal_int
-	popq	%rax
-	retq
-.Lfunc_end5:
-	.size	assert_int, .Lfunc_end5-assert_int
-	.cfi_endproc
-                                        # -- End function
 	.type	.L__unnamed_14,@object  # @0
 	.section	.rodata.str1.1,"aMS",@progbits,1
 .L__unnamed_14:
@@ -519,86 +492,81 @@ assert_int:                             # @assert_int
 	.asciz	"test/bubble_sort.tig::52.41: Array out of bound"
 	.size	.L__unnamed_23, 48
 
-	.type	.L__unnamed_24,@object  # @10
+	.type	.L__unnamed_1,@object   # @10
 	.section	.rodata.str1.1,"aMS",@progbits,1
-.L__unnamed_24:
-	.asciz	"bubble_sort.tig"
-	.size	.L__unnamed_24, 16
-
-	.type	.L__unnamed_1,@object   # @11
 .L__unnamed_1:
 	.asciz	"Before sorting"
 	.size	.L__unnamed_1, 15
 
-	.type	.L__unnamed_2,@object   # @12
+	.type	.L__unnamed_2,@object   # @11
 .L__unnamed_2:
 	.asciz	"=============="
 	.size	.L__unnamed_2, 15
 
-	.type	.L__unnamed_3,@object   # @13
+	.type	.L__unnamed_3,@object   # @12
 .L__unnamed_3:
 	.asciz	"After sorting"
 	.size	.L__unnamed_3, 14
 
-	.type	.L__unnamed_4,@object   # @14
+	.type	.L__unnamed_4,@object   # @13
 	.section	.rodata.str1.16,"aMS",@progbits,1
 	.p2align	4
 .L__unnamed_4:
-	.asciz	"test/bubble_sort.tig::67.23: Array out of bound"
+	.asciz	"test/bubble_sort.tig::65.23: Array out of bound"
 	.size	.L__unnamed_4, 48
 
-	.type	.L__unnamed_5,@object   # @15
+	.type	.L__unnamed_5,@object   # @14
 	.p2align	4
 .L__unnamed_5:
-	.asciz	"test/bubble_sort.tig::68.23: Array out of bound"
+	.asciz	"test/bubble_sort.tig::66.23: Array out of bound"
 	.size	.L__unnamed_5, 48
 
-	.type	.L__unnamed_6,@object   # @16
+	.type	.L__unnamed_6,@object   # @15
 	.p2align	4
 .L__unnamed_6:
-	.asciz	"test/bubble_sort.tig::69.23: Array out of bound"
+	.asciz	"test/bubble_sort.tig::67.23: Array out of bound"
 	.size	.L__unnamed_6, 48
 
-	.type	.L__unnamed_7,@object   # @17
+	.type	.L__unnamed_7,@object   # @16
 	.p2align	4
 .L__unnamed_7:
-	.asciz	"test/bubble_sort.tig::70.23: Array out of bound"
+	.asciz	"test/bubble_sort.tig::68.23: Array out of bound"
 	.size	.L__unnamed_7, 48
 
-	.type	.L__unnamed_8,@object   # @18
+	.type	.L__unnamed_8,@object   # @17
 	.p2align	4
 .L__unnamed_8:
-	.asciz	"test/bubble_sort.tig::71.23: Array out of bound"
+	.asciz	"test/bubble_sort.tig::69.23: Array out of bound"
 	.size	.L__unnamed_8, 48
 
-	.type	.L__unnamed_9,@object   # @19
+	.type	.L__unnamed_9,@object   # @18
 	.p2align	4
 .L__unnamed_9:
-	.asciz	"test/bubble_sort.tig::75.23: Array out of bound"
+	.asciz	"test/bubble_sort.tig::73.23: Array out of bound"
 	.size	.L__unnamed_9, 48
 
-	.type	.L__unnamed_10,@object  # @20
+	.type	.L__unnamed_10,@object  # @19
 	.p2align	4
 .L__unnamed_10:
-	.asciz	"test/bubble_sort.tig::76.23: Array out of bound"
+	.asciz	"test/bubble_sort.tig::74.23: Array out of bound"
 	.size	.L__unnamed_10, 48
 
-	.type	.L__unnamed_11,@object  # @21
+	.type	.L__unnamed_11,@object  # @20
 	.p2align	4
 .L__unnamed_11:
-	.asciz	"test/bubble_sort.tig::77.23: Array out of bound"
+	.asciz	"test/bubble_sort.tig::75.23: Array out of bound"
 	.size	.L__unnamed_11, 48
 
-	.type	.L__unnamed_12,@object  # @22
+	.type	.L__unnamed_12,@object  # @21
 	.p2align	4
 .L__unnamed_12:
-	.asciz	"test/bubble_sort.tig::78.23: Array out of bound"
+	.asciz	"test/bubble_sort.tig::76.23: Array out of bound"
 	.size	.L__unnamed_12, 48
 
-	.type	.L__unnamed_13,@object  # @23
+	.type	.L__unnamed_13,@object  # @22
 	.p2align	4
 .L__unnamed_13:
-	.asciz	"test/bubble_sort.tig::79.23: Array out of bound"
+	.asciz	"test/bubble_sort.tig::77.23: Array out of bound"
 	.size	.L__unnamed_13, 48
 
 

@@ -82,9 +82,8 @@ main:                                   # @main
 	movq	%rbx, %rdi
 	movq	%r15, %rsi
 	callq	eval_sum
-	movl	$.L__unnamed_1, %edi
-	movl	$34, %edx
-	movl	%eax, %esi
+	movl	$34, %esi
+	movl	%eax, %edi
 	callq	assert_equal_int
 	xorl	%eax, %eax
 	addq	$8, %rsp
@@ -145,11 +144,5 @@ eval_sum:                               # @eval_sum
 	.size	eval_sum, .Lfunc_end1-eval_sum
 	.cfi_endproc
                                         # -- End function
-	.type	.L__unnamed_1,@object   # @0
-	.section	.rodata.str1.1,"aMS",@progbits,1
-.L__unnamed_1:
-	.asciz	"binary_tree.tig"
-	.size	.L__unnamed_1, 16
-
 
 	.section	".note.GNU-stack","",@progbits

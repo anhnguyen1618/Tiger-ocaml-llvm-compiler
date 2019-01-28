@@ -4,7 +4,18 @@ parse: parse.native
 
 main: main.native
 
-test: test.native
+single_test:
+	./bin/parse test/$(f) 	
+
+	opt -f -S llvm_byte_code/test/$(f).ll -o llvm_byte_code/test/$(f)-opt.ll \
+    	-mem2reg -adce -argpromotion -constmerge -globaldce -globalopt \
+    	-loop-deletion -constprop
+
+	llc llvm_byte_code/test/$(f)-opt.ll
+
+	clang llvm_byte_code/test/$(f)-opt.s src/bindings.c -o run_prog
+
+	./run_prog
 
 %.native:
 	echo "================= COMPILING COMPILER =================\n"

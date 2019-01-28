@@ -7,8 +7,6 @@ let
     var current_node := c
     var index := 1    
 
-    function assert_int(actual: int, expected: int) = 
-		assert_equal_int("linked_list.tig", actual, expected)
 in
     b.next := a;
     printInt(is_nil(current_node));

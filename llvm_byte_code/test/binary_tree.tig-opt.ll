@@ -1,13 +1,11 @@
 ; ModuleID = 'llvm_byte_code/test/binary_tree.tig.ll'
 source_filename = "Tiger jit"
 
-@0 = private unnamed_addr constant [16 x i8] c"binary_tree.tig\00"
-
 declare void @tig_print_int(i32) local_unnamed_addr
 
 declare i32 @tig_nillable(i8*) local_unnamed_addr
 
-declare void @assert_equal_int(i8*, i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr
 
 define i32 @main() local_unnamed_addr {
 entry:
@@ -89,7 +87,7 @@ entry:
   %6 = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %record_init)
   call void @tig_print_int(i32 %6)
   %7 = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %record_init)
-  call void @assert_equal_int(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @0, i32 0, i32 0), i32 %7, i32 34)
+  call void @assert_equal_int(i32 %7, i32 34)
   ret i32 0
 }
 

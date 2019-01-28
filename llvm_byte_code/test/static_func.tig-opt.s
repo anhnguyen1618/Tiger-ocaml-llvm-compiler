@@ -35,12 +35,11 @@ main:                                   # @main
 	movl	$0, (%rax)
 	movq	$.L__unnamed_1, 8(%rax)
 	movq	%rax, 24(%rsp)
-	leaq	8(%rsp), %rbx
+	leaq	8(%rsp), %rdi
 	movl	$1, %esi
 	movl	$2, %edx
 	movl	$3, %ecx
 	movl	$4, %r8d
-	movq	%rbx, %rdi
 	callq	f
 	movq	24(%rsp), %rax
 	movl	(%rax), %edi
@@ -49,15 +48,13 @@ main:                                   # @main
 	movq	8(%rax), %rdi
 	callq	tig_print
 	movq	24(%rsp), %rax
-	movl	(%rax), %esi
-	movl	$28, %edx
-	movq	%rbx, %rdi
-	callq	assert_int
+	movl	(%rax), %edi
+	movl	$28, %esi
+	callq	assert_equal_int
 	movq	24(%rsp), %rax
-	movq	8(%rax), %rsi
-	movl	$.L__unnamed_2, %edx
-	movq	%rbx, %rdi
-	callq	assert_string
+	movq	8(%rax), %rdi
+	movl	$.L__unnamed_2, %esi
+	callq	assert_equal_string
 	xorl	%eax, %eax
 	addq	$32, %rsp
 	popq	%rbx
@@ -86,40 +83,6 @@ f:                                      # @f
 	retq
 .Lfunc_end1:
 	.size	f, .Lfunc_end1-f
-	.cfi_endproc
-                                        # -- End function
-	.globl	assert_string           # -- Begin function assert_string
-	.p2align	4, 0x90
-	.type	assert_string,@function
-assert_string:                          # @assert_string
-	.cfi_startproc
-# %bb.0:                                # %entry
-	pushq	%rax
-	.cfi_def_cfa_offset 16
-	movq	%rdi, (%rsp)
-	movl	$.L__unnamed_3, %edi
-	callq	assert_equal_string
-	popq	%rax
-	retq
-.Lfunc_end2:
-	.size	assert_string, .Lfunc_end2-assert_string
-	.cfi_endproc
-                                        # -- End function
-	.globl	assert_int              # -- Begin function assert_int
-	.p2align	4, 0x90
-	.type	assert_int,@function
-assert_int:                             # @assert_int
-	.cfi_startproc
-# %bb.0:                                # %entry
-	pushq	%rax
-	.cfi_def_cfa_offset 16
-	movq	%rdi, (%rsp)
-	movl	$.L__unnamed_3, %edi
-	callq	assert_equal_int
-	popq	%rax
-	retq
-.Lfunc_end3:
-	.size	assert_int, .Lfunc_end3-assert_int
 	.cfi_endproc
                                         # -- End function
 	.globl	g                       # -- Begin function g
@@ -164,7 +127,7 @@ g:                                      # @g
 	addl	20(%rax), %ebx
 	addl	8(%rax), %ebx
 	movl	$4, %esi
-	movl	$.L__unnamed_4, %edx
+	movl	$.L__unnamed_3, %edx
 	movq	%r14, %rdi
 	callq	tig_check_array_bound
 	movq	8(%r14), %rax
@@ -175,8 +138,8 @@ g:                                      # @g
 	popq	%r14
 	popq	%r15
 	retq
-.Lfunc_end4:
-	.size	g, .Lfunc_end4-g
+.Lfunc_end2:
+	.size	g, .Lfunc_end2-g
 	.cfi_endproc
                                         # -- End function
 	.type	.L__unnamed_1,@object   # @0
@@ -185,20 +148,15 @@ g:                                      # @g
 	.asciz	"hello world"
 	.size	.L__unnamed_1, 12
 
-	.type	.L__unnamed_4,@object   # @1
+	.type	.L__unnamed_3,@object   # @1
 	.section	.rodata.str1.16,"aMS",@progbits,1
 	.p2align	4
-.L__unnamed_4:
-	.asciz	"test/static_func.tig::16.43: Array out of bound"
-	.size	.L__unnamed_4, 48
-
-	.type	.L__unnamed_3,@object   # @2
-	.section	.rodata.str1.1,"aMS",@progbits,1
 .L__unnamed_3:
-	.asciz	"static_func.tig"
-	.size	.L__unnamed_3, 16
+	.asciz	"test/static_func.tig::16.43: Array out of bound"
+	.size	.L__unnamed_3, 48
 
-	.type	.L__unnamed_2,@object   # @3
+	.type	.L__unnamed_2,@object   # @2
+	.section	.rodata.str1.1,"aMS",@progbits,1
 .L__unnamed_2:
 	.asciz	"foo bar"
 	.size	.L__unnamed_2, 8

@@ -1,9 +1,6 @@
 ; ModuleID = 'Tiger jit'
 source_filename = "Tiger jit"
 
-@0 = private unnamed_addr constant [14 x i8] c"whileloop.tig\00"
-@1 = private unnamed_addr constant [23 x i8] c"whileloop.tig: Passed!\00"
-
 declare void @tig_print_int(i32)
 
 declare void @tig_print(i8*)
@@ -42,7 +39,9 @@ declare i8* @tig_concat(i8*, i8*)
 
 declare i32 @tig_not(i32)
 
-declare void @assert_equal_int(i8*, i32, i32)
+declare void @assert_equal_int(i32, i32)
+
+declare void @assert_equal_string(i8*, i8*)
 
 define i32 @main() {
 entry:
@@ -71,10 +70,9 @@ loop:                                             ; preds = %test
 
 end:                                              ; preds = %then, %test
   %a10 = load i32, i32* %a
-  call void @assert_int({ i32 }* %frame_pointer, i32 %a10, i32 3)
+  call void @assert_equal_int(i32 %a10, i32 3)
   %b11 = load i32, i32* %b
-  call void @assert_int({ i32 }* %frame_pointer, i32 %b11, i32 5)
-  call void @tig_print(i8* getelementptr inbounds ([23 x i8], [23 x i8]* @1, i32 0, i32 0))
+  call void @assert_equal_int(i32 %b11, i32 5)
   ret i32 0
 
 test3:                                            ; preds = %loop
@@ -102,19 +100,4 @@ merge:                                            ; preds = %else, %then
   %add_tmp9 = add i32 %a8, 1
   store i32 %add_tmp9, i32* %a
   br label %test
-}
-
-define void @assert_int({ i32 }*, i32, i32) {
-entry:
-  %expected = alloca i32
-  %actual = alloca i32
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
-  store i32 %1, i32* %actual
-  store i32 %2, i32* %expected
-  %actual1 = load i32, i32* %actual
-  %expected2 = load i32, i32* %expected
-  call void @assert_equal_int(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @0, i32 0, i32 0), i32 %actual1, i32 %expected2)
-  ret void
 }

@@ -18,12 +18,6 @@ let
 		 in
 			g(4)
 		 end
-	
-	function assert_string(actual: string, expected: string) =
-		assert_equal_string("static_func.tig", actual, expected)
-	
-	function assert_int(actual: int, expected: int) = 
-		assert_equal_int("static_func.tig", actual, expected)
 in
 	f(1,2,3,4);
 	printInt(rec.result);

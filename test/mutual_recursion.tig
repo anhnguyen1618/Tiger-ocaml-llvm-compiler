@@ -3,5 +3,5 @@ let
 	function b(): int = 4
 in
 	printInt(a());
-	assert_equal_int("mutual_recursion.tig", a(), b())
+	assert_int(a(), b())
 end

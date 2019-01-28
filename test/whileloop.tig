@@ -1,9 +1,6 @@
 let
 	var a := 0
 	var b := 2
-
-    function assert_int(actual: int, expected: int) = 
-		assert_equal_int("whileloop.tig", actual, expected)
 in
 	while a < 5 do
 	(
@@ -13,6 +10,5 @@ in
 		a := a + 1
 	);
 	assert_int(a, 3);
-    assert_int(b, 5);
-    print("whileloop.tig: Passed!")
+    	assert_int(b, 5)
 end

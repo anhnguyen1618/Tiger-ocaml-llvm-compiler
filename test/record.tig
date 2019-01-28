@@ -14,12 +14,6 @@ let
 	type student = {name: string, class: class}
 	var class: class := class {name= "hello", id=10}
 	var student: student := student {name= "world", class = class}
-
-	function assert_string(actual: string, expected: string) =
-		assert_equal_string("record.tig", actual, expected)
-	
-	function assert_int(actual: int, expected: int) = 
-		assert_equal_int("record.tig", actual, expected)
 in
 	print(student.name);
 	assert_string(student.name, "world");

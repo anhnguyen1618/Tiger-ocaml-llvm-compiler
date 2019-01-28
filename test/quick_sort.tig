@@ -64,8 +64,7 @@ let
             for i := 0 to size - 1 do arr[i] := size-i-1;
             arr
         end
-    function assert_int(actual: int, expected: int) = 
-		assert_equal_int("quick_sort.tig", actual, expected)
+
     var arr_test := create_array_test()
 in
     print("Before sorting");

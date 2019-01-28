@@ -491,11 +491,7 @@ let func_dec
          | _ -> L.build_ret body builder);
 
   ignore(pop_fp_from_stack());
-  L.position_at_end previous_block builder;
-  
-  L.print_module "Tiger jit" the_module
-  (* Validate the generated code, checking for consistency. *)
-                 (*Llvm_analysis.assert_valid_function func_block;*)
+  L.position_at_end previous_block builder
 
 let build_external_func
       (name: string)

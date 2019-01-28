@@ -1,18 +1,7 @@
 ; ModuleID = 'llvm_byte_code/test/fib.tig.ll'
 source_filename = "Tiger jit"
 
-@0 = private unnamed_addr constant [19 x i8] c"Test file: fig.tig\00"
-@1 = private unnamed_addr constant [7 x i8] c"Expect\00"
-@2 = private unnamed_addr constant [9 x i8] c"To equal\00"
-@3 = private unnamed_addr constant [17 x i8] c"fib.tig: Passed!\00"
-
-declare void @tig_print_int(i32) local_unnamed_addr
-
-declare void @tig_print(i8*) local_unnamed_addr
-
-declare void @tig_exit(i32) local_unnamed_addr
-
-declare i32 @tig_not(i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr
 
 define i32 @main() local_unnamed_addr {
 entry:
@@ -22,12 +11,11 @@ entry:
   %2 = call i32 @fib({ i32 }* %frame_pointer, i32 5)
   %3 = call i32 @fib({ i32 }* %frame_pointer, i32 14)
   %4 = call i32 @fib({ i32 }* %frame_pointer, i32 30)
-  call void @assert_int({ i32 }* %frame_pointer, i32 %0, i32 0)
-  call void @assert_int({ i32 }* %frame_pointer, i32 %1, i32 1)
-  call void @assert_int({ i32 }* %frame_pointer, i32 %2, i32 5)
-  call void @assert_int({ i32 }* %frame_pointer, i32 %3, i32 377)
-  call void @assert_int({ i32 }* %frame_pointer, i32 %4, i32 832040)
-  call void @tig_print(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @3, i32 0, i32 0))
+  call void @assert_equal_int(i32 %0, i32 0)
+  call void @assert_equal_int(i32 %1, i32 1)
+  call void @assert_equal_int(i32 %2, i32 5)
+  call void @assert_equal_int(i32 %3, i32 377)
+  call void @assert_equal_int(i32 %4, i32 832040)
   ret i32 0
 }
 
@@ -78,34 +66,4 @@ else4:                                            ; preds = %test2
 merge5:                                           ; preds = %else4, %then3
   %if_result_addr.0 = phi i32 [ 1, %then3 ], [ %add_tmp, %else4 ]
   br label %merge
-}
-
-define void @assert_int({ i32 }*, i32, i32) local_unnamed_addr {
-entry:
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
-  br label %test
-
-test:                                             ; preds = %entry
-  %eq_tmp = icmp eq i32 %1, %2
-  %bool_tmp = zext i1 %eq_tmp to i32
-  %3 = call i32 @tig_not(i32 %bool_tmp)
-  %cond = icmp eq i32 %3, 1
-  br i1 %cond, label %then, label %else
-
-then:                                             ; preds = %test
-  call void @tig_print(i8* getelementptr inbounds ([19 x i8], [19 x i8]* @0, i32 0, i32 0))
-  call void @tig_print(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @1, i32 0, i32 0))
-  call void @tig_print_int(i32 %1)
-  call void @tig_print(i8* getelementptr inbounds ([9 x i8], [9 x i8]* @2, i32 0, i32 0))
-  call void @tig_print_int(i32 %2)
-  call void @tig_exit(i32 1)
-  br label %merge
-
-else:                                             ; preds = %test
-  br label %merge
-
-merge:                                            ; preds = %else, %then
-  ret void
 }

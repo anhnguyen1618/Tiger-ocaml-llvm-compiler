@@ -1,8 +1,7 @@
 ; ModuleID = 'Tiger jit'
 source_filename = "Tiger jit"
 
-@0 = private unnamed_addr constant [16 x i8] c"linked_list.tig\00"
-@1 = private unnamed_addr constant [12 x i8] c"end program\00"
+@0 = private unnamed_addr constant [12 x i8] c"end program\00"
 
 declare void @tig_print_int(i32)
 
@@ -42,9 +41,9 @@ declare i8* @tig_concat(i8*, i8*)
 
 declare i32 @tig_not(i32)
 
-declare void @assert_equal_int(i8*, i32, i32)
+declare void @assert_equal_int(i32, i32)
 
-declare void @assert_equal_string(i8*, i8*, i8*)
+declare void @assert_equal_string(i8*, i8*)
 
 define i32 @main() {
 entry:
@@ -112,7 +111,7 @@ loop:                                             ; preds = %test
   %element17 = getelementptr { i32, i8* }, { i32, i8* }* %current_node16, i32 0, i32 0
   %field_var18 = load i32, i32* %element17
   %index19 = load i32, i32* %index
-  call void @assert_int({ i32 }* %frame_pointer, i32 %field_var18, i32 %index19)
+  call void @assert_equal_int(i32 %field_var18, i32 %index19)
   %current_node20 = load { i32, i8* }*, { i32, i8* }** %current_node
   %element21 = getelementptr { i32, i8* }, { i32, i8* }* %current_node20, i32 0, i32 1
   %field_var22 = load i8*, i8** %element21
@@ -124,25 +123,10 @@ loop:                                             ; preds = %test
   br label %test
 
 end:                                              ; preds = %test
-  call void @tig_print(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @1, i32 0, i32 0))
+  call void @tig_print(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @0, i32 0, i32 0))
   %index24 = load i32, i32* %index
-  call void @assert_int({ i32 }* %frame_pointer, i32 %index24, i32 4)
+  call void @assert_equal_int(i32 %index24, i32 4)
   ret i32 0
 }
 
 declare noalias i8* @malloc(i32)
-
-define void @assert_int({ i32 }*, i32, i32) {
-entry:
-  %expected = alloca i32
-  %actual = alloca i32
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
-  store i32 %1, i32* %actual
-  store i32 %2, i32* %expected
-  %actual1 = load i32, i32* %actual
-  %expected2 = load i32, i32* %expected
-  call void @assert_equal_int(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @0, i32 0, i32 0), i32 %actual1, i32 %expected2)
-  ret void
-}

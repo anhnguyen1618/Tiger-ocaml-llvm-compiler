@@ -4,9 +4,6 @@ let
     else if n = 1 then 1
     else fib(n-1) + fib(n-2)
 
-  function assert_int(actual: int, expected: int) = 
-    assert_equal_int("fib.tig", actual, expected)
-
   var fib0 := fib(0)
   var fib1 := fib(1)
   var fib5 := fib(5)
@@ -17,6 +14,5 @@ in
   assert_int(fib1, 1);
   assert_int(fib5, 5);
   assert_int(fib14, 377);
-  assert_int(fib30, 832040);
-  print("fib.tig: Passed!")
+  assert_int(fib30, 832040)
 end

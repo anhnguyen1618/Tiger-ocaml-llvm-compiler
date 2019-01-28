@@ -17,6 +17,6 @@ in
     (
       printInt (fib(counter));
       print (record.name);
-      counter := counter - 1;
+      counter := counter - 1
     )
 end

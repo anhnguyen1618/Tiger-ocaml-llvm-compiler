@@ -15,11 +15,11 @@ let
 	var b := create_rec ()
 in
 	printInt (arr[0].a);
-	assert_equal_int("malloc.tig", arr[0].a, 5);
+	assert_int(arr[0].a, 5);
 	
 	printInt (b[1].a);
-	assert_equal_int("malloc.tig", b[1].a, 6);
+	assert_int(b[1].a, 6);
 
 	arr[1].a := 5;
-	assert_equal_int("malloc.tig", b[1].a, 5)
+	assert_int(b[1].a, 5)
 end

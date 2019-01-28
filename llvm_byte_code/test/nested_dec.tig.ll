@@ -1,8 +1,6 @@
 ; ModuleID = 'Tiger jit'
 source_filename = "Tiger jit"
 
-@0 = private unnamed_addr constant [15 x i8] c"nested_dec.tig\00"
-
 declare void @tig_print_int(i32)
 
 declare void @tig_print(i8*)
@@ -41,9 +39,9 @@ declare i8* @tig_concat(i8*, i8*)
 
 declare i32 @tig_not(i32)
 
-declare void @assert_equal_int(i8*, i32, i32)
+declare void @assert_equal_int(i32, i32)
 
-declare void @assert_equal_string(i8*, i8*, i8*)
+declare void @assert_equal_string(i8*, i8*)
 
 define i32 @main() {
 entry:
@@ -82,6 +80,6 @@ merge:                                            ; preds = %else, %then
   %a4 = load i32, i32* %a
   call void @tig_print_int(i32 %a4)
   %a5 = load i32, i32* %a
-  call void @assert_equal_int(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @0, i32 0, i32 0), i32 %a5, i32 -8)
+  call void @assert_equal_int(i32 %a5, i32 -8)
   ret i32 0
 }

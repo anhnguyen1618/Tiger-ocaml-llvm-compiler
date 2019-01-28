@@ -1,8 +1,6 @@
 ; ModuleID = 'Tiger jit'
 source_filename = "Tiger jit"
 
-@0 = private unnamed_addr constant [12 x i8] c"mutable.tig\00"
-
 declare void @tig_print_int(i32)
 
 declare void @tig_print(i8*)
@@ -41,9 +39,9 @@ declare i8* @tig_concat(i8*, i8*)
 
 declare i32 @tig_not(i32)
 
-declare void @assert_equal_int(i8*, i32, i32)
+declare void @assert_equal_int(i32, i32)
 
-declare void @assert_equal_string(i8*, i8*, i8*)
+declare void @assert_equal_string(i8*, i8*)
 
 define i32 @main() {
 entry:
@@ -51,7 +49,7 @@ entry:
   %0 = call i32 @f({ i32 }* %frame_pointer, i32 10)
   call void @tig_print_int(i32 %0)
   %1 = call i32 @f({ i32 }* %frame_pointer, i32 10)
-  call void @assert_equal_int(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @0, i32 0, i32 0), i32 %1, i32 20)
+  call void @assert_equal_int(i32 %1, i32 20)
   ret i32 0
 
 break_loop:                                       ; No predecessors!

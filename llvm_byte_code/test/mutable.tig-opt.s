@@ -20,9 +20,8 @@ main:                                   # @main
 	movl	$10, %esi
 	movq	%rbx, %rdi
 	callq	f
-	movl	$.L__unnamed_1, %edi
-	movl	$20, %edx
-	movl	%eax, %esi
+	movl	$20, %esi
+	movl	%eax, %edi
 	callq	assert_equal_int
 	xorl	%eax, %eax
 	addq	$16, %rsp
@@ -46,11 +45,5 @@ f:                                      # @f
 	.size	f, .Lfunc_end1-f
 	.cfi_endproc
                                         # -- End function
-	.type	.L__unnamed_1,@object   # @0
-	.section	.rodata.str1.1,"aMS",@progbits,1
-.L__unnamed_1:
-	.asciz	"mutable.tig"
-	.size	.L__unnamed_1, 12
-
 
 	.section	".note.GNU-stack","",@progbits

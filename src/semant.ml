@@ -655,7 +655,7 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   let main_level = Translate.new_level Translate.outermost in
   ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, outermost_break_block)); 
   Translate.build_return_main();
-  dump_module Translate.the_module;
+  (*dump_module Translate.the_module;*)
   print_module ("llvm_byte_code/"^ output_name ^ ".ll") Translate.the_module;
 
 

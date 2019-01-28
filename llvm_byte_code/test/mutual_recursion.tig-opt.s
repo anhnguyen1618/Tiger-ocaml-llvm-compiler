@@ -24,9 +24,8 @@ main:                                   # @main
 	movl	%eax, %ebp
 	movq	%rbx, %rdi
 	callq	b
-	movl	$.L__unnamed_1, %edi
-	movl	%ebp, %esi
-	movl	%eax, %edx
+	movl	%ebp, %edi
+	movl	%eax, %esi
 	callq	assert_equal_int
 	xorl	%eax, %eax
 	addq	$8, %rsp
@@ -66,12 +65,5 @@ b:                                      # @b
 	.size	b, .Lfunc_end2-b
 	.cfi_endproc
                                         # -- End function
-	.type	.L__unnamed_1,@object   # @0
-	.section	.rodata.str1.16,"aMS",@progbits,1
-	.p2align	4
-.L__unnamed_1:
-	.asciz	"mutual_recursion.tig"
-	.size	.L__unnamed_1, 21
-
 
 	.section	".note.GNU-stack","",@progbits

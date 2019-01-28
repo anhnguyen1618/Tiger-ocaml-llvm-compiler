@@ -1,11 +1,9 @@
 ; ModuleID = 'llvm_byte_code/test/mutable.tig.ll'
 source_filename = "Tiger jit"
 
-@0 = private unnamed_addr constant [12 x i8] c"mutable.tig\00"
-
 declare void @tig_print_int(i32) local_unnamed_addr
 
-declare void @assert_equal_int(i8*, i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr
 
 define i32 @main() local_unnamed_addr {
 entry:
@@ -13,7 +11,7 @@ entry:
   %0 = call i32 @f({ i32 }* %frame_pointer, i32 10)
   call void @tig_print_int(i32 %0)
   %1 = call i32 @f({ i32 }* %frame_pointer, i32 10)
-  call void @assert_equal_int(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @0, i32 0, i32 0), i32 %1, i32 20)
+  call void @assert_equal_int(i32 %1, i32 20)
   ret i32 0
 }
 

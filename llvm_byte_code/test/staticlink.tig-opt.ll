@@ -3,14 +3,10 @@ source_filename = "Tiger jit"
 
 @0 = private unnamed_addr constant [47 x i8] c"test/staticlink.tig::10.35: Array out of bound\00"
 @1 = private unnamed_addr constant [46 x i8] c"test/staticlink.tig::12.6: Array out of bound\00"
-@2 = private unnamed_addr constant [15 x i8] c"staticlink.tig\00"
-@3 = private unnamed_addr constant [24 x i8] c"staticlink.tig: Passed!\00"
-
-declare void @tig_print(i8*) local_unnamed_addr
 
 declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr
 
-declare void @assert_equal_int(i8*, i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr
 
 define i32 @main() local_unnamed_addr {
 entry:
@@ -44,12 +40,11 @@ end:                                              ; preds = %test
   %var_dec6 = getelementptr { i32, i32, { i32, i32* }* }, { i32, i32, { i32, i32* }* }* %frame_pointer, i32 0, i32 2
   store { i32, i32* }* %array_wrapper, { i32, i32* }** %var_dec6
   %0 = call i32 @nested_function({ i32, i32, { i32, i32* }* }* %frame_pointer, i32 0)
-  call void @assert_int({ i32, i32, { i32, i32* }* }* %frame_pointer, i32 %0, i32 18)
+  call void @assert_equal_int(i32 %0, i32 18)
   %1 = call i32 @nested_function({ i32, i32, { i32, i32* }* }* %frame_pointer, i32 -5)
-  call void @assert_int({ i32, i32, { i32, i32* }* }* %frame_pointer, i32 %1, i32 13)
+  call void @assert_equal_int(i32 %1, i32 13)
   %2 = call i32 @nested_function({ i32, i32, { i32, i32* }* }* %frame_pointer, i32 -18)
-  call void @assert_int({ i32, i32, { i32, i32* }* }* %frame_pointer, i32 %2, i32 0)
-  call void @tig_print(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @3, i32 0, i32 0))
+  call void @assert_equal_int(i32 %2, i32 0)
   ret i32 0
 }
 
@@ -76,15 +71,6 @@ entry:
   store i32 7, i32* %arr_ele_addr
   %3 = call i32 @f({ { i32, i32, { i32, i32* }* }*, i32, i32 }* %frame_pointer)
   ret i32 %3
-}
-
-define void @assert_int({ i32, i32, { i32, i32* }* }*, i32, i32) local_unnamed_addr {
-entry:
-  %frame_pointer = alloca { { i32, i32, { i32, i32* }* }* }
-  %arg_address = getelementptr { { i32, i32, { i32, i32* }* }* }, { { i32, i32, { i32, i32* }* }* }* %frame_pointer, i32 0, i32 0
-  store { i32, i32, { i32, i32* }* }* %0, { i32, i32, { i32, i32* }* }** %arg_address
-  call void @assert_equal_int(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @2, i32 0, i32 0), i32 %1, i32 %2)
-  ret void
 }
 
 define i32 @f({ { i32, i32, { i32, i32* }* }*, i32, i32 }*) local_unnamed_addr {

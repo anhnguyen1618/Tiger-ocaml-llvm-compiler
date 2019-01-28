@@ -1,12 +1,8 @@
 let
 	var a := "test string"
 	var b := "test string"
-
-	function assert_string(actual: string, expected: string) =
-		assert_equal_string("string_cmp.tig", actual, expected) 
 in
 	assert_string(a, b);
 	a := str_concat(a, "-hello world");
-	assert_string(a, "test string-hello world");
-	print("string_cmp.tig: Passed!")
+	assert_string(a, "test string-hello world")
 end

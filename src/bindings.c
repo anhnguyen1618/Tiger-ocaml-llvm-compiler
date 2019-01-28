@@ -135,22 +135,18 @@ extern int *tig_init_record (int size)
   return a;
 }
 
-extern void assert_equal_int(const char *fileName, const int actual, const int expected)
+extern void assert_equal_int(const int actual, const int expected)
 {
   if (actual != expected) {
-    printf("Test file: %s\n", fileName);
-    printf("Expect %d to be %d\n", actual, expected);
-    printf("%s%s%s", Color_Red, "===> Test failed!\n", Color_end);
+    printf("%sExpect %d to be %d %s\n", Color_Red, actual, expected, Color_end);
     exit(1);
   }
 }
 
-extern void assert_equal_string(const char *fileName, const char *actual, const char *expected)
+extern void assert_equal_string(const char *actual, const char *expected)
 {
   if (tig_string_cmp(actual, expected) == 0) {
-    printf("Test file: %s\n", fileName);
-    printf("Expect \"%s\" to be \"%s\"\n", actual, expected);
-    printf("%s%s%s", Color_Red, "===> Test failed!\n", Color_end);
+    printf("%sExpect \"%s\" to be \"%s\" %s\n", Color_Red, actual, expected, Color_end);
     exit(1);
   }
 }

@@ -13,11 +13,8 @@ let
 			f()
 		 end
 	
-	function assert_int(actual: int, expected: int) = 
-		assert_equal_int("staticlink.tig", actual, expected)
 in
 	assert_int(nested_function(0), 18);
 	assert_int(nested_function(-5), 13);
-	assert_int(nested_function(-18), 0);
-	print ("staticlink.tig: Passed!")
+	assert_int(nested_function(-18), 0)
 end

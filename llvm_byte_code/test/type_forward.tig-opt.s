@@ -10,9 +10,8 @@ main:                                   # @main
 	.cfi_def_cfa_offset 16
 	movl	$11, %edi
 	callq	tig_print_int
-	movl	$.L__unnamed_1, %edi
+	movl	$11, %edi
 	movl	$11, %esi
-	movl	$11, %edx
 	callq	assert_equal_int
 	xorl	%eax, %eax
 	popq	%rcx
@@ -21,12 +20,5 @@ main:                                   # @main
 	.size	main, .Lfunc_end0-main
 	.cfi_endproc
                                         # -- End function
-	.type	.L__unnamed_1,@object   # @0
-	.section	.rodata.str1.16,"aMS",@progbits,1
-	.p2align	4
-.L__unnamed_1:
-	.asciz	"type_forward.tig"
-	.size	.L__unnamed_1, 17
-
 
 	.section	".note.GNU-stack","",@progbits

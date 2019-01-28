@@ -16,5 +16,5 @@ in
 		end
 	);
 	printInt(a);
-	assert_equal_int("nested_dec.tig", a, -8)
+	assert_int(a, -8)
 end

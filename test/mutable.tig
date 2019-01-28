@@ -8,5 +8,5 @@ let
 		end
 in
 	printInt(f(10));
-	assert_equal_int("mutable.tig", f(10), 20)
+	assert_int(f(10), 20)
 end

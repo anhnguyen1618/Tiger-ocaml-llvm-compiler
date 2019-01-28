@@ -4,5 +4,5 @@ let
     var node: a := 6
 in
     printInt(node + 5);
-    assert_equal_int("type_forward.tig", node + 5, 11)
+    assert_int(node + 5, 11)
 end

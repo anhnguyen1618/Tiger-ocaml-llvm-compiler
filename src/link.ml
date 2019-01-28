@@ -27,7 +27,7 @@ let reset_global_state () =
   current_counter := 1
 
 
-let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
+let trans_type ((t_env: tenv), (ty: A.ty), (name: S.symbol)): T.ty =
   let look_up_type ((s: S.symbol), (p: int)): T.ty =
     match S.look(t_env, s) with
       Some t -> t
@@ -37,7 +37,7 @@ let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
     (name, look_up_type(typ, pos)) in
 		    
   let check_record (fields: A.field list): T.ty =
-    T.RECORD (List.map map_field_to_record fields, Temp.newtemp()) in
+    T.RECORD (List.map map_field_to_record fields, Temp.newtemp(), S.name(name), ref None) in
 
   let check_array_type e = T.ARRAY(look_up_type e, Temp.newtemp()) in
 			 
@@ -100,7 +100,7 @@ let rec trans_dec (
     let dumb_t_env = List.fold_left add_dump_type t_env types in
     
     let f { v_env; t_env } (A.Type {name; ty; pos}) =
-      {t_env = S.enter(t_env, name, trans_type(t_env, ty)); v_env = v_env }
+      {t_env = S.enter(t_env, name, trans_type(t_env, ty, name)); v_env = v_env }
     in
     U.check_circular types;
     List.fold_left f {v_env = v_env; t_env = dumb_t_env } types
@@ -168,7 +168,7 @@ let rec trans_dec (
       let ty = tr_var obj in
       let object_type = actual_ty ty in
       match object_type with
-      | T.RECORD (tys, _) ->
+      | T.RECORD (tys, _, _, _) ->
 	 let index = ref (-1) in
          let matchedField = List.find_opt
                               (fun (symbol, _) -> (index := !index + 1; S.eq(s, symbol))) tys
@@ -210,7 +210,7 @@ let rec trans_dec (
 
     and check_record_exp (A.RecordExp {fields; typ; pos}) =      
       match S.look(t_env, typ) with
-      | Some (T.RECORD (types, refer) as x) ->
+      | Some (T.RECORD (types, refer, _, _) as x) ->
 	 begin
            if List.length fields <> List.length types
 	   then T.NIL
@@ -218,7 +218,7 @@ let rec trans_dec (
 	   (List.iter (fun (_, e, _) -> ignore(tr_exp e)) fields;
 	    x)
          end
-      | _ -> T.RECORD ([], Temp.newtemp ())
+      | _ -> T.RECORD ([], Temp.newtemp (), "", ref None)
 
     and check_seq_exp (exp_pos: (A.exp * int) list): expty =
       match List.length exp_pos with

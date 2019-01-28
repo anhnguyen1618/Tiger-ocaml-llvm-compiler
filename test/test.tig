@@ -1,0 +1,6 @@
+let
+    type a = {a: int}
+    var a:= a {a = 5}
+in
+    printInt(a.a)
+end

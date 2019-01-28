@@ -33,7 +33,7 @@ val break_exp: break_block -> exp
 
 val array_exp: exp -> exp -> Types.ty -> exp
 
-val record_exp: (Symbol.symbol * Types.ty) list -> exp list -> exp
+val record_exp: (Symbol.symbol * Types.ty) list -> string -> Llvm.lltype option ref -> exp list -> exp
 
 val field_var_exp: exp -> exp -> exp
 

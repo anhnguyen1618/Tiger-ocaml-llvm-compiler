@@ -1,8 +1,11 @@
 module S = Symbol
 type unique = Temp.temp
+module L = Llvm
+
+type llvm_option_ty = L.lltype option ref
 
 type ty = 
-  RECORD of (Symbol.symbol * ty) list * unique
+  RECORD of (Symbol.symbol * ty) list * unique * string * llvm_option_ty
 | NIL
 | INT
 | STRING
@@ -10,7 +13,7 @@ type ty =
 | ARRAY_POINTER of ty * unique
 | NAME of Symbol.symbol * ty option ref
 | INT_POINTER
-| RECORD_ALLOC of (Symbol.symbol * ty) list * unique
+| RECORD_ALLOC of (Symbol.symbol * ty) list * unique * string * llvm_option_ty
 | STRING_POINTER
 | GENERIC_ARRAY
 | GENERIC_RECORD
@@ -26,7 +29,7 @@ let rec leq = function
   | (RECORD(_), NIL) -> true 
   | (INT, INT) -> true
   | (STRING, STRING) -> true
-  | (RECORD(_, unique1), RECORD(_, unique2)) -> (unique1 = unique2)
+  | (RECORD(_, unique1, _, _), RECORD(_, unique2, _, _)) -> (unique1 = unique2)
   | (ARRAY(_, unique1), ARRAY(_, unique2)) -> (unique1 = unique2)
   | (NIL, NIL) -> true
   | (NAME(sym1, _), NAME(sym2, _)) -> S.name(sym1) = S.name(sym2)
@@ -58,7 +61,7 @@ let eq (t1, t2) =
   comp(t1, t2) = EQ
 
 let rec printTy = function
-  | RECORD(_, _) -> print_string "type is record\n"
+  | RECORD(_, _,_, _) -> print_string "type is record\n"
   | NIL -> print_string "type is nil\n"
   | INT -> print_string "type is int\n"
   | STRING -> print_string "type is string\n"
@@ -68,7 +71,7 @@ let rec printTy = function
   | _ -> ()
 
 let rec name = function
-  | RECORD(_, _) -> "record"
+  | RECORD(_, _, _, _) -> "record"
   | NIL -> "nil"
   | INT -> "int"
   | STRING -> "string"

@@ -53,10 +53,20 @@ let rec get_llvm_type: T.ty -> L.lltype = function
      let wrapper_type = L.struct_type context [| int_type; array_type |] in
      wrapper_type |> L.pointer_type
 
-  | T.RECORD(field_types, uniq) ->
-     L.pointer_type (get_llvm_type (T.RECORD_ALLOC (field_types, uniq)))
-  | T.RECORD_ALLOC (field_types, _) ->
-     L.struct_type context ( (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list)
+  | T.RECORD(field_types, uniq, name, named_type) ->
+     L.pointer_type (get_llvm_type (T.RECORD_ALLOC (field_types, uniq, name, named_type)))
+  | T.RECORD_ALLOC (field_types, _, name, named_type) ->
+     begin
+       let real_named_type = !named_type in
+       match real_named_type with
+       | Some x -> x
+       | None ->
+          let named_struct = L.named_struct_type context name in
+          let map_ty = (List.map (fun (_, ty) -> get_llvm_type ty) field_types) |> Array.of_list in
+          L.struct_set_body named_struct map_ty false;
+          named_type := Some(named_struct);
+          named_struct
+     end
   | T.INT_POINTER -> int_pointer
   | T.GENERIC_ARRAY -> string_type
   | T.GENERIC_RECORD -> string_type
@@ -82,9 +92,9 @@ let get_fp_value (): exp =
 
 let build_frame_pointer_alloc (esc_vars: T.ty list) =
   let element_types = List.map (fun typ -> (Symbol.symbol(""), typ)) esc_vars in
-  let frame_pointer_struct_type = T.RECORD_ALLOC(element_types, Temp.newtemp()) in
+  let frame_pointer_struct_type = T.RECORD_ALLOC(element_types, Temp.newtemp(), "fp", ref None) in
   let address = L.build_alloca (get_llvm_type frame_pointer_struct_type) "frame_pointer" builder in
-  let frame_pointer_type = T.RECORD(element_types, Temp.newtemp()) in
+  let frame_pointer_type = T.RECORD(element_types, Temp.newtemp(), "fp", ref None) in
   push_fp_to_stack frame_pointer_type address
 
 let build_return_main () =
@@ -293,9 +303,13 @@ let array_exp
   wrapper_addr
 
 
-let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
+let record_exp
+      (tys: (Symbol.symbol * T.ty) list)
+      (name: string)
+      (named_type: L.lltype option ref)
+      (exps: exp list) =
   (*let record_addr = alloc_unesc_temp "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in*)
-  let record_addr = malloc "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in
+  let record_addr = malloc "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp(), name, named_type)) in
   let size = exps |> List.length |> int_exp in
 
   (*let record_addr = func_call_exp "tig_init_record" [size] in *)

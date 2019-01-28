@@ -22,7 +22,7 @@ let decrease_nested_level () = change_nested_loop_level (-)
 let get_nested_level () = !nested_loop_level
 
 
-let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
+let trans_type ((t_env: tenv), (ty: A.ty), (name: S.symbol)): T.ty =
 
   let look_up_type ((s: S.symbol), (p: int)): T.ty =
     match S.look(t_env, s) with
@@ -33,7 +33,7 @@ let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
     (name, look_up_type(typ, pos)) in
 		    
   let check_record (fields: A.field list): T.ty =
-    T.RECORD (List.map map_field_to_record fields, Temp.newtemp()) in
+    T.RECORD (List.map map_field_to_record fields, Temp.newtemp(), S.name(name), ref None) in
 
   let check_array_type e = T.ARRAY(look_up_type e, Temp.newtemp()) in
 			 
@@ -126,7 +126,7 @@ let rec trans_dec (
     let dumb_t_env = List.fold_left add_dump_type t_env types in
     
     let f { v_env; t_env } (A.Type {name; ty; pos}) =
-      {t_env = S.enter(t_env, name, trans_type(t_env, ty)); v_env = v_env }
+      {t_env = S.enter(t_env, name, trans_type(t_env, ty, name)); v_env = v_env }
     in
 
     let resolve_dummy_type { v_env; t_env } (A.Type {name; ty; pos}) =
@@ -286,7 +286,7 @@ let rec trans_dec (
       let { exp = recExp; ty = ty } = tr_var obj in
       let typeWithObj = actual_ty ty in
       match typeWithObj with
-      | T.RECORD (tys, _) ->
+      | T.RECORD (tys, _, _, _) ->
 	 let index = ref (-1) in
          let matchedField = List.find_opt
                               (fun (symbol, _) -> (index := !index + 1; S.eq(s, symbol))) tys
@@ -361,7 +361,7 @@ let rec trans_dec (
       let { exp = rec_access; ty = ty } = tr_var obj in
       let typeWithObj = actual_ty ty in
       match typeWithObj with
-      | T.RECORD (tys, _) ->
+      | T.RECORD (tys, _, _, _) ->
 	 let index = ref (-1) in
          let matchedField = List.find_opt
                               (fun (symbol, _) -> (index := !index + 1; S.eq(s, symbol))) tys
@@ -462,7 +462,7 @@ let rec trans_dec (
                         fields_with_name_types in
       
       match S.look(t_env, typ) with
-	Some (T.RECORD (types, refer)) ->
+	Some (T.RECORD (types, refer, name, named_type)) ->
 	 let rec check_fields = function
            | [] -> []
 	   | (s, t, p) :: tl ->
@@ -483,7 +483,7 @@ let rec trans_dec (
 	     in
 	     if List.length field_exps <> List.length types
 	     then (Err.error pos ("RecordExp and record type '" ^ S.name(typ) ^ "' doesn't match");
-		   {exp = Translate.dummy_exp(*Translate.recordDec(fieldLetsIR)*); ty = T.RECORD (types, refer)})
+		   {exp = Translate.dummy_exp(*Translate.recordDec(fieldLetsIR)*); ty = T.RECORD (types, refer, "", ref None)})
 	     else
                let proper_nil_fields (_, t) (_, {exp; ty}, _) =
                  match ty with
@@ -492,14 +492,14 @@ let rec trans_dec (
                in
 	       let typesInCreateOrder = check_fields field_exps in
                let field_irs = List.map2 proper_nil_fields types fields_with_name_types in
-	       {exp = (Translate.record_exp types field_irs) ; ty = T.RECORD (typesInCreateOrder, refer)}
+	       {exp = (Translate.record_exp types name named_type field_irs) ; ty = T.RECORD (typesInCreateOrder, refer, name, named_type)}
 			    
       | Some _ ->
          Err.error pos (S.name(typ) ^ " does not have type record");
-	 {exp = Translate.dummy_exp; ty = T.RECORD ([], Temp.newtemp ())}
+	 {exp = Translate.dummy_exp; ty = T.RECORD ([], Temp.newtemp (), "", ref None)}
       | None ->
          Err.error pos ("type " ^ S.name(typ)  ^ " can't be found");
-	 {exp = Translate.dummy_exp; ty = T.RECORD ([], Temp.newtemp ())}
+	 {exp = Translate.dummy_exp; ty = T.RECORD ([], Temp.newtemp (), "", ref None)}
 
     and check_seq_exp (exp_pos: (A.exp * int) list): expty =
       match List.length exp_pos with
@@ -655,7 +655,7 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   let main_level = Translate.new_level Translate.outermost in
   ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, outermost_break_block)); 
   Translate.build_return_main();
-  (*dump_module Translate.the_module;*)
+  dump_module Translate.the_module;
   print_module ("llvm_byte_code/"^ output_name ^ ".ll") Translate.the_module;
 
 

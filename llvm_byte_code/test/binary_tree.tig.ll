@@ -118,34 +118,34 @@ entry:
   store { i32, i8*, i8* }* %record_init29, { i32, i8*, i8* }** %f
   %load_left = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root
   %element_left = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %load_left, i32 0, i32 1
+  %0 = bitcast i8** %element_left to { i32, i8*, i8* }**
   %b33 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %b
-  %0 = bitcast { i32, i8*, i8* }* %b33 to i8*
-  store i8* %0, i8** %element_left
+  store { i32, i8*, i8* }* %b33, { i32, i8*, i8* }** %0
   %load_left34 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root
   %element_left35 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %load_left34, i32 0, i32 2
+  %1 = bitcast i8** %element_left35 to { i32, i8*, i8* }**
   %e36 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %e
-  %1 = bitcast { i32, i8*, i8* }* %e36 to i8*
-  store i8* %1, i8** %element_left35
+  store { i32, i8*, i8* }* %e36, { i32, i8*, i8* }** %1
   %load_left37 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %b
   %element_left38 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %load_left37, i32 0, i32 1
+  %2 = bitcast i8** %element_left38 to { i32, i8*, i8* }**
   %a39 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %a
-  %2 = bitcast { i32, i8*, i8* }* %a39 to i8*
-  store i8* %2, i8** %element_left38
+  store { i32, i8*, i8* }* %a39, { i32, i8*, i8* }** %2
   %load_left40 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %b
   %element_left41 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %load_left40, i32 0, i32 2
+  %3 = bitcast i8** %element_left41 to { i32, i8*, i8* }**
   %c42 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %c
-  %3 = bitcast { i32, i8*, i8* }* %c42 to i8*
-  store i8* %3, i8** %element_left41
+  store { i32, i8*, i8* }* %c42, { i32, i8*, i8* }** %3
   %load_left43 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %e
   %element_left44 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %load_left43, i32 0, i32 1
+  %4 = bitcast i8** %element_left44 to { i32, i8*, i8* }**
   %d45 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %d
-  %4 = bitcast { i32, i8*, i8* }* %d45 to i8*
-  store i8* %4, i8** %element_left44
+  store { i32, i8*, i8* }* %d45, { i32, i8*, i8* }** %4
   %load_left46 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %e
   %element_left47 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %load_left46, i32 0, i32 2
+  %5 = bitcast i8** %element_left47 to { i32, i8*, i8* }**
   %f48 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %f
-  %5 = bitcast { i32, i8*, i8* }* %f48 to i8*
-  store i8* %5, i8** %element_left47
+  store { i32, i8*, i8* }* %f48, { i32, i8*, i8* }** %5
   %root49 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root
   %6 = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %root49)
   call void @tig_print_int(i32 %6)

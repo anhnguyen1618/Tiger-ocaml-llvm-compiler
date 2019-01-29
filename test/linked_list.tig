@@ -1,14 +1,22 @@
 let
-    type node = {data: int, next: node}
-
+    type node = {data: my_int, next: node}
+    type my_int = int
     var a := node {data = 3, next = nil}
     var b := node {data = 2, next = nil}
     var c := node {data = 1, next = b}
+    var d := node {data = 4, next = nil}
     var current_node := c
     var index := 1    
 
 in
     b.next := a;
+    c.next.next.data := 5;
+    assert_int(a.data, 5);
+
+    c.next.next.data := 3;
+
+    c.next.next.next := d; 
+
     printInt(is_nil(current_node));
     while is_nil(current_node) = 0 
     do
@@ -19,5 +27,5 @@ in
             index := index +1
         );
     print("end program");
-    assert_int(index, 4)
+    assert_int(index, 5)
 end

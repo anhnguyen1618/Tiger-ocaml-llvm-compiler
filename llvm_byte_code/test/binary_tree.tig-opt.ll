@@ -67,23 +67,23 @@ entry:
   %Element32 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init29, i32 0, i32 2
   store i8* null, i8** %Element32
   %element_left = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init, i32 0, i32 1
-  %0 = bitcast { i32, i8*, i8* }* %record_init9 to i8*
-  store i8* %0, i8** %element_left
+  %0 = bitcast i8** %element_left to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init9, { i32, i8*, i8* }** %0
   %element_left35 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init, i32 0, i32 2
-  %1 = bitcast { i32, i8*, i8* }* %record_init24 to i8*
-  store i8* %1, i8** %element_left35
+  %1 = bitcast i8** %element_left35 to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init24, { i32, i8*, i8* }** %1
   %element_left38 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init9, i32 0, i32 1
-  %2 = bitcast { i32, i8*, i8* }* %record_init4 to i8*
-  store i8* %2, i8** %element_left38
+  %2 = bitcast i8** %element_left38 to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init4, { i32, i8*, i8* }** %2
   %element_left41 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init9, i32 0, i32 2
-  %3 = bitcast { i32, i8*, i8* }* %record_init14 to i8*
-  store i8* %3, i8** %element_left41
+  %3 = bitcast i8** %element_left41 to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init14, { i32, i8*, i8* }** %3
   %element_left44 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init24, i32 0, i32 1
-  %4 = bitcast { i32, i8*, i8* }* %record_init19 to i8*
-  store i8* %4, i8** %element_left44
+  %4 = bitcast i8** %element_left44 to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init19, { i32, i8*, i8* }** %4
   %element_left47 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init24, i32 0, i32 2
-  %5 = bitcast { i32, i8*, i8* }* %record_init29 to i8*
-  store i8* %5, i8** %element_left47
+  %5 = bitcast i8** %element_left47 to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init29, { i32, i8*, i8* }** %5
   %6 = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %record_init)
   call void @tig_print_int(i32 %6)
   %7 = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %record_init)

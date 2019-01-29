@@ -61,9 +61,11 @@ val build_return_main: unit -> unit
 
 val build_external_func: string -> Types.ty list -> Types.ty -> unit
 
-val build_bitcast_generic: exp -> exp
+val build_bitcast_generic: Types.ty -> exp -> exp
 
 val cast_generic_to_record: exp -> Types.ty -> exp
+
+val cast_generic_to_record_pointer: exp -> Types.ty -> exp
 
                                                                   
 

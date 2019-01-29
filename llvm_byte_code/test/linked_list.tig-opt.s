@@ -8,12 +8,17 @@ main:                                   # @main
 # %bb.0:                                # %entry
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
-	pushq	%r14
+	pushq	%r15
 	.cfi_def_cfa_offset 24
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 32
-	.cfi_offset %rbx, -32
-	.cfi_offset %r14, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	pushq	%rax
+	.cfi_def_cfa_offset 48
+	.cfi_offset %rbx, -40
+	.cfi_offset %r14, -32
+	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
 	movl	$16, %edi
 	callq	malloc
@@ -30,7 +35,24 @@ main:                                   # @main
 	movq	%rax, %rbx
 	movl	$1, (%rbx)
 	movq	%rbp, 8(%rbx)
+	movl	$16, %edi
+	callq	malloc
+	movq	%rax, %r15
+	movl	$4, (%r15)
+	movq	$0, 8(%r15)
 	movq	%r14, 8(%rbp)
+	movq	8(%rbx), %rax
+	movq	8(%rax), %rax
+	movl	$5, (%rax)
+	movl	(%r14), %edi
+	movl	$5, %esi
+	callq	assert_equal_int
+	movq	8(%rbx), %rax
+	movq	8(%rax), %rax
+	movl	$3, (%rax)
+	movq	8(%rbx), %rax
+	movq	8(%rax), %rax
+	movq	%r15, 8(%rax)
 	movq	%rbx, %rdi
 	callq	tig_nillable
 	movl	%eax, %edi
@@ -56,12 +78,14 @@ main:                                   # @main
 # %bb.3:                                # %end
 	movl	$.L__unnamed_1, %edi
 	callq	tig_print
-	movl	$4, %esi
+	movl	$5, %esi
 	movl	%ebp, %edi
 	callq	assert_equal_int
 	xorl	%eax, %eax
+	addq	$8, %rsp
 	popq	%rbx
 	popq	%r14
+	popq	%r15
 	popq	%rbp
 	retq
 .Lfunc_end0:

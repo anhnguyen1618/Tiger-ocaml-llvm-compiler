@@ -60,7 +60,12 @@ let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT_POINTER -> int_pointer
   | T.GENERIC_ARRAY -> string_type
   | T.GENERIC_RECORD -> string_type
-  | T.NAME _ -> string_type
+  | T.NAME (_, real_type) -> begin
+      match !real_type with
+      | Some(T.RECORD _) -> string_type
+      | Some x -> get_llvm_type x
+      | None -> string_type
+    end
   | _ -> L.void_type context
        
 let frame_pointer_stack = Stack.create()
@@ -105,11 +110,14 @@ let build_main_func (esc_vars: T.ty list): break_block =
   build_frame_pointer_alloc (stuff_static_link::esc_vars);
   exit_loop_block
 
-let build_bitcast_generic value =
-  L.build_bitcast value string_type "" builder
+let build_bitcast_generic typ value =
+  L.build_bitcast value (get_llvm_type typ) "" builder
 
 let cast_generic_to_record value typ =
   L.build_bitcast value (get_llvm_type typ) "" builder
+
+let cast_generic_to_record_pointer value typ =
+  L.build_bitcast value (get_llvm_type typ |> L.pointer_type) "" builder
 
 let point_to_func_entry_builder (): L.llbuilder =
   let current_block = L.insertion_block builder in
@@ -304,7 +312,7 @@ let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
     let addr = L.build_gep record_addr [| int_exp(0); int_exp(index) |] "Element" builder in
     ignore(L.build_store exp addr builder) in
   let casted_exps = List.map2 (fun (_, ty) exp -> match ty with
-                                           | T.NAME _ -> build_bitcast_generic exp
+                                           | T.NAME _ -> build_bitcast_generic ty exp
                                            | _ -> exp
                   ) tys exps in
   List.iteri alloc casted_exps;
@@ -326,7 +334,7 @@ let field_var_exp_left (arr_addr: exp ) (index: exp) =
 
 let check_bound_array (arr_wrapper_addr: exp) (index_exp: exp) (pos: int)=
   let error_msg = Err.gen_err_message pos "Array out of bound" in
-  let casted_array = build_bitcast_generic arr_wrapper_addr in
+  let casted_array = build_bitcast_generic T.STRING arr_wrapper_addr in
   ignore(func_call_exp TOP TOP "tig_check_array_bound" [casted_array; index_exp; string_exp(error_msg)])
 
 let subscript_exp (arr_wrapper_addr: exp) (index: exp) (pos: int) =

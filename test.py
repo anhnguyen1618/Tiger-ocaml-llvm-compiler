@@ -4,15 +4,15 @@ TEST_DIR = "./test"
 TEST_FILE_PATTERN = '*.tig'
 SUCCESS_CODE = 0
 
-RED_COLOR = '\033[92m'
-GREEN_COLOR = '\033[91m'
+GREEN_COLOR = '\033[92m'
+RED_COLOR = '\033[91m'
 END_COLOR = '\033[0m'
 
 TICK_ICON = u'\u2713'
 X_ICON = u'\u2718'
 
 def print_success(file_name):
-    print(RED_COLOR + TICK_ICON + ' ' + file_name + END_COLOR)
+    print(GREEN_COLOR + TICK_ICON + ' ' + file_name + END_COLOR)
 
 def print_error(file_name):
     print(RED_COLOR + X_ICON + ' ' + file_name + END_COLOR)

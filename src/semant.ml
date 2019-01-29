@@ -367,7 +367,17 @@ let rec trans_dec (
                               (fun (symbol, _) -> (index := !index + 1; S.eq(s, symbol))) tys
          in
          (match matchedField with
-          | Some (_, ty) -> {exp = Translate.field_var_exp_left rec_access (int_exp !index); ty = ty}
+          | Some (_, (T.NAME _ as ty)) ->
+             let actual_type = actual_ty ty in
+             let generic_addr = Translate.field_var_exp_left rec_access (int_exp !index) in
+             let casted_addr = Translate.cast_generic_to_record_pointer generic_addr actual_type in
+             {exp = casted_addr ; ty = ty}
+            
+             (*let raw_addr_val = Translate.field_var_exp rec_access (int_exp !index) in
+             Translate.cast_generic_to_record raw_addr_val (actual_ty ty)
+             Translate.cast_generic_to_record raw_val actual_type*)
+          | Some (_, ty) ->               
+             {exp = Translate.field_var_exp_left rec_access (int_exp !index); ty = ty}
           | None -> (
             let msg = Printf.sprintf "Property '%s' does not exist on type '%s'\n"
                         (S.name s) (T.name typeWithObj) in
@@ -431,8 +441,8 @@ let rec trans_dec (
                     (T.name ty) (T.name real_arg_type) in
 	U.assert_type_eq (ty, real_arg_type, pos, msg);
         let casted_arg_ir = match ty with
-          | T.GENERIC_RECORD -> Translate.build_bitcast_generic argIr
-          | T.GENERIC_ARRAY -> Translate.build_bitcast_generic argIr
+          | T.GENERIC_RECORD -> Translate.build_bitcast_generic T.STRING argIr
+          | T.GENERIC_ARRAY -> Translate.build_bitcast_generic T.STRING argIr
           | _ -> argIr
         in
         acc @ [casted_arg_ir]
@@ -522,11 +532,7 @@ let rec trans_dec (
         | T.NIL -> Translate.nil_exp left_type
         | _ -> rhs_value
       in
-      let casted_value = match left_type with
-        | T.NAME _ -> Translate.build_bitcast_generic value
-        | _ -> value
-      in
-      { exp = (Translate.assign_stm addr casted_value; Translate.dummy_exp); ty=T.NIL }
+      { exp = (Translate.assign_stm addr value; Translate.dummy_exp); ty=T.NIL }
 
     and check_if_exp (A.IfExp {test = test_exp; then' = then_exp; else' = else_option; pos}): expty =
       (* This is a hack to get type because we have to thunk code gen*)

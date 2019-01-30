@@ -1,0 +1,28 @@
+language: c
+compiler: clang
+
+script: 
+  - ./compile.sh
+
+before_install:
+  - opam init -y --compiler=4.05.0
+  - eval `opam config env`
+  - opam install -y ocamlbuild ocamlfind menhir llvm
+  - sudo chmod +x compile.sh
+  - rm llvm_byte_code/test/*
+
+matrix:
+  include:
+    # works on Precise and Trusty
+    - os: linux
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-6.0
+          packages:
+            - llvm-6.0-dev
+            - opam
+      env:
+        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"

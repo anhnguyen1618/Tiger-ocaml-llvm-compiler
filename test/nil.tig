@@ -11,5 +11,5 @@ in
 
 	b := nil;
 	printInt(is_nil(b));
-	assert_int(is_nil(b), 1)
+	assert_int(is_nil(b), 0)
 end

@@ -1,6 +1,10 @@
 language: c
 compiler: clang
 
+cache:
+  directories:
+  - $HOME/.opam/
+
 script: 
   - ./compile.sh
 
@@ -8,6 +12,7 @@ notifications:
   email: false
 
 before_install:
+  - ocaml -version
   - opam init -y --compiler=4.05.0
   - eval `opam config env`
   - opam install -y ocamlbuild ocamlfind menhir llvm

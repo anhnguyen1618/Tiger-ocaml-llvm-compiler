@@ -1,6 +1,5 @@
 _build/
 .vscode/
-bin/
 run_prog
 .DS_Store
 *~

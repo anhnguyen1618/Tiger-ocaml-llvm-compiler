@@ -12,12 +12,12 @@ notifications:
   email: false
 
 before_install:
-  - ls ~/.opam
   - opam init -y --compiler=4.05.0
   - eval `opam config env`
   - opam install -y ocamlbuild ocamlfind menhir llvm
   - sudo chmod +x compile.sh
   - rm llvm_byte_code/test/*
+  - mkdir bin
 
 matrix:
   include:
@@ -34,4 +34,3 @@ matrix:
             - opam
       env:
         - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
-        

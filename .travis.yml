@@ -4,6 +4,9 @@ compiler: clang
 script: 
   - ./compile.sh
 
+notifications:
+  email: false
+
 before_install:
   - opam init -y --compiler=4.05.0
   - eval `opam config env`

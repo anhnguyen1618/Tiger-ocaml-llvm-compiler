@@ -17,7 +17,6 @@ before_install:
   - opam install -y ocamlbuild ocamlfind menhir llvm
   - sudo chmod +x compile.sh
   - rm llvm_byte_code/test/*
-  - mkdir bin
 
 matrix:
   include:

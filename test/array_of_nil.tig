@@ -1,0 +1,22 @@
+let
+    type node = {data: int, next: node}
+    type arr = array of node
+    var x := node {data = 1, next = nil}
+    var nil_var: node := nil
+    function f (): node = nil
+
+    function g(node: node): int =
+        if is_nil(node) then 0
+        else node.data
+
+    var arr := arr [5] of f()
+    var arr1 := arr [5] of nil
+    var arr2 := arr [5] of nil_var
+in
+    assert_int(is_nil(arr[1]), 1);
+    assert_int(is_nil(arr1[1]), 1);
+    assert_int(is_nil(arr2[1]), 1);
+    assert_int(g(nil), 0);
+    assert_int(g(x), 1);
+    assert_int(g(x.next), 0)
+end

@@ -440,10 +440,13 @@ let rec trans_dec (
                                   Expect: '%s'. Received: '%s'"
                     (T.name ty) (T.name real_arg_type) in
 	U.assert_type_eq (ty, real_arg_type, pos, msg);
-        let casted_arg_ir = match ty with
-          | T.GENERIC_RECORD -> Translate.build_bitcast_generic T.STRING argIr
-          | T.GENERIC_ARRAY -> Translate.build_bitcast_generic T.STRING argIr
+        let arg_val = match arg_type with
+          | T.NIL -> Translate.nil_exp ty
           | _ -> argIr
+        in
+        let casted_arg_ir = match ty with
+          | T.GENERIC_RECORD | T.GENERIC_ARRAY -> Translate.build_bitcast_generic T.STRING arg_val
+          | _ -> arg_val
         in
         acc @ [casted_arg_ir]
       in

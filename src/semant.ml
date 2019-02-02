@@ -211,7 +211,7 @@ let rec trans_dec (
         let translate_body () =
           let {exp = bodyIr; ty = result_body_type } = trans_exp(body_venv, t_env, func_level, body, break) in
           body_type := result_body_type;
-          bodyIr
+          (result_body_type, bodyIr)
         in
         translate_body
       in
@@ -600,20 +600,26 @@ let rec trans_dec (
       match S.look(t_env, typ) with
 	Some (T.ARRAY(array_type, unique)) ->
          let size_result = tr_exp size in
-         let init_result = tr_exp init in
+         let {exp = init_exp; ty = init_ty} = tr_exp init in
          U.assert_type_eq (
              actual_ty_exp size_result,
              T.INT, pos,
              "Size with array must have type " ^ T.name(T.INT));
          U.assert_type_eq (
-             actual_ty_exp init_result,
+             actual_ty init_ty,
              array_type,
              pos,
              "Initialize letue with array does not have type " ^ T.name(array_type));
+         let element_type = actual_ty array_type in
+         let real_init_ty = actual_ty init_ty in
+         let casted_init_val = match real_init_ty with
+           | T.NIL -> Translate.nil_exp element_type
+           | _ -> init_exp
+         in
          { exp = Translate.array_exp
                    size_result.exp
-                   init_result.exp
-                   (actual_ty_exp init_result);
+                   casted_init_val
+                   element_type;
            ty = T.ARRAY(array_type, unique) }
      
       | Some _ ->
@@ -661,7 +667,7 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   let main_level = Translate.new_level Translate.outermost in
   ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, outermost_break_block)); 
   Translate.build_return_main();
-  (*dump_module Translate.the_module;*)
+  dump_module Translate.the_module;
   print_module ("llvm_byte_code/"^ output_name ^ ".ll") Translate.the_module;
 
 

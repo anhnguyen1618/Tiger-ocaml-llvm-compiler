@@ -442,7 +442,7 @@ let func_dec
       (typ: T.ty)
       (esc_vars: T.ty list)
       (args: arg_name_type_map list)
-      (add_arg_bindings: access list -> unit -> exp) =
+      (add_arg_bindings: access list -> unit -> T.ty * exp) =
   let (parent_fp_type, _) = get_current_fp() in
 
   let create_fp_type () =
@@ -493,10 +493,12 @@ let func_dec
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;
 
-  let body = gen_body() in
-  ignore(match typ with
-         | T.NIL -> L.build_ret_void builder
-         | _ -> L.build_ret body builder);
+  let (body_type, body_exp) = gen_body() in
+  ignore(match (typ, body_type) with
+         | (T.NIL, _) -> L.build_ret_void builder
+         | (_, T.NIL) -> L.build_ret (nil_exp typ)  builder
+         | _ -> L.build_ret body_exp builder);
+
 
   ignore(pop_fp_from_stack());
   L.position_at_end previous_block builder

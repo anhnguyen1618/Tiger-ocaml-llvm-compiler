@@ -39,6 +39,11 @@ let external_functions = [
                              label=Temp.namedlabel "tig_check_array_bound";
                              formals=[T.GENERIC_ARRAY; T.INT; T.STRING];
                              result= T.NIL}));
+      ("check_null_pointer", FunEntry ({
+                             level=Translate.outermost;
+                             label=Temp.namedlabel "tig_check_null_pointer";
+                             formals=[T.GENERIC_RECORD; T.STRING];
+                             result= T.NIL}));
 
       ("random", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_random"; formals=[T.INT]; result=T.INT}));
       ("exit", FunEntry ({level=Translate.outermost; label=Temp.namedlabel "tig_exit"; formals=[T.INT]; result=T.NIL}));

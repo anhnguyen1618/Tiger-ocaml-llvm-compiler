@@ -24,6 +24,7 @@ print_error() {
 run_all_test_cases() {
     printf "${GREEN}==================== RUN ALL TESTS ====================${RESET}\n"
 
+    number_of_tests=0
     number_of_failed_test=0
     error_msg=""
     
@@ -35,13 +36,14 @@ run_all_test_cases() {
 	    print_success "${file_name}"
 	else
 	    print_error "${file_name}"
-	    number_of_failed_test+=1
+	    ((number_of_failed_test++))
 	    error_msg+="- ${file_name}\n"
 	fi
+	((number_of_tests++))
     done
 
     if [ $number_of_failed_test -eq 0 ]; then
-	printf "${GREEN}==================== ALL TESTS PASSED ====================${RESET}\n"
+	printf "${GREEN}==================== ALL TESTS PASSED (${number_of_tests} cases) ====================${RESET}\n"
     else
 	printf "${RED}==================== ${number_of_failed_test} TESTS FAILED ====================${RESET}\n"
         echo -e $error_msg

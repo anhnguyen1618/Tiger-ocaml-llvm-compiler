@@ -1,9 +1,21 @@
 ; ModuleID = 'llvm_byte_code/test/binary_tree.tig.ll'
 source_filename = "Tiger jit"
 
+@0 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::7.17: Nil pointer exception!\00"
+@1 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::7.38: Nil pointer exception!\00"
+@2 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::7.60: Nil pointer exception!\00"
+@3 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::17.8: Nil pointer exception!\00"
+@4 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::18.8: Nil pointer exception!\00"
+@5 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::19.5: Nil pointer exception!\00"
+@6 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::20.5: Nil pointer exception!\00"
+@7 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::21.5: Nil pointer exception!\00"
+@8 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::22.5: Nil pointer exception!\00"
+
 declare void @tig_print_int(i32) local_unnamed_addr
 
 declare i32 @tig_nillable(i8*) local_unnamed_addr
+
+declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr
 
 declare void @assert_equal_int(i32, i32) local_unnamed_addr
 
@@ -66,28 +78,40 @@ entry:
   store i8* null, i8** %Element31
   %Element32 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init29, i32 0, i32 2
   store i8* null, i8** %Element32
+  %0 = bitcast { i32, i8*, i8* }* %record_init to i8*
+  call void @tig_check_null_pointer(i8* %0, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @3, i32 0, i32 0))
   %element_left = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init, i32 0, i32 1
-  %0 = bitcast i8** %element_left to { i32, i8*, i8* }**
-  store { i32, i8*, i8* }* %record_init9, { i32, i8*, i8* }** %0
+  %1 = bitcast i8** %element_left to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init9, { i32, i8*, i8* }** %1
+  %2 = bitcast { i32, i8*, i8* }* %record_init to i8*
+  call void @tig_check_null_pointer(i8* %2, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @4, i32 0, i32 0))
   %element_left35 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init, i32 0, i32 2
-  %1 = bitcast i8** %element_left35 to { i32, i8*, i8* }**
-  store { i32, i8*, i8* }* %record_init24, { i32, i8*, i8* }** %1
+  %3 = bitcast i8** %element_left35 to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init24, { i32, i8*, i8* }** %3
+  %4 = bitcast { i32, i8*, i8* }* %record_init9 to i8*
+  call void @tig_check_null_pointer(i8* %4, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @5, i32 0, i32 0))
   %element_left38 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init9, i32 0, i32 1
-  %2 = bitcast i8** %element_left38 to { i32, i8*, i8* }**
-  store { i32, i8*, i8* }* %record_init4, { i32, i8*, i8* }** %2
+  %5 = bitcast i8** %element_left38 to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init4, { i32, i8*, i8* }** %5
+  %6 = bitcast { i32, i8*, i8* }* %record_init9 to i8*
+  call void @tig_check_null_pointer(i8* %6, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @6, i32 0, i32 0))
   %element_left41 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init9, i32 0, i32 2
-  %3 = bitcast i8** %element_left41 to { i32, i8*, i8* }**
-  store { i32, i8*, i8* }* %record_init14, { i32, i8*, i8* }** %3
+  %7 = bitcast i8** %element_left41 to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init14, { i32, i8*, i8* }** %7
+  %8 = bitcast { i32, i8*, i8* }* %record_init24 to i8*
+  call void @tig_check_null_pointer(i8* %8, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @7, i32 0, i32 0))
   %element_left44 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init24, i32 0, i32 1
-  %4 = bitcast i8** %element_left44 to { i32, i8*, i8* }**
-  store { i32, i8*, i8* }* %record_init19, { i32, i8*, i8* }** %4
+  %9 = bitcast i8** %element_left44 to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init19, { i32, i8*, i8* }** %9
+  %10 = bitcast { i32, i8*, i8* }* %record_init24 to i8*
+  call void @tig_check_null_pointer(i8* %10, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @8, i32 0, i32 0))
   %element_left47 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init24, i32 0, i32 2
-  %5 = bitcast i8** %element_left47 to { i32, i8*, i8* }**
-  store { i32, i8*, i8* }* %record_init29, { i32, i8*, i8* }** %5
-  %6 = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %record_init)
-  call void @tig_print_int(i32 %6)
-  %7 = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %record_init)
-  call void @assert_equal_int(i32 %7, i32 34)
+  %11 = bitcast i8** %element_left47 to { i32, i8*, i8* }**
+  store { i32, i8*, i8* }* %record_init29, { i32, i8*, i8* }** %11
+  %12 = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %record_init)
+  call void @tig_print_int(i32 %12)
+  %13 = call i32 @eval_sum({ i32 }* %frame_pointer, { i32, i8*, i8* }* %record_init)
+  call void @assert_equal_int(i32 %13, i32 34)
   ret i32 0
 }
 
@@ -108,22 +132,28 @@ then:                                             ; preds = %test
   br label %merge
 
 else:                                             ; preds = %test
+  %4 = bitcast { i32, i8*, i8* }* %1 to i8*
+  call void @tig_check_null_pointer(i8* %4, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @0, i32 0, i32 0))
   %element = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %1, i32 0, i32 0
   %field_var = load i32, i32* %element
+  %5 = bitcast { i32, i8*, i8* }* %1 to i8*
+  call void @tig_check_null_pointer(i8* %5, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @1, i32 0, i32 0))
   %element4 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %1, i32 0, i32 1
   %field_var5 = load i8*, i8** %element4
-  %4 = bitcast i8* %field_var5 to { i32, i8*, i8* }*
+  %6 = bitcast i8* %field_var5 to { i32, i8*, i8* }*
   %fp_addr_in_sl = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
   %fp_addr = load { i32 }*, { i32 }** %fp_addr_in_sl
-  %5 = call i32 @eval_sum({ i32 }* %fp_addr, { i32, i8*, i8* }* %4)
-  %add_tmp = add i32 %field_var, %5
+  %7 = call i32 @eval_sum({ i32 }* %fp_addr, { i32, i8*, i8* }* %6)
+  %add_tmp = add i32 %field_var, %7
+  %8 = bitcast { i32, i8*, i8* }* %1 to i8*
+  call void @tig_check_null_pointer(i8* %8, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @2, i32 0, i32 0))
   %element7 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %1, i32 0, i32 2
   %field_var8 = load i8*, i8** %element7
-  %6 = bitcast i8* %field_var8 to { i32, i8*, i8* }*
+  %9 = bitcast i8* %field_var8 to { i32, i8*, i8* }*
   %fp_addr_in_sl9 = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
   %fp_addr10 = load { i32 }*, { i32 }** %fp_addr_in_sl9
-  %7 = call i32 @eval_sum({ i32 }* %fp_addr10, { i32, i8*, i8* }* %6)
-  %add_tmp11 = add i32 %add_tmp, %7
+  %10 = call i32 @eval_sum({ i32 }* %fp_addr10, { i32, i8*, i8* }* %9)
+  %add_tmp11 = add i32 %add_tmp, %10
   br label %merge
 
 merge:                                            ; preds = %else, %then

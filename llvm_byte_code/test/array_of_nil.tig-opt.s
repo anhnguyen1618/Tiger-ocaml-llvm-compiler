@@ -131,6 +131,9 @@ main:                                   # @main
 	movl	$1, %esi
 	movl	%eax, %edi
 	callq	assert_equal_int
+	movl	$.L__unnamed_4, %esi
+	movq	%r14, %rdi
+	callq	tig_check_null_pointer
 	movq	8(%r14), %rsi
 	movq	%rbx, %rdi
 	callq	g
@@ -182,6 +185,9 @@ g:                                      # @g
 	cmpl	$1, %ecx
 	je	.LBB2_2
 # %bb.1:                                # %else
+	movl	$.L__unnamed_5, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
 	movl	(%rbx), %eax
 .LBB2_2:                                # %merge
 	addq	$16, %rsp
@@ -191,24 +197,36 @@ g:                                      # @g
 	.size	g, .Lfunc_end2-g
 	.cfi_endproc
                                         # -- End function
-	.type	.L__unnamed_1,@object   # @0
+	.type	.L__unnamed_5,@object   # @0
 	.section	.rodata.str1.16,"aMS",@progbits,1
+	.p2align	4
+.L__unnamed_5:
+	.asciz	"test/array_of_nil.tig::10.17: Nil pointer exception!"
+	.size	.L__unnamed_5, 53
+
+	.type	.L__unnamed_1,@object   # @1
 	.p2align	4
 .L__unnamed_1:
 	.asciz	"test/array_of_nil.tig::16.25: Array out of bound"
 	.size	.L__unnamed_1, 49
 
-	.type	.L__unnamed_2,@object   # @1
+	.type	.L__unnamed_2,@object   # @2
 	.p2align	4
 .L__unnamed_2:
 	.asciz	"test/array_of_nil.tig::17.26: Array out of bound"
 	.size	.L__unnamed_2, 49
 
-	.type	.L__unnamed_3,@object   # @2
+	.type	.L__unnamed_3,@object   # @3
 	.p2align	4
 .L__unnamed_3:
 	.asciz	"test/array_of_nil.tig::18.26: Array out of bound"
 	.size	.L__unnamed_3, 49
+
+	.type	.L__unnamed_4,@object   # @4
+	.p2align	4
+.L__unnamed_4:
+	.asciz	"test/array_of_nil.tig::21.18: Nil pointer exception!"
+	.size	.L__unnamed_4, 53
 
 
 	.section	".note.GNU-stack","",@progbits

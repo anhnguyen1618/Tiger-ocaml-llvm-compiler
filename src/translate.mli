@@ -35,9 +35,9 @@ val array_exp: exp -> exp -> Types.ty -> exp
 
 val record_exp: (Symbol.symbol * Types.ty) list -> exp list -> exp
 
-val field_var_exp: exp -> exp -> exp
+val field_var_exp: exp -> exp -> int -> exp
 
-val field_var_exp_left: exp -> exp -> exp
+val field_var_exp_left: exp -> exp -> int -> exp
 
 val subscript_exp: exp -> exp -> int -> exp
 

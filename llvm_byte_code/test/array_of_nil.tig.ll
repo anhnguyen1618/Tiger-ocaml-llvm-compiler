@@ -1,9 +1,11 @@
 ; ModuleID = 'Tiger jit'
 source_filename = "Tiger jit"
 
-@0 = private unnamed_addr constant [49 x i8] c"test/array_of_nil.tig::16.25: Array out of bound\00"
-@1 = private unnamed_addr constant [49 x i8] c"test/array_of_nil.tig::17.26: Array out of bound\00"
-@2 = private unnamed_addr constant [49 x i8] c"test/array_of_nil.tig::18.26: Array out of bound\00"
+@0 = private unnamed_addr constant [53 x i8] c"test/array_of_nil.tig::10.17: Nil pointer exception!\00"
+@1 = private unnamed_addr constant [49 x i8] c"test/array_of_nil.tig::16.25: Array out of bound\00"
+@2 = private unnamed_addr constant [49 x i8] c"test/array_of_nil.tig::17.26: Array out of bound\00"
+@3 = private unnamed_addr constant [49 x i8] c"test/array_of_nil.tig::18.26: Array out of bound\00"
+@4 = private unnamed_addr constant [53 x i8] c"test/array_of_nil.tig::21.18: Nil pointer exception!\00"
 
 declare void @tig_print_int(i32)
 
@@ -20,6 +22,8 @@ declare i32 @tig_array_length(i8*)
 declare i32 @tig_nillable(i8*)
 
 declare void @tig_check_array_bound(i8*, i32, i8*)
+
+declare void @tig_check_null_pointer(i8*, i8*)
 
 declare i32 @tig_random(i32)
 
@@ -157,7 +161,7 @@ end31:                                            ; preds = %test29
   store { i32, { i32, i8* }** }* %array_wrapper40, { i32, { i32, i8* }** }** %arr2
   %arr43 = load { i32, { i32, i8* }** }*, { i32, { i32, i8* }** }** %arr
   %1 = bitcast { i32, { i32, i8* }** }* %arr43 to i8*
-  call void @tig_check_array_bound(i8* %1, i32 1, i8* getelementptr inbounds ([49 x i8], [49 x i8]* @0, i32 0, i32 0))
+  call void @tig_check_array_bound(i8* %1, i32 1, i8* getelementptr inbounds ([49 x i8], [49 x i8]* @1, i32 0, i32 0))
   %array_pointer = getelementptr { i32, { i32, i8* }** }, { i32, { i32, i8* }** }* %arr43, i32 0, i32 1
   %arr_addr = load { i32, i8* }**, { i32, i8* }*** %array_pointer
   %arr_ele_addr = getelementptr { i32, i8* }*, { i32, i8* }** %arr_addr, i32 1
@@ -167,7 +171,7 @@ end31:                                            ; preds = %test29
   call void @assert_equal_int(i32 %3, i32 1)
   %arr144 = load { i32, { i32, i8* }** }*, { i32, { i32, i8* }** }** %arr1
   %4 = bitcast { i32, { i32, i8* }** }* %arr144 to i8*
-  call void @tig_check_array_bound(i8* %4, i32 1, i8* getelementptr inbounds ([49 x i8], [49 x i8]* @1, i32 0, i32 0))
+  call void @tig_check_array_bound(i8* %4, i32 1, i8* getelementptr inbounds ([49 x i8], [49 x i8]* @2, i32 0, i32 0))
   %array_pointer45 = getelementptr { i32, { i32, i8* }** }, { i32, { i32, i8* }** }* %arr144, i32 0, i32 1
   %arr_addr46 = load { i32, i8* }**, { i32, i8* }*** %array_pointer45
   %arr_ele_addr47 = getelementptr { i32, i8* }*, { i32, i8* }** %arr_addr46, i32 1
@@ -177,7 +181,7 @@ end31:                                            ; preds = %test29
   call void @assert_equal_int(i32 %6, i32 1)
   %arr249 = load { i32, { i32, i8* }** }*, { i32, { i32, i8* }** }** %arr2
   %7 = bitcast { i32, { i32, i8* }** }* %arr249 to i8*
-  call void @tig_check_array_bound(i8* %7, i32 1, i8* getelementptr inbounds ([49 x i8], [49 x i8]* @2, i32 0, i32 0))
+  call void @tig_check_array_bound(i8* %7, i32 1, i8* getelementptr inbounds ([49 x i8], [49 x i8]* @3, i32 0, i32 0))
   %array_pointer50 = getelementptr { i32, { i32, i8* }** }, { i32, { i32, i8* }** }* %arr249, i32 0, i32 1
   %arr_addr51 = load { i32, i8* }**, { i32, i8* }*** %array_pointer50
   %arr_ele_addr52 = getelementptr { i32, i8* }*, { i32, i8* }** %arr_addr51, i32 1
@@ -191,11 +195,13 @@ end31:                                            ; preds = %test29
   %11 = call i32 @g({ i32 }* %frame_pointer, { i32, i8* }* %x54)
   call void @assert_equal_int(i32 %11, i32 1)
   %x55 = load { i32, i8* }*, { i32, i8* }** %x
+  %12 = bitcast { i32, i8* }* %x55 to i8*
+  call void @tig_check_null_pointer(i8* %12, i8* getelementptr inbounds ([53 x i8], [53 x i8]* @4, i32 0, i32 0))
   %element = getelementptr { i32, i8* }, { i32, i8* }* %x55, i32 0, i32 1
   %field_var = load i8*, i8** %element
-  %12 = bitcast i8* %field_var to { i32, i8* }*
-  %13 = call i32 @g({ i32 }* %frame_pointer, { i32, i8* }* %12)
-  call void @assert_equal_int(i32 %13, i32 0)
+  %13 = bitcast i8* %field_var to { i32, i8* }*
+  %14 = call i32 @g({ i32 }* %frame_pointer, { i32, i8* }* %13)
+  call void @assert_equal_int(i32 %14, i32 0)
   ret i32 0
 }
 
@@ -232,6 +238,8 @@ then:                                             ; preds = %test
 
 else:                                             ; preds = %test
   %node2 = load { i32, i8* }*, { i32, i8* }** %node
+  %4 = bitcast { i32, i8* }* %node2 to i8*
+  call void @tig_check_null_pointer(i8* %4, i8* getelementptr inbounds ([53 x i8], [53 x i8]* @0, i32 0, i32 0))
   %element = getelementptr { i32, i8* }, { i32, i8* }* %node2, i32 0, i32 0
   %field_var = load i32, i32* %element
   store i32 %field_var, i32* %if_result_addr

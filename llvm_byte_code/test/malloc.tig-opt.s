@@ -46,51 +46,69 @@ main:                                   # @main
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movq	(%rax), %rax
-	movl	(%rax), %edi
+	movq	(%rax), %rbx
+	movl	$.L__unnamed_2, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movl	(%rbx), %edi
 	callq	tig_print_int
 	movq	16(%rsp), %rbx
 	xorl	%esi, %esi
-	movl	$.L__unnamed_2, %edx
+	movl	$.L__unnamed_3, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movq	(%rax), %rax
-	movl	(%rax), %edi
+	movq	(%rax), %rbx
+	movl	$.L__unnamed_4, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movl	(%rbx), %edi
 	movl	$5, %esi
 	callq	assert_equal_int
 	movl	$1, %esi
-	movl	$.L__unnamed_3, %edx
+	movl	$.L__unnamed_5, %edx
 	movq	%r14, %rdi
 	callq	tig_check_array_bound
 	movq	8(%r14), %rax
-	movq	8(%rax), %rax
-	movl	(%rax), %edi
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_6, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movl	(%rbx), %edi
 	callq	tig_print_int
 	movl	$1, %esi
-	movl	$.L__unnamed_4, %edx
+	movl	$.L__unnamed_7, %edx
 	movq	%r14, %rdi
 	callq	tig_check_array_bound
 	movq	8(%r14), %rax
-	movq	8(%rax), %rax
-	movl	(%rax), %edi
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_8, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movl	(%rbx), %edi
 	movl	$6, %esi
 	callq	assert_equal_int
 	movq	16(%rsp), %rbx
 	movl	$1, %esi
-	movl	$.L__unnamed_5, %edx
+	movl	$.L__unnamed_9, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
-	movq	8(%rax), %rax
-	movl	$5, (%rax)
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_10, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movl	$5, (%rbx)
 	movl	$1, %esi
-	movl	$.L__unnamed_6, %edx
+	movl	$.L__unnamed_11, %edx
 	movq	%r14, %rdi
 	callq	tig_check_array_bound
 	movq	8(%r14), %rax
-	movq	8(%rax), %rax
-	movl	(%rax), %edi
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_12, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movl	(%rbx), %edi
 	movl	$5, %esi
 	callq	assert_equal_int
 	xorl	%eax, %eax
@@ -124,7 +142,7 @@ create_rec:                             # @create_rec
 	movq	(%rsp), %rax
 	movq	8(%rax), %rbx
 	movl	$1, %esi
-	movl	$.L__unnamed_7, %edx
+	movl	$.L__unnamed_13, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
 	movq	8(%rbx), %rax
@@ -139,12 +157,12 @@ create_rec:                             # @create_rec
 	.size	create_rec, .Lfunc_end1-create_rec
 	.cfi_endproc
                                         # -- End function
-	.type	.L__unnamed_7,@object   # @0
+	.type	.L__unnamed_13,@object  # @0
 	.section	.rodata.str1.16,"aMS",@progbits,1
 	.p2align	4
-.L__unnamed_7:
+.L__unnamed_13:
 	.asciz	"test/malloc.tig::11.6: Array out of bound"
-	.size	.L__unnamed_7, 42
+	.size	.L__unnamed_13, 42
 
 	.type	.L__unnamed_1,@object   # @1
 	.p2align	4
@@ -155,32 +173,68 @@ create_rec:                             # @create_rec
 	.type	.L__unnamed_2,@object   # @2
 	.p2align	4
 .L__unnamed_2:
-	.asciz	"test/malloc.tig::18.15: Array out of bound"
-	.size	.L__unnamed_2, 43
+	.asciz	"test/malloc.tig::17.17: Nil pointer exception!"
+	.size	.L__unnamed_2, 47
 
 	.type	.L__unnamed_3,@object   # @3
 	.p2align	4
 .L__unnamed_3:
-	.asciz	"test/malloc.tig::20.12: Array out of bound"
+	.asciz	"test/malloc.tig::18.15: Array out of bound"
 	.size	.L__unnamed_3, 43
 
 	.type	.L__unnamed_4,@object   # @4
 	.p2align	4
 .L__unnamed_4:
-	.asciz	"test/malloc.tig::21.13: Array out of bound"
-	.size	.L__unnamed_4, 43
+	.asciz	"test/malloc.tig::18.18: Nil pointer exception!"
+	.size	.L__unnamed_4, 47
 
 	.type	.L__unnamed_5,@object   # @5
 	.p2align	4
 .L__unnamed_5:
-	.asciz	"test/malloc.tig::23.4: Array out of bound"
-	.size	.L__unnamed_5, 42
+	.asciz	"test/malloc.tig::20.12: Array out of bound"
+	.size	.L__unnamed_5, 43
 
 	.type	.L__unnamed_6,@object   # @6
 	.p2align	4
 .L__unnamed_6:
+	.asciz	"test/malloc.tig::20.15: Nil pointer exception!"
+	.size	.L__unnamed_6, 47
+
+	.type	.L__unnamed_7,@object   # @7
+	.p2align	4
+.L__unnamed_7:
+	.asciz	"test/malloc.tig::21.13: Array out of bound"
+	.size	.L__unnamed_7, 43
+
+	.type	.L__unnamed_8,@object   # @8
+	.p2align	4
+.L__unnamed_8:
+	.asciz	"test/malloc.tig::21.16: Nil pointer exception!"
+	.size	.L__unnamed_8, 47
+
+	.type	.L__unnamed_9,@object   # @9
+	.p2align	4
+.L__unnamed_9:
+	.asciz	"test/malloc.tig::23.4: Array out of bound"
+	.size	.L__unnamed_9, 42
+
+	.type	.L__unnamed_10,@object  # @10
+	.p2align	4
+.L__unnamed_10:
+	.asciz	"test/malloc.tig::23.7: Nil pointer exception!"
+	.size	.L__unnamed_10, 46
+
+	.type	.L__unnamed_11,@object  # @11
+	.p2align	4
+.L__unnamed_11:
 	.asciz	"test/malloc.tig::24.13: Array out of bound"
-	.size	.L__unnamed_6, 43
+	.size	.L__unnamed_11, 43
+
+	.type	.L__unnamed_12,@object  # @12
+	.p2align	4
+.L__unnamed_12:
+	.asciz	"test/malloc.tig::24.16: Nil pointer exception!"
+	.size	.L__unnamed_12, 47
 
 
 	.section	".note.GNU-stack","",@progbits

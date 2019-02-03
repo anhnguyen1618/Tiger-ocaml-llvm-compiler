@@ -161,7 +161,7 @@ let rec trans_dec (
     let check_simple_var (s: S.symbol): expty =
       match S.look(v_env, s) with
         Some (E.VarEntry({ty; _})) -> actual_ty ty
-      | _ -> Error.Error.error 0 ("couldn't find variable " ^ S.name(s) ^ "\n"); T.NIL
+      | _ -> T.NIL
     in
     
     let rec check_field_var (obj, s, pos): expty =

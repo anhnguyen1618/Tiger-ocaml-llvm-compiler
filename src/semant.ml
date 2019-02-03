@@ -294,7 +294,7 @@ let rec trans_dec (
          (match matchedField with
           | Some (_, ty) ->
              let actual_type = actual_ty ty in
-             let raw_val = Translate.field_var_exp recExp (Translate.int_exp !index) in
+             let raw_val = Translate.field_var_exp recExp (Translate.int_exp !index) pos in
              let casted_val = match ty with
                | T.NAME _ -> Translate.cast_generic_to_record raw_val actual_type
                | _ -> raw_val
@@ -369,7 +369,7 @@ let rec trans_dec (
          (match matchedField with
           | Some (_, (T.NAME _ as ty)) ->
              let actual_type = actual_ty ty in
-             let generic_addr = Translate.field_var_exp_left rec_access (int_exp !index) in
+             let generic_addr = Translate.field_var_exp_left rec_access (int_exp !index) pos in
              let casted_addr = Translate.cast_generic_to_record_pointer generic_addr actual_type in
              {exp = casted_addr ; ty = ty}
             
@@ -377,7 +377,7 @@ let rec trans_dec (
              Translate.cast_generic_to_record raw_addr_val (actual_ty ty)
              Translate.cast_generic_to_record raw_val actual_type*)
           | Some (_, ty) ->               
-             {exp = Translate.field_var_exp_left rec_access (int_exp !index); ty = ty}
+             {exp = Translate.field_var_exp_left rec_access (int_exp !index) pos; ty = ty}
           | None -> (
             let msg = Printf.sprintf "Property '%s' does not exist on type '%s'\n"
                         (S.name s) (T.name typeWithObj) in

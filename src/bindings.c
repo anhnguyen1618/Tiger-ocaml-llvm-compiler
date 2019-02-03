@@ -60,6 +60,14 @@ extern int tig_nillable(const char *s)
   return s == NULL;
 }
 
+extern void tig_check_null_pointer(const char *s, const char *msg)
+{
+  if (tig_nillable(s) == 1) {
+    tig_print(msg);
+    exit(1);
+  }
+}
+
 extern int tig_array_length(const char *s)
 {
   return s[0];

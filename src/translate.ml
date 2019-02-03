@@ -318,18 +318,25 @@ let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
   List.iteri alloc casted_exps;
   record_addr
 
-let field_var_exp (arr_addr: exp) (index: exp) =
+let check_record_nil (address: exp) (pos: int) =
+  let error_msg = Err.gen_err_message pos "Nil pointer exception!" in
+  let casted_record = build_bitcast_generic T.STRING address in
+  ignore(func_call_exp TOP TOP "tig_check_null_pointer" [casted_record; string_exp(error_msg)])
+
+let field_var_exp (arr_addr: exp) (index: exp) (pos: int) =
+  check_record_nil arr_addr pos;
   (*L.build_load arr_addr "zz" builder  *)
   let addr = L.build_gep arr_addr [| int_exp(0); index |] "element" builder in
   L.build_load addr "field_var" builder
 
-let field_var_exp_left (arr_addr: exp ) (index: exp) =
+let field_var_exp_left (arr_addr: exp ) (index: exp) (pos: int) =
   (* we have to load here becase 
      RHS exp: arr := malloc() => arr has int* type and is saved to int**
      ,when calling transVar(simple) => return int* type 
      LHS exp: arr := malloc() => arr has int* type and is saved to int**
      HOWEVER when calling transVar_left(simple) => return int** (address that contain int* type*)
   let addr = L.build_load arr_addr "load_left" builder in
+  check_record_nil addr pos;
   L.build_gep addr [| int_exp(0);index |] "element_left" builder
 
 let check_bound_array (arr_wrapper_addr: exp) (index_exp: exp) (pos: int)=

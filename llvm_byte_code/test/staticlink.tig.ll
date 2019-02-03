@@ -20,6 +20,8 @@ declare i32 @tig_nillable(i8*)
 
 declare void @tig_check_array_bound(i8*, i32, i8*)
 
+declare void @tig_check_null_pointer(i8*, i8*)
+
 declare i32 @tig_random(i32)
 
 declare void @tig_exit(i32)

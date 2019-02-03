@@ -13,8 +13,14 @@ main:                                   # @main
 	callq	malloc
 	movq	%rax, %rbx
 	movq	$.L__unnamed_1, (%rbx)
-	movl	$.L__unnamed_1, %edi
+	movl	$.L__unnamed_2, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movq	(%rbx), %rdi
 	callq	tig_print
+	movl	$.L__unnamed_3, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
 	movq	(%rbx), %rdi
 	movl	$.L__unnamed_1, %esi
 	callq	assert_equal_string
@@ -43,7 +49,20 @@ main:                                   # @main
 	.size	main, .Lfunc_end0-main
 	.cfi_endproc
                                         # -- End function
-	.type	.L__unnamed_1,@object   # @0
+	.type	.L__unnamed_2,@object   # @0
+	.section	.rodata.str1.16,"aMS",@progbits,1
+	.p2align	4
+.L__unnamed_2:
+	.asciz	"test/nil.tig::6.8: Nil pointer exception!"
+	.size	.L__unnamed_2, 42
+
+	.type	.L__unnamed_3,@object   # @1
+	.p2align	4
+.L__unnamed_3:
+	.asciz	"test/nil.tig::7.16: Nil pointer exception!"
+	.size	.L__unnamed_3, 43
+
+	.type	.L__unnamed_1,@object   # @2
 	.section	.rodata.str1.1,"aMS",@progbits,1
 .L__unnamed_1:
 	.asciz	"hello world"

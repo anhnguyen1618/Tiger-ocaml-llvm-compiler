@@ -220,7 +220,7 @@ let rec trans_dec (
       let esc_vars = Link.extract_esc(dumb_v_esc_venv, t_env, body) in
       let next_esc_order = 1 + List.length esc_vars in
       
-      List.iter T.printTy esc_vars;
+      (*List.iter T.printTy esc_vars;*)
       
       let gen_arg_mappings
             (result, index)
@@ -663,7 +663,7 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   Escape.find_escape(my_exp);
   
   let escs = Link.extract_esc (Env.base_venv, Env.base_tenv, my_exp) in
-  List.iter T.printTy escs;
+  (*List.iter T.printTy escs;*)
 
   let outermost_break_block = Translate.build_main_func escs in
 

@@ -3,12 +3,16 @@ source_filename = "Tiger jit"
 
 @0 = private unnamed_addr constant [13 x i8] c"Demo program\00"
 @1 = private unnamed_addr constant [41 x i8] c"test/demo.tig::14.20: Array out of bound\00"
+@2 = private unnamed_addr constant [45 x i8] c"test/demo.tig::14.23: Nil pointer exception!\00"
+@3 = private unnamed_addr constant [45 x i8] c"test/demo.tig::19.19: Nil pointer exception!\00"
 
 declare void @tig_print_int(i32) local_unnamed_addr
 
 declare void @tig_print(i8*) local_unnamed_addr
 
 declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr
+
+declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr
 
 define i32 @main() local_unnamed_addr {
 entry:
@@ -49,6 +53,8 @@ end:                                              ; preds = %test
   %arr_addr = load { i32, i8* }**, { i32, i8* }*** %array_pointer
   %arr_ele_addr = getelementptr { i32, i8* }*, { i32, i8* }** %arr_addr, i32 0
   %arr_ele = load { i32, i8* }*, { i32, i8* }** %arr_ele_addr
+  %1 = bitcast { i32, i8* }* %arr_ele to i8*
+  call void @tig_check_null_pointer(i8* %1, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @2, i32 0, i32 0))
   %element = getelementptr { i32, i8* }, { i32, i8* }* %arr_ele, i32 0, i32 0
   %field_var = load i32, i32* %element
   br label %test11
@@ -61,8 +67,10 @@ test11:                                           ; preds = %loop12, %end
   br i1 %cond16, label %loop12, label %end13
 
 loop12:                                           ; preds = %test11
-  %1 = call i32 @fib({ i32 }* %frame_pointer, i32 %counter.0)
-  call void @tig_print_int(i32 %1)
+  %2 = call i32 @fib({ i32 }* %frame_pointer, i32 %counter.0)
+  call void @tig_print_int(i32 %2)
+  %3 = bitcast { i32, i8* }* %record_init to i8*
+  call void @tig_check_null_pointer(i8* %3, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @3, i32 0, i32 0))
   %element19 = getelementptr { i32, i8* }, { i32, i8* }* %record_init, i32 0, i32 1
   %field_var20 = load i8*, i8** %element19
   call void @tig_print(i8* %field_var20)

@@ -46,8 +46,11 @@ main:                                   # @main
 	movq	%r14, %rdi
 	callq	tig_check_array_bound
 	movq	8(%r14), %rax
-	movq	(%rax), %rax
-	movl	(%rax), %ebp
+	movq	(%rax), %rbp
+	movl	$.L__unnamed_3, %esi
+	movq	%rbp, %rdi
+	callq	tig_check_null_pointer
+	movl	(%rbp), %ebp
 	leaq	8(%rsp), %r14
 	testl	%ebp, %ebp
 	jle	.LBB0_6
@@ -59,6 +62,9 @@ main:                                   # @main
 	callq	fib
 	movl	%eax, %edi
 	callq	tig_print_int
+	movl	$.L__unnamed_4, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
 	movq	8(%rbx), %rdi
 	callq	tig_print
 	decl	%ebp
@@ -129,6 +135,18 @@ fib:                                    # @fib
 .L__unnamed_2:
 	.asciz	"test/demo.tig::14.20: Array out of bound"
 	.size	.L__unnamed_2, 41
+
+	.type	.L__unnamed_3,@object   # @2
+	.p2align	4
+.L__unnamed_3:
+	.asciz	"test/demo.tig::14.23: Nil pointer exception!"
+	.size	.L__unnamed_3, 45
+
+	.type	.L__unnamed_4,@object   # @3
+	.p2align	4
+.L__unnamed_4:
+	.asciz	"test/demo.tig::19.19: Nil pointer exception!"
+	.size	.L__unnamed_4, 45
 
 
 	.section	".note.GNU-stack","",@progbits

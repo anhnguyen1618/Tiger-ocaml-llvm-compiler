@@ -13,7 +13,8 @@ let rec traverse_var: esc_env * depth * A.var -> unit = function
   | (env, d, (A.FieldVar(var, id, pos))) ->
       traverse_var(env, d, var)
   | (env, d, A.SubscriptVar(var, exp, pos)) ->
-      traverse_var(env, d, var)
+     traverse_var(env, d, var);
+     traverse_exp(env, d, exp)
 
 and traverse_exp = function
   | (env, d, A.OpExp{left; oper; right; pos}) ->
@@ -36,7 +37,7 @@ and traverse_exp = function
     traverse_exp(env,d,then');
     traverse_exp(env,d,test);
      (match else' with
-       Some (exp) -> traverse_exp(env,d,then')
+       Some (exp) -> traverse_exp(env,d,exp)
      | None -> ())
   | (env, d, A.WhileExp{test; body; pos}) ->
     traverse_exp(env,d,test);

@@ -1,0 +1,99 @@
+let
+    type int_array = array of int
+    function print_array (arr: int_array) =
+        (
+            print("[");
+            for i:= 0 to array_length(arr) - 1 do print_arr_ele(arr[i]);
+            print("");
+            print("]")
+        )
+
+    function create_array(): int_array = 
+        let
+            var size := 8 
+            var arr := int_array [size] of 1
+        in
+            for i := 0 to size - 1 do arr[i] := random(50);
+            arr
+        end
+     function binary_sort(arr: int_array) =
+        let
+            type node = {data: int, left: node, right: node}
+            function build_binary_tree(): node = nil  
+                /* let
+                    var root_node: node := nil
+                    var new_node := node {data = value, left = nil, right = nil}
+                    function add_node(value: int) =
+                        if is_nil(root_node)
+                        then root_node := new_node
+                        else 
+                            let
+                                function insert_node(cur_node: node) =
+                                    if cur_node.data <= value & is_nil(cur_node.right)
+                                    then cur_node.right := new_node
+                                    else if cur_node.data > value & is_nil(cur_node.left)
+                                    then cur_node.left := new_node
+                                    else if cur_node.data <= value
+                                    then insert_node(cur_node.right)
+                                    else insert_node(cur_node.left)
+                            in
+                                insert_node(root_node)
+                            end
+
+                in
+                    for i := 0 to array_length(arr) - 1 do 
+                        add_node(arr[i]);
+                    root_node
+                end */
+            
+            var counter := 0    
+            function in_order_traversing(cur_node: node) =
+                if is_nil(cur_node) then 0
+                else (
+                    in_order_traversing(cur_node.left);
+                    arr[counter] := cur_node.data;
+                    counter := counter + 1;
+                    in_order_traversing(cur_node.right);
+                    1
+                )
+
+            var root_node := build_binary_tree()
+
+        in
+            in_order_traversing(root_node)
+        end
+    var arr := create_array()
+
+    /* This is for testing */
+    function create_array_test(): int_array = 
+        let
+            var size := 5 
+            var arr := int_array [size] of 1
+        in
+            for i := 0 to size - 1 do arr[i] := size-i-1;
+            arr
+        end
+    var arr_test := create_array_test()
+in
+    print("Before sorting");
+    print_array(arr);
+    print("==============");
+    binary_sort(arr);
+    print("After sorting");
+    print_array(arr);
+
+    /* Testing start here */
+    assert_int(arr_test[0], 4);
+    assert_int(arr_test[1], 3);
+    assert_int(arr_test[2], 2);
+    assert_int(arr_test[3], 1);
+    assert_int(arr_test[4], 0);
+
+    binary_sort(arr_test);
+
+    assert_int(arr_test[0], 0);
+    assert_int(arr_test[1], 1);
+    assert_int(arr_test[2], 2);
+    assert_int(arr_test[3], 3);
+    assert_int(arr_test[4], 4)
+end

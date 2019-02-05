@@ -296,45 +296,45 @@ build_binary_tree:                      # @build_binary_tree
 	.cfi_def_cfa_offset 32
 	pushq	%rbx
 	.cfi_def_cfa_offset 40
-	pushq	%rax
-	.cfi_def_cfa_offset 48
+	subq	$24, %rsp
+	.cfi_def_cfa_offset 64
 	.cfi_offset %rbx, -40
 	.cfi_offset %r14, -32
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
-	movq	%rdi, (%rsp)
+	movq	%rdi, 8(%rsp)
+	movq	$0, 16(%rsp)
 	movq	16(%rdi), %rdi
 	callq	tig_array_length
-	movq	(%rsp), %rax
+	movq	8(%rsp), %rax
 	movq	16(%rax), %rdi
 	callq	tig_array_length
 	movl	%eax, %r15d
 	decl	%r15d
-	xorl	%ebx, %ebx
-	movq	%rsp, %r14
-	cmpl	%ebx, %r15d
+	xorl	%ebp, %ebp
+	leaq	8(%rsp), %r14
+	cmpl	%ebp, %r15d
 	jl	.LBB4_3
 	.p2align	4, 0x90
 .LBB4_2:                                # %loop
                                         # =>This Inner Loop Header: Depth=1
-	movq	(%rsp), %rax
-	movq	16(%rax), %rbp
+	movq	8(%rsp), %rax
+	movq	16(%rax), %rbx
 	movl	$.L__unnamed_19, %edx
-	movq	%rbp, %rdi
-	movl	%ebx, %esi
+	movq	%rbx, %rdi
+	movl	%ebp, %esi
 	callq	tig_check_array_bound
-	movq	8(%rbp), %rax
-	movslq	%ebx, %rcx
-	movl	(%rax,%rcx,4), %edx
-	xorl	%esi, %esi
+	movq	8(%rbx), %rax
+	movslq	%ebp, %rcx
+	movl	(%rax,%rcx,4), %esi
 	movq	%r14, %rdi
 	callq	add_node
-	incl	%ebx
-	cmpl	%ebx, %r15d
+	incl	%ebp
+	cmpl	%ebp, %r15d
 	jge	.LBB4_2
 .LBB4_3:                                # %end
-	xorl	%eax, %eax
-	addq	$8, %rsp
+	movq	16(%rsp), %rax
+	addq	$24, %rsp
 	popq	%rbx
 	popq	%r14
 	popq	%r15
@@ -350,40 +350,40 @@ build_binary_tree:                      # @build_binary_tree
 add_node:                               # @add_node
 	.cfi_startproc
 # %bb.0:                                # %test
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
 	pushq	%rbx
-	.cfi_def_cfa_offset 24
-	subq	$24, %rsp
+	.cfi_def_cfa_offset 16
+	subq	$32, %rsp
 	.cfi_def_cfa_offset 48
-	.cfi_offset %rbx, -24
-	.cfi_offset %rbp, -16
-	movl	%edx, %ebp
-	movq	%rsi, %rbx
-	movq	%rdi, (%rsp)
-	movl	%ebp, 16(%rsp)
+	.cfi_offset %rbx, -16
+	movl	%esi, %ebx
+	movq	%rdi, 8(%rsp)
+	movl	%ebx, 24(%rsp)
 	movl	$24, %edi
 	callq	malloc
-	movl	%ebp, (%rax)
+	movl	%ebx, (%rax)
 	movq	$0, 8(%rax)
 	movq	$0, 16(%rax)
-	movq	%rax, 8(%rsp)
-	movq	%rbx, %rdi
+	movq	%rax, 16(%rsp)
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rdi
 	callq	tig_nillable
 	cmpl	$1, %eax
 	jne	.LBB5_2
 # %bb.1:                                # %then
 	movl	$.L__unnamed_20, %edi
 	callq	tig_print
+	movq	8(%rsp), %rax
+	movq	16(%rsp), %rcx
+	movq	%rcx, 8(%rax)
 	jmp	.LBB5_3
 .LBB5_2:                                # %else
-	movq	%rsp, %rdi
-	movq	%rbx, %rsi
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rsi
+	leaq	8(%rsp), %rdi
 	callq	insert_node
 .LBB5_3:                                # %merge
-	addq	$24, %rsp
+	addq	$32, %rsp
 	popq	%rbx
-	popq	%rbp
 	retq
 .Lfunc_end5:
 	.size	add_node, .Lfunc_end5-add_node
@@ -704,7 +704,7 @@ create_array_test:                      # @create_array_test
 	.type	.L__unnamed_19,@object  # @15
 	.p2align	4
 .L__unnamed_19:
-	.asciz	"test/binary_sort.tig::49.47: Array out of bound"
+	.asciz	"test/binary_sort.tig::49.36: Array out of bound"
 	.size	.L__unnamed_19, 48
 
 	.type	.L__unnamed_30,@object  # @16

@@ -64,9 +64,11 @@ let rec trans_dec (
     let add_esc_type esc_type =
       if !escape
       then
+        begin
           escape_vars := esc_type :: !escape_vars;
           order := !current_counter;
           increase_counter()
+        end
     in
     match typ with
       Some (s, p) ->

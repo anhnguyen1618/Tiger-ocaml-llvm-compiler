@@ -16,7 +16,7 @@ source_filename = "Tiger jit"
 @12 = private unnamed_addr constant [52 x i8] c"test/binary_sort.tig::39.52: Nil pointer exception!\00"
 @13 = private unnamed_addr constant [52 x i8] c"test/binary_sort.tig::40.61: Nil pointer exception!\00"
 @14 = private unnamed_addr constant [52 x i8] c"test/binary_sort.tig::41.61: Nil pointer exception!\00"
-@15 = private unnamed_addr constant [48 x i8] c"test/binary_sort.tig::49.47: Array out of bound\00"
+@15 = private unnamed_addr constant [48 x i8] c"test/binary_sort.tig::49.36: Array out of bound\00"
 @16 = private unnamed_addr constant [52 x i8] c"test/binary_sort.tig::57.48: Nil pointer exception!\00"
 @17 = private unnamed_addr constant [48 x i8] c"test/binary_sort.tig::58.23: Array out of bound\00"
 @18 = private unnamed_addr constant [52 x i8] c"test/binary_sort.tig::58.44: Nil pointer exception!\00"
@@ -337,12 +337,12 @@ define { i32, i8*, i8* }* @build_binary_tree({ { i32 }*, i32, { i32, i32* }* }*)
 entry:
   %_limit = alloca i32
   %i = alloca i32
-  %root_node = alloca { i32, i8*, i8* }*
-  %frame_pointer = alloca { { { i32 }*, i32, { i32, i32* }* }* }
-  %arg_address = getelementptr { { { i32 }*, i32, { i32, i32* }* }* }, { { { i32 }*, i32, { i32, i32* }* }* }* %frame_pointer, i32 0, i32 0
+  %frame_pointer = alloca { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }
+  %arg_address = getelementptr { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %frame_pointer, i32 0, i32 0
   store { { i32 }*, i32, { i32, i32* }* }* %0, { { i32 }*, i32, { i32, i32* }* }** %arg_address
+  %root_node = getelementptr { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %frame_pointer, i32 0, i32 1
   store { i32, i8*, i8* }* null, { i32, i8*, i8* }** %root_node
-  %fp_addr_in_sl = getelementptr { { { i32 }*, i32, { i32, i32* }* }* }, { { { i32 }*, i32, { i32, i32* }* }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr_in_sl = getelementptr { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %frame_pointer, i32 0, i32 0
   %fp_addr = load { { i32 }*, i32, { i32, i32* }* }*, { { i32 }*, i32, { i32, i32* }* }** %fp_addr_in_sl
   %arr = getelementptr { { i32 }*, i32, { i32, i32* }* }, { { i32 }*, i32, { i32, i32* }* }* %fp_addr, i32 0, i32 2
   %arr1 = load { i32, i32* }*, { i32, i32* }** %arr
@@ -350,7 +350,7 @@ entry:
   %2 = call i32 @tig_array_length(i8* %1)
   %minus_tmp = sub i32 %2, 1
   store i32 0, i32* %i
-  %fp_addr_in_sl2 = getelementptr { { { i32 }*, i32, { i32, i32* }* }* }, { { { i32 }*, i32, { i32, i32* }* }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr_in_sl2 = getelementptr { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %frame_pointer, i32 0, i32 0
   %fp_addr3 = load { { i32 }*, i32, { i32, i32* }* }*, { { i32 }*, i32, { i32, i32* }* }** %fp_addr_in_sl2
   %arr4 = getelementptr { { i32 }*, i32, { i32, i32* }* }, { { i32 }*, i32, { i32, i32* }* }* %fp_addr3, i32 0, i32 2
   %arr5 = load { i32, i32* }*, { i32, i32* }** %arr4
@@ -369,39 +369,37 @@ test:                                             ; preds = %loop, %entry
   br i1 %cond, label %loop, label %end
 
 loop:                                             ; preds = %test
-  %root_node9 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root_node
-  %fp_addr_in_sl10 = getelementptr { { { i32 }*, i32, { i32, i32* }* }* }, { { { i32 }*, i32, { i32, i32* }* }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr11 = load { { i32 }*, i32, { i32, i32* }* }*, { { i32 }*, i32, { i32, i32* }* }** %fp_addr_in_sl10
-  %arr12 = getelementptr { { i32 }*, i32, { i32, i32* }* }, { { i32 }*, i32, { i32, i32* }* }* %fp_addr11, i32 0, i32 2
-  %arr13 = load { i32, i32* }*, { i32, i32* }** %arr12
-  %i14 = load i32, i32* %i
-  %5 = bitcast { i32, i32* }* %arr13 to i8*
-  call void @tig_check_array_bound(i8* %5, i32 %i14, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @15, i32 0, i32 0))
-  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %arr13, i32 0, i32 1
+  %fp_addr_in_sl9 = getelementptr { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr10 = load { { i32 }*, i32, { i32, i32* }* }*, { { i32 }*, i32, { i32, i32* }* }** %fp_addr_in_sl9
+  %arr11 = getelementptr { { i32 }*, i32, { i32, i32* }* }, { { i32 }*, i32, { i32, i32* }* }* %fp_addr10, i32 0, i32 2
+  %arr12 = load { i32, i32* }*, { i32, i32* }** %arr11
+  %i13 = load i32, i32* %i
+  %5 = bitcast { i32, i32* }* %arr12 to i8*
+  call void @tig_check_array_bound(i8* %5, i32 %i13, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @15, i32 0, i32 0))
+  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %arr12, i32 0, i32 1
   %arr_addr = load i32*, i32** %array_pointer
-  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 %i14
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 %i13
   %arr_ele = load i32, i32* %arr_ele_addr
-  call void @add_node({ { { i32 }*, i32, { i32, i32* }* }* }* %frame_pointer, { i32, i8*, i8* }* %root_node9, i32 %arr_ele)
-  %i15 = load i32, i32* %i
-  %add_tmp = add i32 %i15, 1
+  call void @add_node({ { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %frame_pointer, i32 %arr_ele)
+  %i14 = load i32, i32* %i
+  %add_tmp = add i32 %i14, 1
   store i32 %add_tmp, i32* %i
   br label %test
 
 end:                                              ; preds = %test
-  %root_node16 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root_node
+  %root_node15 = getelementptr { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %frame_pointer, i32 0, i32 1
+  %root_node16 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root_node15
   ret { i32, i8*, i8* }* %root_node16
 }
 
-define void @add_node({ { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32) {
+define void @add_node({ { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, i32) {
 entry:
-  %root_node = alloca { i32, i8*, i8* }*
-  %frame_pointer = alloca { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }
-  %arg_address = getelementptr { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 0
-  store { { { i32 }*, i32, { i32, i32* }* }* }* %0, { { { i32 }*, i32, { i32, i32* }* }* }** %arg_address
-  store { i32, i8*, i8* }* %1, { i32, i8*, i8* }** %root_node
-  %arg_address1 = getelementptr { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 2
-  store i32 %2, i32* %arg_address1
-  %value = getelementptr { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 2
+  %frame_pointer = alloca { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }
+  %arg_address = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 0
+  store { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %0, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }** %arg_address
+  %arg_address1 = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 2
+  store i32 %1, i32* %arg_address1
+  %value = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 2
   %value2 = load i32, i32* %value
   %malloccall = tail call i8* @malloc(i32 ptrtoint ({ i32, i8*, i8* }* getelementptr ({ i32, i8*, i8* }, { i32, i8*, i8* }* null, i32 1) to i32))
   %record_init = bitcast i8* %malloccall to { i32, i8*, i8* }*
@@ -411,41 +409,50 @@ entry:
   store i8* null, i8** %Element3
   %Element4 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %record_init, i32 0, i32 2
   store i8* null, i8** %Element4
-  %var_dec = getelementptr { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 1
+  %var_dec = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 1
   store { i32, i8*, i8* }* %record_init, { i32, i8*, i8* }** %var_dec
   br label %test
 
 test:                                             ; preds = %entry
+  %fp_addr_in_sl = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 0
+  %fp_addr = load { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }** %fp_addr_in_sl
+  %root_node = getelementptr { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %fp_addr, i32 0, i32 1
   %root_node5 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root_node
-  %3 = bitcast { i32, i8*, i8* }* %root_node5 to i8*
-  %4 = call i32 @tig_nillable(i8* %3)
-  %cond = icmp eq i32 %4, 1
+  %2 = bitcast { i32, i8*, i8* }* %root_node5 to i8*
+  %3 = call i32 @tig_nillable(i8* %2)
+  %cond = icmp eq i32 %3, 1
   br i1 %cond, label %then, label %else
 
 then:                                             ; preds = %test
   call void @tig_print(i8* getelementptr inbounds ([9 x i8], [9 x i8]* @5, i32 0, i32 0))
-  %new_node = getelementptr { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 1
-  %new_node6 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %new_node
-  store { i32, i8*, i8* }* %new_node6, { i32, i8*, i8* }** %root_node
+  %fp_addr_in_sl6 = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 0
+  %fp_addr7 = load { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }** %fp_addr_in_sl6
+  %root_node8 = getelementptr { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %fp_addr7, i32 0, i32 1
+  %new_node = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 1
+  %new_node9 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %new_node
+  store { i32, i8*, i8* }* %new_node9, { i32, i8*, i8* }** %root_node8
   br label %merge
 
 else:                                             ; preds = %test
-  %root_node7 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root_node
-  call void @insert_node({ { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, { i32, i8*, i8* }* %root_node7)
+  %fp_addr_in_sl10 = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, i32 0, i32 0
+  %fp_addr11 = load { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }** %fp_addr_in_sl10
+  %root_node12 = getelementptr { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }, { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }* %fp_addr11, i32 0, i32 1
+  %root_node13 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root_node12
+  call void @insert_node({ { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %frame_pointer, { i32, i8*, i8* }* %root_node13)
   br label %merge
 
 merge:                                            ; preds = %else, %then
   ret void
 }
 
-define void @insert_node({ { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }*, { i32, i8*, i8* }*) {
+define void @insert_node({ { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }*, { i32, i8*, i8* }*) {
 entry:
   %if_result_addr34 = alloca i32
   %if_result_addr = alloca i32
   %cur_node = alloca { i32, i8*, i8* }*
-  %frame_pointer = alloca { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }
-  %arg_address = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
-  store { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %0, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }** %arg_address
+  %frame_pointer = alloca { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }
+  %arg_address = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  store { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %0, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }** %arg_address
   store { i32, i8*, i8* }* %1, { i32, i8*, i8* }** %cur_node
   br label %test
 
@@ -458,9 +465,9 @@ then:                                             ; preds = %merge4
   call void @tig_check_null_pointer(i8* %2, i8* getelementptr inbounds ([52 x i8], [52 x i8]* @8, i32 0, i32 0))
   %element_left = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %load_left, i32 0, i32 2
   %3 = bitcast i8** %element_left to { i32, i8*, i8* }**
-  %fp_addr_in_sl11 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr12 = load { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl11
-  %new_node = getelementptr { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr12, i32 0, i32 1
+  %fp_addr_in_sl11 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr12 = load { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl11
+  %new_node = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr12, i32 0, i32 1
   %new_node13 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %new_node
   store { i32, i8*, i8* }* %new_node13, { i32, i8*, i8* }** %3
   br label %merge
@@ -477,9 +484,9 @@ test1:                                            ; preds = %test
   call void @tig_check_null_pointer(i8* %4, i8* getelementptr inbounds ([52 x i8], [52 x i8]* @6, i32 0, i32 0))
   %element = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %cur_node5, i32 0, i32 0
   %field_var = load i32, i32* %element
-  %fp_addr_in_sl = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr = load { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl
-  %value = getelementptr { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr, i32 0, i32 2
+  %fp_addr_in_sl = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr = load { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl
+  %value = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr, i32 0, i32 2
   %value6 = load i32, i32* %value
   %le_tmp = icmp sle i32 %field_var, %value6
   %bool_tmp = zext i1 %le_tmp to i32
@@ -516,9 +523,9 @@ then15:                                           ; preds = %merge21
   call void @tig_check_null_pointer(i8* %9, i8* getelementptr inbounds ([52 x i8], [52 x i8]* @11, i32 0, i32 0))
   %element_left38 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %load_left37, i32 0, i32 1
   %10 = bitcast i8** %element_left38 to { i32, i8*, i8* }**
-  %fp_addr_in_sl39 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr40 = load { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl39
-  %new_node41 = getelementptr { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr40, i32 0, i32 1
+  %fp_addr_in_sl39 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr40 = load { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl39
+  %new_node41 = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr40, i32 0, i32 1
   %new_node42 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %new_node41
   store { i32, i8*, i8* }* %new_node42, { i32, i8*, i8* }** %10
   br label %merge17
@@ -535,9 +542,9 @@ test18:                                           ; preds = %test14
   call void @tig_check_null_pointer(i8* %11, i8* getelementptr inbounds ([52 x i8], [52 x i8]* @9, i32 0, i32 0))
   %element23 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %cur_node22, i32 0, i32 0
   %field_var24 = load i32, i32* %element23
-  %fp_addr_in_sl25 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr26 = load { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl25
-  %value27 = getelementptr { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr26, i32 0, i32 2
+  %fp_addr_in_sl25 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr26 = load { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl25
+  %value27 = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr26, i32 0, i32 2
   %value28 = load i32, i32* %value27
   %gt_tmp = icmp sgt i32 %field_var24, %value28
   %bool_tmp29 = zext i1 %gt_tmp to i32
@@ -571,9 +578,9 @@ test43:                                           ; preds = %else16
   call void @tig_check_null_pointer(i8* %16, i8* getelementptr inbounds ([52 x i8], [52 x i8]* @12, i32 0, i32 0))
   %element48 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %cur_node47, i32 0, i32 0
   %field_var49 = load i32, i32* %element48
-  %fp_addr_in_sl50 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr51 = load { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl50
-  %value52 = getelementptr { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr51, i32 0, i32 2
+  %fp_addr_in_sl50 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr51 = load { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl50
+  %value52 = getelementptr { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr51, i32 0, i32 2
   %value53 = load i32, i32* %value52
   %le_tmp54 = icmp sle i32 %field_var49, %value53
   %bool_tmp55 = zext i1 %le_tmp54 to i32
@@ -587,9 +594,9 @@ then44:                                           ; preds = %test43
   %element58 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %cur_node57, i32 0, i32 2
   %field_var59 = load i8*, i8** %element58
   %18 = bitcast i8* %field_var59 to { i32, i8*, i8* }*
-  %fp_addr_in_sl60 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr61 = load { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl60
-  call void @insert_node({ { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr61, { i32, i8*, i8* }* %18)
+  %fp_addr_in_sl60 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr61 = load { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl60
+  call void @insert_node({ { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr61, { i32, i8*, i8* }* %18)
   br label %merge46
 
 else45:                                           ; preds = %test43
@@ -599,9 +606,9 @@ else45:                                           ; preds = %test43
   %element63 = getelementptr { i32, i8*, i8* }, { i32, i8*, i8* }* %cur_node62, i32 0, i32 1
   %field_var64 = load i8*, i8** %element63
   %20 = bitcast i8* %field_var64 to { i32, i8*, i8* }*
-  %fp_addr_in_sl65 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr66 = load { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl65
-  call void @insert_node({ { { { i32 }*, i32, { i32, i32* }* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr66, { i32, i8*, i8* }* %20)
+  %fp_addr_in_sl65 = getelementptr { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }, { { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* }* %frame_pointer, i32 0, i32 0
+  %fp_addr66 = load { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }*, { { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }** %fp_addr_in_sl65
+  call void @insert_node({ { { { i32 }*, i32, { i32, i32* }* }*, { i32, i8*, i8* }* }*, { i32, i8*, i8* }*, i32 }* %fp_addr66, { i32, i8*, i8* }* %20)
   br label %merge46
 
 merge46:                                          ; preds = %else45, %then44

@@ -61,13 +61,13 @@ let rec trans_dec (
           A.VarDec { name; typ; init; pos; escape; order }
         ) =
     let rhs_type = trans_exp (v_env, t_env, init) in
-    if !escape
-    then
-      begin
-        escape_vars := rhs_type :: !escape_vars;
-        order := !current_counter;
-        increase_counter()
-      end;
+    let add_esc_type esc_type =
+      if !escape
+      then
+          escape_vars := esc_type :: !escape_vars;
+          order := !current_counter;
+          increase_counter()
+    in
     match typ with
       Some (s, p) ->
        begin
@@ -75,6 +75,7 @@ let rec trans_dec (
 	 | Some lhs_type ->
             let new_entry = E.VarEntry{ty = lhs_type; access = Translate.dummy_access} in
 	    let new_v_env = S.enter(v_env, name, new_entry) in
+            add_esc_type lhs_type;
             {
               v_env = new_v_env;
 	      t_env = t_env;
@@ -83,6 +84,7 @@ let rec trans_dec (
        end
     | None ->
        let new_entry = E.VarEntry{ty = rhs_type; access = Translate.dummy_access} in
+       add_esc_type rhs_type;
        {
 	 v_env = S.enter(v_env, name, new_entry);
 	 t_env = t_env

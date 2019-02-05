@@ -19,15 +19,18 @@ let
      function binary_sort(arr: int_array) =
         let
             type node = {data: int, left: node, right: node}
-            function build_binary_tree(): node = nil  
-                /* let
+            function build_binary_tree(): node = 
+                let
                     var root_node: node := nil
-                    var new_node := node {data = value, left = nil, right = nil}
-                    function add_node(value: int) =
-                        if is_nil(root_node)
-                        then root_node := new_node
-                        else 
-                            let
+                   
+                    function add_node(value: int) = 
+                        let 
+                         var new_node := node {data = value, left = nil, right = nil}   
+                        in
+                            if is_nil(root_node)
+                            then (print("run here"); root_node := new_node)
+                            else 
+                             let
                                 function insert_node(cur_node: node) =
                                     if cur_node.data <= value & is_nil(cur_node.right)
                                     then cur_node.right := new_node
@@ -35,16 +38,17 @@ let
                                     then cur_node.left := new_node
                                     else if cur_node.data <= value
                                     then insert_node(cur_node.right)
-                                    else insert_node(cur_node.left)
+                                    else insert_node(cur_node.left) 
                             in
                                 insert_node(root_node)
-                            end
+                            end 
+                        end
 
                 in
                     for i := 0 to array_length(arr) - 1 do 
                         add_node(arr[i]);
                     root_node
-                end */
+                end 
             
             var counter := 0    
             function in_order_traversing(cur_node: node) =

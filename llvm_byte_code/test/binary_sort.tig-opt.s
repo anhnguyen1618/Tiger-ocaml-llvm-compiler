@@ -288,11 +288,199 @@ binary_sort:                            # @binary_sort
 build_binary_tree:                      # @build_binary_tree
 	.cfi_startproc
 # %bb.0:                                # %entry
-	movq	%rdi, -8(%rsp)
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	pushq	%r15
+	.cfi_def_cfa_offset 24
+	pushq	%r14
+	.cfi_def_cfa_offset 32
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	pushq	%rax
+	.cfi_def_cfa_offset 48
+	.cfi_offset %rbx, -40
+	.cfi_offset %r14, -32
+	.cfi_offset %r15, -24
+	.cfi_offset %rbp, -16
+	movq	%rdi, (%rsp)
+	movq	16(%rdi), %rdi
+	callq	tig_array_length
+	movq	(%rsp), %rax
+	movq	16(%rax), %rdi
+	callq	tig_array_length
+	movl	%eax, %r15d
+	decl	%r15d
+	xorl	%ebx, %ebx
+	movq	%rsp, %r14
+	cmpl	%ebx, %r15d
+	jl	.LBB4_3
+	.p2align	4, 0x90
+.LBB4_2:                                # %loop
+                                        # =>This Inner Loop Header: Depth=1
+	movq	(%rsp), %rax
+	movq	16(%rax), %rbp
+	movl	$.L__unnamed_19, %edx
+	movq	%rbp, %rdi
+	movl	%ebx, %esi
+	callq	tig_check_array_bound
+	movq	8(%rbp), %rax
+	movslq	%ebx, %rcx
+	movl	(%rax,%rcx,4), %edx
+	xorl	%esi, %esi
+	movq	%r14, %rdi
+	callq	add_node
+	incl	%ebx
+	cmpl	%ebx, %r15d
+	jge	.LBB4_2
+.LBB4_3:                                # %end
 	xorl	%eax, %eax
+	addq	$8, %rsp
+	popq	%rbx
+	popq	%r14
+	popq	%r15
+	popq	%rbp
 	retq
 .Lfunc_end4:
 	.size	build_binary_tree, .Lfunc_end4-build_binary_tree
+	.cfi_endproc
+                                        # -- End function
+	.globl	add_node                # -- Begin function add_node
+	.p2align	4, 0x90
+	.type	add_node,@function
+add_node:                               # @add_node
+	.cfi_startproc
+# %bb.0:                                # %test
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	pushq	%rbx
+	.cfi_def_cfa_offset 24
+	subq	$24, %rsp
+	.cfi_def_cfa_offset 48
+	.cfi_offset %rbx, -24
+	.cfi_offset %rbp, -16
+	movl	%edx, %ebp
+	movq	%rsi, %rbx
+	movq	%rdi, (%rsp)
+	movl	%ebp, 16(%rsp)
+	movl	$24, %edi
+	callq	malloc
+	movl	%ebp, (%rax)
+	movq	$0, 8(%rax)
+	movq	$0, 16(%rax)
+	movq	%rax, 8(%rsp)
+	movq	%rbx, %rdi
+	callq	tig_nillable
+	cmpl	$1, %eax
+	jne	.LBB5_2
+# %bb.1:                                # %then
+	movl	$.L__unnamed_20, %edi
+	callq	tig_print
+	jmp	.LBB5_3
+.LBB5_2:                                # %else
+	movq	%rsp, %rdi
+	movq	%rbx, %rsi
+	callq	insert_node
+.LBB5_3:                                # %merge
+	addq	$24, %rsp
+	popq	%rbx
+	popq	%rbp
+	retq
+.Lfunc_end5:
+	.size	add_node, .Lfunc_end5-add_node
+	.cfi_endproc
+                                        # -- End function
+	.globl	insert_node             # -- Begin function insert_node
+	.p2align	4, 0x90
+	.type	insert_node,@function
+insert_node:                            # @insert_node
+	.cfi_startproc
+# %bb.0:                                # %test1
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	subq	$16, %rsp
+	.cfi_def_cfa_offset 32
+	.cfi_offset %rbx, -16
+	movq	%rsi, %rbx
+	movq	%rdi, 8(%rsp)
+	movl	$.L__unnamed_21, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movl	(%rbx), %ecx
+	movq	8(%rsp), %rdx
+	xorl	%eax, %eax
+	cmpl	16(%rdx), %ecx
+	jg	.LBB6_2
+# %bb.1:                                # %then2
+	movl	$.L__unnamed_22, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movq	16(%rbx), %rdi
+	callq	tig_nillable
+.LBB6_2:                                # %merge4
+	cmpl	$1, %eax
+	jne	.LBB6_6
+# %bb.3:                                # %then
+	movl	$.L__unnamed_23, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rax
+	movq	%rax, 16(%rbx)
+	jmp	.LBB6_4
+.LBB6_6:                                # %test18
+	movl	$.L__unnamed_24, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movl	(%rbx), %ecx
+	movq	8(%rsp), %rdx
+	xorl	%eax, %eax
+	cmpl	16(%rdx), %ecx
+	jle	.LBB6_8
+# %bb.7:                                # %then19
+	movl	$.L__unnamed_25, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movq	8(%rbx), %rdi
+	callq	tig_nillable
+.LBB6_8:                                # %merge21
+	cmpl	$1, %eax
+	jne	.LBB6_9
+# %bb.5:                                # %then15
+	movl	$.L__unnamed_26, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rax
+	movq	%rax, 8(%rbx)
+	jmp	.LBB6_4
+.LBB6_9:                                # %test43
+	movl	$.L__unnamed_27, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movl	(%rbx), %eax
+	movq	8(%rsp), %rcx
+	cmpl	16(%rcx), %eax
+	jg	.LBB6_12
+# %bb.10:                               # %then44
+	movl	$.L__unnamed_28, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movq	16(%rbx), %rsi
+	jmp	.LBB6_11
+.LBB6_12:                               # %else45
+	movl	$.L__unnamed_29, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+	movq	8(%rbx), %rsi
+.LBB6_11:                               # %merge
+	movq	8(%rsp), %rdi
+	callq	insert_node
+.LBB6_4:                                # %merge
+	addq	$16, %rsp
+	popq	%rbx
+	retq
+.Lfunc_end6:
+	.size	insert_node, .Lfunc_end6-insert_node
 	.cfi_endproc
                                         # -- End function
 	.globl	in_order_traversing     # -- Begin function in_order_traversing
@@ -317,9 +505,9 @@ in_order_traversing:                    # @in_order_traversing
 	movq	%rbx, %rdi
 	callq	tig_nillable
 	cmpl	$1, %eax
-	je	.LBB5_2
+	je	.LBB7_2
 # %bb.1:                                # %else
-	movl	$.L__unnamed_19, %esi
+	movl	$.L__unnamed_30, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
 	movq	8(%rbx), %rsi
@@ -328,32 +516,32 @@ in_order_traversing:                    # @in_order_traversing
 	movq	8(%rsp), %rax
 	movslq	8(%rax), %r14
 	movq	16(%rax), %r15
-	movl	$.L__unnamed_20, %edx
+	movl	$.L__unnamed_31, %edx
 	movq	%r15, %rdi
 	movl	%r14d, %esi
 	callq	tig_check_array_bound
 	movq	8(%r15), %r15
-	movl	$.L__unnamed_21, %esi
+	movl	$.L__unnamed_32, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
 	movl	(%rbx), %eax
 	movl	%eax, (%r15,%r14,4)
 	movq	8(%rsp), %rax
 	incl	8(%rax)
-	movl	$.L__unnamed_22, %esi
+	movl	$.L__unnamed_33, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
 	movq	16(%rbx), %rsi
 	movq	8(%rsp), %rdi
 	callq	in_order_traversing
-.LBB5_2:                                # %merge
+.LBB7_2:                                # %merge
 	addq	$16, %rsp
 	popq	%rbx
 	popq	%r14
 	popq	%r15
 	retq
-.Lfunc_end5:
-	.size	in_order_traversing, .Lfunc_end5-in_order_traversing
+.Lfunc_end7:
+	.size	in_order_traversing, .Lfunc_end7-in_order_traversing
 	.cfi_endproc
                                         # -- End function
 	.globl	create_array_test       # -- Begin function create_array_test
@@ -379,15 +567,15 @@ create_array_test:                      # @create_array_test
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
-	jg	.LBB6_3
+	jg	.LBB8_3
 	.p2align	4, 0x90
-.LBB6_2:                                # %loop
+.LBB8_2:                                # %loop
                                         # =>This Inner Loop Header: Depth=1
 	movl	$1, (%rbx,%rax,4)
 	incq	%rax
 	cmpl	$4, %eax
-	jle	.LBB6_2
-.LBB6_3:                                # %end
+	jle	.LBB8_2
+.LBB8_3:                                # %end
 	movl	$16, %edi
 	callq	malloc
 	movq	%rax, %r14
@@ -396,11 +584,11 @@ create_array_test:                      # @create_array_test
 	movl	$4, %ebp
 	xorl	%ebx, %ebx
 	cmpl	$4, %ebx
-	jg	.LBB6_6
+	jg	.LBB8_6
 	.p2align	4, 0x90
-.LBB6_5:                                # %loop11
+.LBB8_5:                                # %loop11
                                         # =>This Inner Loop Header: Depth=1
-	movl	$.L__unnamed_23, %edx
+	movl	$.L__unnamed_34, %edx
 	movq	%r14, %rdi
 	movl	%ebx, %esi
 	callq	tig_check_array_bound
@@ -409,16 +597,16 @@ create_array_test:                      # @create_array_test
 	decl	%ebp
 	incq	%rbx
 	cmpl	$4, %ebx
-	jle	.LBB6_5
-.LBB6_6:                                # %end12
+	jle	.LBB8_5
+.LBB8_6:                                # %end12
 	movq	%r14, %rax
 	addq	$16, %rsp
 	popq	%rbx
 	popq	%r14
 	popq	%rbp
 	retq
-.Lfunc_end6:
-	.size	create_array_test, .Lfunc_end6-create_array_test
+.Lfunc_end8:
+	.size	create_array_test, .Lfunc_end8-create_array_test
 	.cfi_endproc
                                         # -- End function
 	.type	.L__unnamed_14,@object  # @0
@@ -452,112 +640,179 @@ create_array_test:                      # @create_array_test
 	.asciz	"test/binary_sort.tig::16.41: Array out of bound"
 	.size	.L__unnamed_18, 48
 
-	.type	.L__unnamed_19,@object  # @5
-	.p2align	4
-.L__unnamed_19:
-	.asciz	"test/binary_sort.tig::53.48: Nil pointer exception!"
-	.size	.L__unnamed_19, 52
-
-	.type	.L__unnamed_20,@object  # @6
-	.p2align	4
+	.type	.L__unnamed_20,@object  # @5
+	.section	.rodata.str1.1,"aMS",@progbits,1
 .L__unnamed_20:
-	.asciz	"test/binary_sort.tig::54.23: Array out of bound"
-	.size	.L__unnamed_20, 48
+	.asciz	"run here"
+	.size	.L__unnamed_20, 9
 
-	.type	.L__unnamed_21,@object  # @7
+	.type	.L__unnamed_21,@object  # @6
+	.section	.rodata.str1.16,"aMS",@progbits,1
 	.p2align	4
 .L__unnamed_21:
-	.asciz	"test/binary_sort.tig::54.44: Nil pointer exception!"
+	.asciz	"test/binary_sort.tig::35.47: Nil pointer exception!"
 	.size	.L__unnamed_21, 52
 
-	.type	.L__unnamed_22,@object  # @8
+	.type	.L__unnamed_22,@object  # @7
 	.p2align	4
 .L__unnamed_22:
-	.asciz	"test/binary_sort.tig::56.48: Nil pointer exception!"
+	.asciz	"test/binary_sort.tig::35.79: Nil pointer exception!"
 	.size	.L__unnamed_22, 52
 
-	.type	.L__unnamed_23,@object  # @9
+	.type	.L__unnamed_23,@object  # @8
 	.p2align	4
 .L__unnamed_23:
-	.asciz	"test/binary_sort.tig::73.41: Array out of bound"
-	.size	.L__unnamed_23, 48
+	.asciz	"test/binary_sort.tig::36.49: Nil pointer exception!"
+	.size	.L__unnamed_23, 52
 
-	.type	.L__unnamed_1,@object   # @10
+	.type	.L__unnamed_24,@object  # @9
+	.p2align	4
+.L__unnamed_24:
+	.asciz	"test/binary_sort.tig::37.52: Nil pointer exception!"
+	.size	.L__unnamed_24, 52
+
+	.type	.L__unnamed_25,@object  # @10
+	.p2align	4
+.L__unnamed_25:
+	.asciz	"test/binary_sort.tig::37.83: Nil pointer exception!"
+	.size	.L__unnamed_25, 52
+
+	.type	.L__unnamed_26,@object  # @11
+	.p2align	4
+.L__unnamed_26:
+	.asciz	"test/binary_sort.tig::38.49: Nil pointer exception!"
+	.size	.L__unnamed_26, 52
+
+	.type	.L__unnamed_27,@object  # @12
+	.p2align	4
+.L__unnamed_27:
+	.asciz	"test/binary_sort.tig::39.52: Nil pointer exception!"
+	.size	.L__unnamed_27, 52
+
+	.type	.L__unnamed_28,@object  # @13
+	.p2align	4
+.L__unnamed_28:
+	.asciz	"test/binary_sort.tig::40.61: Nil pointer exception!"
+	.size	.L__unnamed_28, 52
+
+	.type	.L__unnamed_29,@object  # @14
+	.p2align	4
+.L__unnamed_29:
+	.asciz	"test/binary_sort.tig::41.61: Nil pointer exception!"
+	.size	.L__unnamed_29, 52
+
+	.type	.L__unnamed_19,@object  # @15
+	.p2align	4
+.L__unnamed_19:
+	.asciz	"test/binary_sort.tig::49.47: Array out of bound"
+	.size	.L__unnamed_19, 48
+
+	.type	.L__unnamed_30,@object  # @16
+	.p2align	4
+.L__unnamed_30:
+	.asciz	"test/binary_sort.tig::57.48: Nil pointer exception!"
+	.size	.L__unnamed_30, 52
+
+	.type	.L__unnamed_31,@object  # @17
+	.p2align	4
+.L__unnamed_31:
+	.asciz	"test/binary_sort.tig::58.23: Array out of bound"
+	.size	.L__unnamed_31, 48
+
+	.type	.L__unnamed_32,@object  # @18
+	.p2align	4
+.L__unnamed_32:
+	.asciz	"test/binary_sort.tig::58.44: Nil pointer exception!"
+	.size	.L__unnamed_32, 52
+
+	.type	.L__unnamed_33,@object  # @19
+	.p2align	4
+.L__unnamed_33:
+	.asciz	"test/binary_sort.tig::60.48: Nil pointer exception!"
+	.size	.L__unnamed_33, 52
+
+	.type	.L__unnamed_34,@object  # @20
+	.p2align	4
+.L__unnamed_34:
+	.asciz	"test/binary_sort.tig::77.41: Array out of bound"
+	.size	.L__unnamed_34, 48
+
+	.type	.L__unnamed_1,@object   # @21
 	.section	.rodata.str1.1,"aMS",@progbits,1
 .L__unnamed_1:
 	.asciz	"Before sorting"
 	.size	.L__unnamed_1, 15
 
-	.type	.L__unnamed_2,@object   # @11
+	.type	.L__unnamed_2,@object   # @22
 .L__unnamed_2:
 	.asciz	"=============="
 	.size	.L__unnamed_2, 15
 
-	.type	.L__unnamed_3,@object   # @12
+	.type	.L__unnamed_3,@object   # @23
 .L__unnamed_3:
 	.asciz	"After sorting"
 	.size	.L__unnamed_3, 14
 
-	.type	.L__unnamed_4,@object   # @13
+	.type	.L__unnamed_4,@object   # @24
 	.section	.rodata.str1.16,"aMS",@progbits,1
 	.p2align	4
 .L__unnamed_4:
-	.asciz	"test/binary_sort.tig::86.23: Array out of bound"
+	.asciz	"test/binary_sort.tig::90.23: Array out of bound"
 	.size	.L__unnamed_4, 48
 
-	.type	.L__unnamed_5,@object   # @14
+	.type	.L__unnamed_5,@object   # @25
 	.p2align	4
 .L__unnamed_5:
-	.asciz	"test/binary_sort.tig::87.23: Array out of bound"
+	.asciz	"test/binary_sort.tig::91.23: Array out of bound"
 	.size	.L__unnamed_5, 48
 
-	.type	.L__unnamed_6,@object   # @15
+	.type	.L__unnamed_6,@object   # @26
 	.p2align	4
 .L__unnamed_6:
-	.asciz	"test/binary_sort.tig::88.23: Array out of bound"
+	.asciz	"test/binary_sort.tig::92.23: Array out of bound"
 	.size	.L__unnamed_6, 48
 
-	.type	.L__unnamed_7,@object   # @16
+	.type	.L__unnamed_7,@object   # @27
 	.p2align	4
 .L__unnamed_7:
-	.asciz	"test/binary_sort.tig::89.23: Array out of bound"
+	.asciz	"test/binary_sort.tig::93.23: Array out of bound"
 	.size	.L__unnamed_7, 48
 
-	.type	.L__unnamed_8,@object   # @17
+	.type	.L__unnamed_8,@object   # @28
 	.p2align	4
 .L__unnamed_8:
-	.asciz	"test/binary_sort.tig::90.23: Array out of bound"
+	.asciz	"test/binary_sort.tig::94.23: Array out of bound"
 	.size	.L__unnamed_8, 48
 
-	.type	.L__unnamed_9,@object   # @18
+	.type	.L__unnamed_9,@object   # @29
 	.p2align	4
 .L__unnamed_9:
-	.asciz	"test/binary_sort.tig::94.23: Array out of bound"
+	.asciz	"test/binary_sort.tig::98.23: Array out of bound"
 	.size	.L__unnamed_9, 48
 
-	.type	.L__unnamed_10,@object  # @19
+	.type	.L__unnamed_10,@object  # @30
 	.p2align	4
 .L__unnamed_10:
-	.asciz	"test/binary_sort.tig::95.23: Array out of bound"
+	.asciz	"test/binary_sort.tig::99.23: Array out of bound"
 	.size	.L__unnamed_10, 48
 
-	.type	.L__unnamed_11,@object  # @20
+	.type	.L__unnamed_11,@object  # @31
 	.p2align	4
 .L__unnamed_11:
-	.asciz	"test/binary_sort.tig::96.23: Array out of bound"
-	.size	.L__unnamed_11, 48
+	.asciz	"test/binary_sort.tig::100.23: Array out of bound"
+	.size	.L__unnamed_11, 49
 
-	.type	.L__unnamed_12,@object  # @21
+	.type	.L__unnamed_12,@object  # @32
 	.p2align	4
 .L__unnamed_12:
-	.asciz	"test/binary_sort.tig::97.23: Array out of bound"
-	.size	.L__unnamed_12, 48
+	.asciz	"test/binary_sort.tig::101.23: Array out of bound"
+	.size	.L__unnamed_12, 49
 
-	.type	.L__unnamed_13,@object  # @22
+	.type	.L__unnamed_13,@object  # @33
 	.p2align	4
 .L__unnamed_13:
-	.asciz	"test/binary_sort.tig::98.23: Array out of bound"
-	.size	.L__unnamed_13, 48
+	.asciz	"test/binary_sort.tig::102.23: Array out of bound"
+	.size	.L__unnamed_13, 49
 
 
 	.section	".note.GNU-stack","",@progbits

@@ -1,0 +1,9 @@
+let
+    type node = {data: int, next: node}
+    var root: node := nil
+    function f () = root := node {data= 5, next= nil}
+in
+    assert_int(is_nil(root), 1);
+    f();
+    assert_int(root.data, 5)
+end

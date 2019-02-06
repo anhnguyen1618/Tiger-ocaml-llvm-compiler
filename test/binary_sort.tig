@@ -28,7 +28,7 @@ let
                          var new_node := node {data = value, left = nil, right = nil}   
                         in
                             if is_nil(root_node)
-                            then (print("run here"); root_node := new_node)
+                            then root_node := new_node
                             else 
                              let
                                 function insert_node(cur_node: node) =

@@ -23,17 +23,17 @@ source_filename = "Tiger jit"
 @19 = private unnamed_addr constant [47 x i8] c"test/record.tig::32.28: Nil pointer exception!\00"
 @20 = private unnamed_addr constant [4 x i8] c"lol\00"
 
-declare void @tig_print_int(i32) local_unnamed_addr
+declare void @tig_print_int(i32) local_unnamed_addr gc "ocaml"
 
-declare void @tig_print(i8*) local_unnamed_addr
+declare void @tig_print(i8*) local_unnamed_addr gc "ocaml"
 
-declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr
+declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_int(i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_string(i8*, i8*) local_unnamed_addr
+declare void @assert_equal_string(i8*, i8*) local_unnamed_addr gc "ocaml"
 
-define i32 @main() local_unnamed_addr {
+define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
   %malloccall = tail call i8* @malloc(i32 ptrtoint ({ i8*, i32 }* getelementptr ({ i8*, i32 }, { i8*, i32 }* null, i32 1) to i32))
   %record_init = bitcast i8* %malloccall to { i8*, i32 }*

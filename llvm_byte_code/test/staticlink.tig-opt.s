@@ -1,5 +1,11 @@
 	.text
 	.file	"Tiger jit"
+	.globl	"camlLlvm_byte_code/test/staticlink__code_begin"
+"camlLlvm_byte_code/test/staticlink__code_begin":
+	.data
+	.globl	"camlLlvm_byte_code/test/staticlink__data_begin"
+"camlLlvm_byte_code/test/staticlink__data_begin":
+	.text
 	.globl	main                    # -- Begin function main
 	.p2align	4, 0x90
 	.type	main,@function
@@ -14,6 +20,7 @@ main:                                   # @main
 	movl	$5, 4(%rsp)
 	movl	$28, %edi
 	callq	malloc
+.Ltmp0:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$6, %eax
@@ -28,6 +35,7 @@ main:                                   # @main
 .LBB0_3:                                # %end
 	movl	$16, %edi
 	callq	malloc
+.Ltmp1:
 	movl	$7, (%rax)
 	movq	%rbx, 8(%rax)
 	movq	%rax, 8(%rsp)
@@ -35,21 +43,27 @@ main:                                   # @main
 	xorl	%esi, %esi
 	movq	%rbx, %rdi
 	callq	nested_function
+.Ltmp2:
 	movl	$18, %esi
 	movl	%eax, %edi
 	callq	assert_equal_int
+.Ltmp3:
 	movl	$-5, %esi
 	movq	%rbx, %rdi
 	callq	nested_function
+.Ltmp4:
 	movl	$13, %esi
 	movl	%eax, %edi
 	callq	assert_equal_int
+.Ltmp5:
 	movl	$-18, %esi
 	movq	%rbx, %rdi
 	callq	nested_function
+.Ltmp6:
 	xorl	%esi, %esi
 	movl	%eax, %edi
 	callq	assert_equal_int
+.Ltmp7:
 	xorl	%eax, %eax
 	addq	$16, %rsp
 	popq	%rbx
@@ -77,10 +91,12 @@ nested_function:                        # @nested_function
 	movl	$.L__unnamed_1, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp8:
 	movq	8(%rbx), %rax
 	movl	$7, 8(%rax)
 	movq	%rsp, %rdi
 	callq	f
+.Ltmp9:
 	addq	$16, %rsp
 	popq	%rbx
 	retq
@@ -111,6 +127,7 @@ f:                                      # @f
 	movl	$.L__unnamed_2, %edx
 	movq	%r14, %rdi
 	callq	tig_check_array_bound
+.Ltmp10:
 	movq	8(%r14), %rax
 	addl	8(%rax), %ebx
 	movq	(%rsp), %rax
@@ -138,4 +155,62 @@ f:                                      # @f
 	.size	.L__unnamed_1, 46
 
 
+	.text
+	.globl	"camlLlvm_byte_code/test/staticlink__code_end"
+"camlLlvm_byte_code/test/staticlink__code_end":
+	.data
+	.globl	"camlLlvm_byte_code/test/staticlink__data_end"
+"camlLlvm_byte_code/test/staticlink__data_end":
+	.quad	0
+	.globl	"camlLlvm_byte_code/test/staticlink__frametable"
+"camlLlvm_byte_code/test/staticlink__frametable":
+	.short	11
+	.p2align	3
+                                        # live roots for main
+	.quad	.Ltmp0
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp1
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp2
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp3
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp4
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp5
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp6
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp7
+	.short	24
+	.short	0
+	.p2align	3
+                                        # live roots for nested_function
+	.quad	.Ltmp8
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp9
+	.short	24
+	.short	0
+	.p2align	3
+                                        # live roots for f
+	.quad	.Ltmp10
+	.short	24
+	.short	0
+	.p2align	3
 	.section	".note.GNU-stack","",@progbits

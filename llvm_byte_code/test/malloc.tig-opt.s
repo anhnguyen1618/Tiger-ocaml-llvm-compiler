@@ -1,5 +1,11 @@
 	.text
 	.file	"Tiger jit"
+	.globl	"camlLlvm_byte_code/test/malloc__code_begin"
+"camlLlvm_byte_code/test/malloc__code_begin":
+	.data
+	.globl	"camlLlvm_byte_code/test/malloc__data_begin"
+"camlLlvm_byte_code/test/malloc__data_begin":
+	.text
 	.globl	main                    # -- Begin function main
 	.p2align	4, 0x90
 	.type	main,@function
@@ -16,10 +22,12 @@ main:                                   # @main
 	.cfi_offset %r14, -16
 	movl	$4, %edi
 	callq	malloc
+.Ltmp0:
 	movq	%rax, %rbx
 	movl	$5, (%rbx)
 	movl	$16, %edi
 	callq	malloc
+.Ltmp1:
 	movq	%rax, %r14
 	xorl	%eax, %eax
 	cmpl	$1, %eax
@@ -34,83 +42,102 @@ main:                                   # @main
 .LBB0_3:                                # %end
 	movl	$16, %edi
 	callq	malloc
+.Ltmp2:
 	movl	$2, (%rax)
 	movq	%r14, 8(%rax)
 	movq	%rax, 16(%rsp)
 	leaq	8(%rsp), %rdi
 	callq	create_rec
+.Ltmp3:
 	movq	%rax, %r14
 	movq	16(%rsp), %rbx
 	xorl	%esi, %esi
 	movl	$.L__unnamed_1, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp4:
 	movq	8(%rbx), %rax
 	movq	(%rax), %rbx
 	movl	$.L__unnamed_2, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp5:
 	movl	(%rbx), %edi
 	callq	tig_print_int
+.Ltmp6:
 	movq	16(%rsp), %rbx
 	xorl	%esi, %esi
 	movl	$.L__unnamed_3, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp7:
 	movq	8(%rbx), %rax
 	movq	(%rax), %rbx
 	movl	$.L__unnamed_4, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp8:
 	movl	(%rbx), %edi
 	movl	$5, %esi
 	callq	assert_equal_int
+.Ltmp9:
 	movl	$1, %esi
 	movl	$.L__unnamed_5, %edx
 	movq	%r14, %rdi
 	callq	tig_check_array_bound
+.Ltmp10:
 	movq	8(%r14), %rax
 	movq	8(%rax), %rbx
 	movl	$.L__unnamed_6, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp11:
 	movl	(%rbx), %edi
 	callq	tig_print_int
+.Ltmp12:
 	movl	$1, %esi
 	movl	$.L__unnamed_7, %edx
 	movq	%r14, %rdi
 	callq	tig_check_array_bound
+.Ltmp13:
 	movq	8(%r14), %rax
 	movq	8(%rax), %rbx
 	movl	$.L__unnamed_8, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp14:
 	movl	(%rbx), %edi
 	movl	$6, %esi
 	callq	assert_equal_int
+.Ltmp15:
 	movq	16(%rsp), %rbx
 	movl	$1, %esi
 	movl	$.L__unnamed_9, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp16:
 	movq	8(%rbx), %rax
 	movq	8(%rax), %rbx
 	movl	$.L__unnamed_10, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp17:
 	movl	$5, (%rbx)
 	movl	$1, %esi
 	movl	$.L__unnamed_11, %edx
 	movq	%r14, %rdi
 	callq	tig_check_array_bound
+.Ltmp18:
 	movq	8(%r14), %rax
 	movq	8(%rax), %rbx
 	movl	$.L__unnamed_12, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp19:
 	movl	(%rbx), %edi
 	movl	$5, %esi
 	callq	assert_equal_int
+.Ltmp20:
 	xorl	%eax, %eax
 	addq	$24, %rsp
 	popq	%rbx
@@ -137,6 +164,7 @@ create_rec:                             # @create_rec
 	movq	%rdi, (%rsp)
 	movl	$4, %edi
 	callq	malloc
+.Ltmp21:
 	movq	%rax, %r14
 	movl	$6, (%r14)
 	movq	(%rsp), %rax
@@ -145,6 +173,7 @@ create_rec:                             # @create_rec
 	movl	$.L__unnamed_13, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp22:
 	movq	8(%rbx), %rax
 	movq	%r14, 8(%rax)
 	movq	(%rsp), %rax
@@ -237,4 +266,109 @@ create_rec:                             # @create_rec
 	.size	.L__unnamed_12, 47
 
 
+	.text
+	.globl	"camlLlvm_byte_code/test/malloc__code_end"
+"camlLlvm_byte_code/test/malloc__code_end":
+	.data
+	.globl	"camlLlvm_byte_code/test/malloc__data_end"
+"camlLlvm_byte_code/test/malloc__data_end":
+	.quad	0
+	.globl	"camlLlvm_byte_code/test/malloc__frametable"
+"camlLlvm_byte_code/test/malloc__frametable":
+	.short	23
+	.p2align	3
+                                        # live roots for main
+	.quad	.Ltmp0
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp1
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp2
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp3
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp4
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp5
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp6
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp7
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp8
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp9
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp10
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp11
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp12
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp13
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp14
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp15
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp16
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp17
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp18
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp19
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp20
+	.short	40
+	.short	0
+	.p2align	3
+                                        # live roots for create_rec
+	.quad	.Ltmp21
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp22
+	.short	24
+	.short	0
+	.p2align	3
 	.section	".note.GNU-stack","",@progbits

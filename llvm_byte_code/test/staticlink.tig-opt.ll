@@ -4,11 +4,11 @@ source_filename = "Tiger jit"
 @0 = private unnamed_addr constant [47 x i8] c"test/staticlink.tig::10.35: Array out of bound\00"
 @1 = private unnamed_addr constant [46 x i8] c"test/staticlink.tig::12.6: Array out of bound\00"
 
-declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr
+declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_int(i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
-define i32 @main() local_unnamed_addr {
+define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { i32, i32, { i32, i32* }* }
   %var_dec = getelementptr { i32, i32, { i32, i32* }* }, { i32, i32, { i32, i32* }* }* %frame_pointer, i32 0, i32 1
@@ -50,7 +50,7 @@ end:                                              ; preds = %test
 
 declare noalias i8* @malloc(i32) local_unnamed_addr
 
-define i32 @nested_function({ i32, i32, { i32, i32* }* }*, i32) local_unnamed_addr {
+define i32 @nested_function({ i32, i32, { i32, i32* }* }*, i32) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32, i32, { i32, i32* }* }*, i32, i32 }
   %arg_address = getelementptr { { i32, i32, { i32, i32* }* }*, i32, i32 }, { { i32, i32, { i32, i32* }* }*, i32, i32 }* %frame_pointer, i32 0, i32 0
@@ -73,7 +73,7 @@ entry:
   ret i32 %3
 }
 
-define i32 @f({ { i32, i32, { i32, i32* }* }*, i32, i32 }*) local_unnamed_addr {
+define i32 @f({ { i32, i32, { i32, i32* }* }*, i32, i32 }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { { i32, i32, { i32, i32* }* }*, i32, i32 }* }
   %arg_address = getelementptr { { { i32, i32, { i32, i32* }* }*, i32, i32 }* }, { { { i32, i32, { i32, i32* }* }*, i32, i32 }* }* %frame_pointer, i32 0, i32 0

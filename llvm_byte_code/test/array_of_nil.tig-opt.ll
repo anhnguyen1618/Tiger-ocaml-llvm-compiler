@@ -7,15 +7,15 @@ source_filename = "Tiger jit"
 @3 = private unnamed_addr constant [49 x i8] c"test/array_of_nil.tig::18.26: Array out of bound\00"
 @4 = private unnamed_addr constant [53 x i8] c"test/array_of_nil.tig::21.18: Nil pointer exception!\00"
 
-declare i32 @tig_nillable(i8*) local_unnamed_addr
+declare i32 @tig_nillable(i8*) local_unnamed_addr gc "ocaml"
 
-declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr
+declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr gc "ocaml"
 
-declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr
+declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_int(i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
-define i32 @main() local_unnamed_addr {
+define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { i32 }
   %malloccall = tail call i8* @malloc(i32 ptrtoint ({ i32, i8* }* getelementptr ({ i32, i8* }, { i32, i8* }* null, i32 1) to i32))
@@ -140,7 +140,7 @@ end31:                                            ; preds = %test29
 
 declare noalias i8* @malloc(i32) local_unnamed_addr
 
-define { i32, i8* }* @f({ i32 }*) local_unnamed_addr {
+define { i32, i8* }* @f({ i32 }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
@@ -148,7 +148,7 @@ entry:
   ret { i32, i8* }* null
 }
 
-define i32 @g({ i32 }*, { i32, i8* }*) local_unnamed_addr {
+define i32 @g({ i32 }*, { i32, i8* }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0

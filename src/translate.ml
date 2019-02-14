@@ -99,6 +99,7 @@ let build_return_main () =
 let build_main_func (esc_vars: T.ty list): break_block =
   let main_function_dec = L.function_type int_type  [||] in
   let main_function = L.declare_function "main" main_function_dec the_module in
+  L.set_gc (Some "ocaml") main_function;
   let main_entry = L.append_block context "entry" main_function in
   
   let exit_loop_block = L.append_block context "break_loop" main_function in
@@ -438,11 +439,12 @@ let add_func_header
     |> Array.of_list
   in
   let func_type = L.function_type (get_llvm_type typ) arg_types in
-  ignore(
-      match L.lookup_function name the_module with
-      | None -> L.declare_function name func_type the_module
-      | Some x -> x)
-
+  let defined_func = match L.lookup_function name the_module with
+    | None -> L.declare_function name func_type the_module
+    | Some x -> x
+  in
+  L.set_gc (Some "ocaml") defined_func
+              
 let func_dec
       (func_level: level)
       (name: string)
@@ -516,29 +518,5 @@ let build_external_func
       (result:T.ty)  =
   let arg_types = (List.map get_llvm_type args) |> Array.of_list in
   let func_type = L.function_type (get_llvm_type result) arg_types in
-  ignore(L.declare_function name func_type the_module)
-
-
-
-
-  
-  
-                    
-    
-                      
-  
-                  
-                 
-
-  
-
-  
-                    
-
-
-    
-  
-
-
-                
-                  
+  let func = L.declare_function name func_type the_module in
+  L.set_gc (Some "ocaml") func                  

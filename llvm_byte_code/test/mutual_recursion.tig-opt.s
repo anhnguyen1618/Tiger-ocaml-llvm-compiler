@@ -1,5 +1,11 @@
 	.text
 	.file	"Tiger jit"
+	.globl	"camlLlvm_byte_code/test/mutual_recursion__code_begin"
+"camlLlvm_byte_code/test/mutual_recursion__code_begin":
+	.data
+	.globl	"camlLlvm_byte_code/test/mutual_recursion__data_begin"
+"camlLlvm_byte_code/test/mutual_recursion__data_begin":
+	.text
 	.globl	main                    # -- Begin function main
 	.p2align	4, 0x90
 	.type	main,@function
@@ -17,16 +23,21 @@ main:                                   # @main
 	movq	%rsp, %rbx
 	movq	%rbx, %rdi
 	callq	a
+.Ltmp0:
 	movl	%eax, %edi
 	callq	tig_print_int
+.Ltmp1:
 	movq	%rbx, %rdi
 	callq	a
+.Ltmp2:
 	movl	%eax, %ebp
 	movq	%rbx, %rdi
 	callq	b
+.Ltmp3:
 	movl	%ebp, %edi
 	movl	%eax, %esi
 	callq	assert_equal_int
+.Ltmp4:
 	xorl	%eax, %eax
 	addq	$8, %rsp
 	popq	%rbx
@@ -46,6 +57,7 @@ a:                                      # @a
 	.cfi_def_cfa_offset 16
 	movq	%rdi, (%rsp)
 	callq	b
+.Ltmp5:
 	popq	%rcx
 	retq
 .Lfunc_end1:
@@ -66,4 +78,41 @@ b:                                      # @b
 	.cfi_endproc
                                         # -- End function
 
+	.globl	"camlLlvm_byte_code/test/mutual_recursion__code_end"
+"camlLlvm_byte_code/test/mutual_recursion__code_end":
+	.data
+	.globl	"camlLlvm_byte_code/test/mutual_recursion__data_end"
+"camlLlvm_byte_code/test/mutual_recursion__data_end":
+	.quad	0
+	.globl	"camlLlvm_byte_code/test/mutual_recursion__frametable"
+"camlLlvm_byte_code/test/mutual_recursion__frametable":
+	.short	6
+	.p2align	3
+                                        # live roots for main
+	.quad	.Ltmp0
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp1
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp2
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp3
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp4
+	.short	24
+	.short	0
+	.p2align	3
+                                        # live roots for a
+	.quad	.Ltmp5
+	.short	8
+	.short	0
+	.p2align	3
+                                        # live roots for b
 	.section	".note.GNU-stack","",@progbits

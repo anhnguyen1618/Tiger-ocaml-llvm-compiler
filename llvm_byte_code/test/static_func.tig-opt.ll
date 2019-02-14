@@ -11,19 +11,19 @@ source_filename = "Tiger jit"
 @7 = private unnamed_addr constant [52 x i8] c"test/static_func.tig::27.18: Nil pointer exception!\00"
 @8 = private unnamed_addr constant [8 x i8] c"foo bar\00"
 
-declare void @tig_print_int(i32) local_unnamed_addr
+declare void @tig_print_int(i32) local_unnamed_addr gc "ocaml"
 
-declare void @tig_print(i8*) local_unnamed_addr
+declare void @tig_print(i8*) local_unnamed_addr gc "ocaml"
 
-declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr
+declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr gc "ocaml"
 
-declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr
+declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_int(i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_string(i8*, i8*) local_unnamed_addr
+declare void @assert_equal_string(i8*, i8*) local_unnamed_addr gc "ocaml"
 
-define i32 @main() local_unnamed_addr {
+define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { i32, { i32, i32* }*, { i32, i8* }* }
   %malloccall = tail call i8* @malloc(i32 mul (i32 ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32), i32 5))
@@ -94,7 +94,7 @@ end:                                              ; preds = %test
 
 declare noalias i8* @malloc(i32) local_unnamed_addr
 
-define void @f({ i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32) local_unnamed_addr {
+define void @f({ i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }
   %arg_address = getelementptr { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }, { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }* %frame_pointer, i32 0, i32 0
@@ -111,7 +111,7 @@ entry:
   ret void
 }
 
-define void @g({ { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }*, i32) local_unnamed_addr {
+define void @g({ { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }*, i32) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }* }
   %arg_address = getelementptr { { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }* }, { { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }* }* %frame_pointer, i32 0, i32 0

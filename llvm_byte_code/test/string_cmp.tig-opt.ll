@@ -5,11 +5,11 @@ source_filename = "Tiger jit"
 @1 = private unnamed_addr constant [13 x i8] c"-hello world\00"
 @2 = private unnamed_addr constant [24 x i8] c"test string-hello world\00"
 
-declare i8* @tig_concat(i8*, i8*) local_unnamed_addr
+declare i8* @tig_concat(i8*, i8*) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_string(i8*, i8*) local_unnamed_addr
+declare void @assert_equal_string(i8*, i8*) local_unnamed_addr gc "ocaml"
 
-define i32 @main() local_unnamed_addr {
+define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
   call void @assert_equal_string(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @0, i32 0, i32 0), i8* getelementptr inbounds ([12 x i8], [12 x i8]* @0, i32 0, i32 0))
   %0 = call i8* @tig_concat(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @0, i32 0, i32 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @1, i32 0, i32 0))

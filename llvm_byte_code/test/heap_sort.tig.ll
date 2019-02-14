@@ -31,51 +31,51 @@ source_filename = "Tiger jit"
 @27 = private unnamed_addr constant [47 x i8] c"test/heap_sort.tig::105.23: Array out of bound\00"
 @28 = private unnamed_addr constant [47 x i8] c"test/heap_sort.tig::106.23: Array out of bound\00"
 
-declare void @tig_print_int(i32)
+declare void @tig_print_int(i32) gc "ocaml"
 
-declare void @tig_print(i8*)
+declare void @tig_print(i8*) gc "ocaml"
 
-declare void @print_arr_int_ele(i32)
+declare void @print_arr_int_ele(i32) gc "ocaml"
 
-declare i32* @tig_init_array(i32, i32)
+declare i32* @tig_init_array(i32, i32) gc "ocaml"
 
-declare i32* @tig_init_record(i32)
+declare i32* @tig_init_record(i32) gc "ocaml"
 
-declare i32 @tig_array_length(i8*)
+declare i32 @tig_array_length(i8*) gc "ocaml"
 
-declare i32 @tig_nillable(i8*)
+declare i32 @tig_nillable(i8*) gc "ocaml"
 
-declare void @tig_check_array_bound(i8*, i32, i8*)
+declare void @tig_check_array_bound(i8*, i32, i8*) gc "ocaml"
 
-declare void @tig_check_null_pointer(i8*, i8*)
+declare void @tig_check_null_pointer(i8*, i8*) gc "ocaml"
 
-declare i32 @tig_random(i32)
+declare i32 @tig_random(i32) gc "ocaml"
 
-declare void @tig_exit(i32)
+declare void @tig_exit(i32) gc "ocaml"
 
-declare void @tig_flush()
+declare void @tig_flush() gc "ocaml"
 
-declare i8* @tig_getchar()
+declare i8* @tig_getchar() gc "ocaml"
 
-declare i32 @tig_ord(i8*)
+declare i32 @tig_ord(i8*) gc "ocaml"
 
-declare i8* @tig_chr(i32)
+declare i8* @tig_chr(i32) gc "ocaml"
 
-declare i32 @tig_string_cmp(i8*, i8*)
+declare i32 @tig_string_cmp(i8*, i8*) gc "ocaml"
 
-declare i32 @tig_size(i8*)
+declare i32 @tig_size(i8*) gc "ocaml"
 
-declare i8* @tig_substring(i8*, i32, i32)
+declare i8* @tig_substring(i8*, i32, i32) gc "ocaml"
 
-declare i8* @tig_concat(i8*, i8*)
+declare i8* @tig_concat(i8*, i8*) gc "ocaml"
 
-declare i32 @tig_not(i32)
+declare i32 @tig_not(i32) gc "ocaml"
 
-declare void @assert_equal_int(i32, i32)
+declare void @assert_equal_int(i32, i32) gc "ocaml"
 
-declare void @assert_equal_string(i8*, i8*)
+declare void @assert_equal_string(i8*, i8*) gc "ocaml"
 
-define i32 @main() {
+define i32 @main() gc "ocaml" {
 entry:
   %arr_test = alloca { i32, i32* }*
   %arr = alloca { i32, i32* }*
@@ -181,7 +181,7 @@ break_loop:                                       ; No predecessors!
   ret i32 0
 }
 
-define void @print_array({ i32 }*, { i32, i32* }*) {
+define void @print_array({ i32 }*, { i32, i32* }*) gc "ocaml" {
 entry:
   %_limit = alloca i32
   %i = alloca i32
@@ -232,7 +232,7 @@ end:                                              ; preds = %test
   ret void
 }
 
-define { i32, i32* }* @create_array({ i32 }*) {
+define { i32, i32* }* @create_array({ i32 }*) gc "ocaml" {
 entry:
   %_limit = alloca i32
   %i7 = alloca i32
@@ -309,7 +309,7 @@ end12:                                            ; preds = %test10
   ret { i32, i32* }* %arr20
 }
 
-define void @heap_sort({ i32 }*, { i32, i32* }*) {
+define void @heap_sort({ i32 }*, { i32, i32* }*) gc "ocaml" {
 entry:
   %size = alloca i32
   %frame_pointer = alloca { { i32 }*, i32, { i32, i32* }* }
@@ -360,7 +360,7 @@ end:                                              ; preds = %test
 
 declare noalias i8* @malloc(i32)
 
-define void @create_max_heap({ { i32 }*, i32, { i32, i32* }* }*) {
+define void @create_max_heap({ { i32 }*, i32, { i32, i32* }* }*) gc "ocaml" {
 entry:
   %index = alloca i32
   %frame_pointer = alloca { { { i32 }*, i32, { i32, i32* }* }* }
@@ -400,7 +400,7 @@ end:                                              ; preds = %test
   ret void
 }
 
-define void @swap({ { i32 }*, i32, { i32, i32* }* }*, i32, i32) {
+define void @swap({ { i32 }*, i32, { i32, i32* }* }*, i32, i32) gc "ocaml" {
 entry:
   %temp_b = alloca i32
   %temp_a = alloca i32
@@ -462,7 +462,7 @@ entry:
   ret void
 }
 
-define void @max_heapify({ { i32 }*, i32, { i32, i32* }* }*, i32, i32) {
+define void @max_heapify({ { i32 }*, i32, { i32, i32* }* }*, i32, i32) gc "ocaml" {
 entry:
   %if_result_addr102 = alloca i32
   %if_result_addr76 = alloca i32
@@ -673,7 +673,7 @@ merge81:                                          ; preds = %else80, %then79
   ret void
 }
 
-define { i32, i32* }* @create_array_test({ i32 }*) {
+define { i32, i32* }* @create_array_test({ i32 }*) gc "ocaml" {
 entry:
   %_limit = alloca i32
   %i7 = alloca i32

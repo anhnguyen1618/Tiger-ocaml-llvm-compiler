@@ -1,5 +1,11 @@
 	.text
 	.file	"Tiger jit"
+	.globl	"camlLlvm_byte_code/test/quick_sort__code_begin"
+"camlLlvm_byte_code/test/quick_sort__code_begin":
+	.data
+	.globl	"camlLlvm_byte_code/test/quick_sort__data_begin"
+"camlLlvm_byte_code/test/quick_sort__data_begin":
+	.text
 	.globl	main                    # -- Begin function main
 	.p2align	4, 0x90
 	.type	main,@function
@@ -20,108 +26,137 @@ main:                                   # @main
 	leaq	8(%rsp), %r14
 	movq	%r14, %rdi
 	callq	create_array
+.Ltmp0:
 	movq	%rax, %r15
 	movq	%r14, %rdi
 	callq	create_array_test
+.Ltmp1:
 	movq	%rax, %rbx
 	movl	$.L__unnamed_1, %edi
 	callq	tig_print
+.Ltmp2:
 	movq	%r14, %rdi
 	movq	%r15, %rsi
 	callq	print_array
+.Ltmp3:
 	movl	$.L__unnamed_2, %edi
 	callq	tig_print
+.Ltmp4:
 	movq	%r14, %rdi
 	movq	%r15, %rsi
 	callq	quick_sort
+.Ltmp5:
 	movl	$.L__unnamed_3, %edi
 	callq	tig_print
+.Ltmp6:
 	movq	%r14, %rdi
 	movq	%r15, %rsi
 	callq	print_array
+.Ltmp7:
 	xorl	%esi, %esi
 	movl	$.L__unnamed_4, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp8:
 	movq	8(%rbx), %rax
 	movl	(%rax), %edi
 	movl	$4, %esi
 	callq	assert_equal_int
+.Ltmp9:
 	movl	$1, %esi
 	movl	$.L__unnamed_5, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp10:
 	movq	8(%rbx), %rax
 	movl	4(%rax), %edi
 	movl	$3, %esi
 	callq	assert_equal_int
+.Ltmp11:
 	movl	$2, %esi
 	movl	$.L__unnamed_6, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp12:
 	movq	8(%rbx), %rax
 	movl	8(%rax), %edi
 	movl	$2, %esi
 	callq	assert_equal_int
+.Ltmp13:
 	movl	$3, %esi
 	movl	$.L__unnamed_7, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp14:
 	movq	8(%rbx), %rax
 	movl	12(%rax), %edi
 	movl	$1, %esi
 	callq	assert_equal_int
+.Ltmp15:
 	movl	$4, %esi
 	movl	$.L__unnamed_8, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp16:
 	movq	8(%rbx), %rax
 	movl	16(%rax), %edi
 	xorl	%esi, %esi
 	callq	assert_equal_int
+.Ltmp17:
 	movq	%r14, %rdi
 	movq	%rbx, %rsi
 	callq	quick_sort
+.Ltmp18:
 	xorl	%esi, %esi
 	movl	$.L__unnamed_9, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp19:
 	movq	8(%rbx), %rax
 	movl	(%rax), %edi
 	xorl	%esi, %esi
 	callq	assert_equal_int
+.Ltmp20:
 	movl	$1, %esi
 	movl	$.L__unnamed_10, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp21:
 	movq	8(%rbx), %rax
 	movl	4(%rax), %edi
 	movl	$1, %esi
 	callq	assert_equal_int
+.Ltmp22:
 	movl	$2, %esi
 	movl	$.L__unnamed_11, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp23:
 	movq	8(%rbx), %rax
 	movl	8(%rax), %edi
 	movl	$2, %esi
 	callq	assert_equal_int
+.Ltmp24:
 	movl	$3, %esi
 	movl	$.L__unnamed_12, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp25:
 	movq	8(%rbx), %rax
 	movl	12(%rax), %edi
 	movl	$3, %esi
 	callq	assert_equal_int
+.Ltmp26:
 	movl	$4, %esi
 	movl	$.L__unnamed_13, %edx
 	movq	%rbx, %rdi
 	callq	tig_check_array_bound
+.Ltmp27:
 	movq	8(%rbx), %rax
 	movl	16(%rax), %edi
 	movl	$4, %esi
 	callq	assert_equal_int
+.Ltmp28:
 	xorl	%eax, %eax
 	addq	$16, %rsp
 	popq	%rbx
@@ -153,10 +188,13 @@ print_array:                            # @print_array
 	movq	%rdi, 8(%rsp)
 	movl	$.L__unnamed_14, %edi
 	callq	tig_print
+.Ltmp29:
 	movq	%rbx, %rdi
 	callq	tig_array_length
+.Ltmp30:
 	movq	%rbx, %rdi
 	callq	tig_array_length
+.Ltmp31:
 	movl	%eax, %r14d
 	decl	%r14d
 	xorl	%ebp, %ebp
@@ -169,18 +207,22 @@ print_array:                            # @print_array
 	movq	%rbx, %rdi
 	movl	%ebp, %esi
 	callq	tig_check_array_bound
+.Ltmp32:
 	movq	8(%rbx), %rax
 	movslq	%ebp, %rcx
 	movl	(%rax,%rcx,4), %edi
 	callq	print_arr_int_ele
+.Ltmp33:
 	incl	%ebp
 	cmpl	%ebp, %r14d
 	jge	.LBB1_2
 .LBB1_3:                                # %end
 	movl	$.L__unnamed_16, %edi
 	callq	tig_print
+.Ltmp34:
 	movl	$.L__unnamed_17, %edi
 	callq	tig_print
+.Ltmp35:
 	addq	$16, %rsp
 	popq	%rbx
 	popq	%r14
@@ -210,6 +252,7 @@ create_array:                           # @create_array
 	movq	%rdi, 8(%rsp)
 	movl	$32, %edi
 	callq	malloc
+.Ltmp36:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$7, %eax
@@ -224,6 +267,7 @@ create_array:                           # @create_array
 .LBB2_3:                                # %end
 	movl	$16, %edi
 	callq	malloc
+.Ltmp37:
 	movq	%rax, %r14
 	movl	$8, (%r14)
 	movq	%rbx, 8(%r14)
@@ -237,9 +281,11 @@ create_array:                           # @create_array
 	movq	%r14, %rdi
 	movl	%ebx, %esi
 	callq	tig_check_array_bound
+.Ltmp38:
 	movq	8(%r14), %r15
 	movl	$50, %edi
 	callq	tig_random
+.Ltmp39:
 	movl	%eax, (%r15,%rbx,4)
 	incq	%rbx
 	cmpl	$7, %ebx
@@ -267,11 +313,13 @@ quick_sort:                             # @quick_sort
 	movq	%rsi, 16(%rsp)
 	movq	%rsi, %rdi
 	callq	tig_array_length
+.Ltmp40:
                                         # kill: def %eax killed %eax def %rax
 	leal	-1(%rax), %edx
 	leaq	8(%rsp), %rdi
 	xorl	%esi, %esi
 	callq	sort
+.Ltmp41:
 	addq	$24, %rsp
 	retq
 .Lfunc_end3:
@@ -312,6 +360,7 @@ partition:                              # @partition
 	movq	%rbx, %rdi
 	movl	%r14d, %esi
 	callq	tig_check_array_bound
+.Ltmp42:
 	movq	8(%rbx), %rax
 	movslq	%r14d, %rbx
 	movl	(%rax,%rbx,4), %r13d
@@ -320,6 +369,7 @@ partition:                              # @partition
 	movl	$.L__unnamed_20, %edx
 	movl	%ebp, %esi
 	callq	tig_check_array_bound
+.Ltmp43:
 	movq	%rbx, 32(%rsp)          # 8-byte Spill
 	leal	-1(%rbx), %eax
 	movl	%eax, 28(%rsp)          # 4-byte Spill
@@ -342,6 +392,7 @@ partition:                              # @partition
 	movq	%rbx, %rdi
 	movl	%ebp, %esi
 	callq	tig_check_array_bound
+.Ltmp44:
 	movq	8(%rbx), %rax
 	movslq	%ebp, %r14
 	movl	(%rax,%r14,4), %r12d
@@ -351,6 +402,7 @@ partition:                              # @partition
 	movq	%rbx, %rdi
 	movl	%r15d, %esi
 	callq	tig_check_array_bound
+.Ltmp45:
 	cmpl	%r13d, %r12d
 	jge	.LBB4_4
 # %bb.3:                                # %then
@@ -365,6 +417,7 @@ partition:                              # @partition
 	movq	%rbx, %rdi
 	movl	%r15d, %esi
 	callq	tig_check_array_bound
+.Ltmp46:
 	movq	8(%rbx), %rax
 	movl	%r12d, (%rax,%r13,4)
 	movl	20(%rsp), %r13d         # 4-byte Reload
@@ -374,6 +427,7 @@ partition:                              # @partition
 	movq	%rbx, %rdi
 	movl	%ebp, %esi
 	callq	tig_check_array_bound
+.Ltmp47:
 	movq	8(%rbx), %rax
 	movl	24(%rsp), %ecx          # 4-byte Reload
 	movl	%ecx, (%rax,%r14,4)
@@ -386,6 +440,7 @@ partition:                              # @partition
 	movq	%rbx, %rdi
 	movl	%r15d, %esi
 	callq	tig_check_array_bound
+.Ltmp48:
 	movq	8(%rbx), %rax
 	movslq	%r15d, %rbx
 	movl	(%rax,%rbx,4), %r14d
@@ -395,6 +450,7 @@ partition:                              # @partition
 	movq	%rbp, %rdi
 	movl	%ebx, %esi
 	callq	tig_check_array_bound
+.Ltmp49:
 	movq	8(%rbp), %rax
 	movl	%r13d, (%rax,%rbx,4)
 	movq	8(%rsp), %rax
@@ -404,6 +460,7 @@ partition:                              # @partition
 	movq	32(%rsp), %rbp          # 8-byte Reload
 	movl	%ebp, %esi
 	callq	tig_check_array_bound
+.Ltmp50:
 	movq	8(%r15), %rax
 	movl	%r14d, (%rax,%rbp,4)
 	movl	%ebx, %eax
@@ -446,15 +503,18 @@ sort:                                   # @sort
 	movl	%ebp, %esi
 	movl	%ebx, %edx
 	callq	partition
+.Ltmp51:
 	movl	%eax, %r14d
 	leal	-1(%r14), %edx
 	movq	8(%rsp), %rdi
 	movl	%ebp, %esi
 	callq	sort
+.Ltmp52:
 	leal	1(%r14), %esi
 	movq	8(%rsp), %rdi
 	movl	%ebx, %edx
 	callq	sort
+.Ltmp53:
 .LBB5_2:                                # %merge
 	addq	$16, %rsp
 	popq	%rbx
@@ -485,6 +545,7 @@ create_array_test:                      # @create_array_test
 	movq	%rdi, 8(%rsp)
 	movl	$20, %edi
 	callq	malloc
+.Ltmp54:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
@@ -499,6 +560,7 @@ create_array_test:                      # @create_array_test
 .LBB6_3:                                # %end
 	movl	$16, %edi
 	callq	malloc
+.Ltmp55:
 	movq	%rax, %r14
 	movl	$5, (%r14)
 	movq	%rbx, 8(%r14)
@@ -513,6 +575,7 @@ create_array_test:                      # @create_array_test
 	movq	%r14, %rdi
 	movl	%ebx, %esi
 	callq	tig_check_array_bound
+.Ltmp56:
 	movq	8(%r14), %rax
 	movl	%ebp, (%rax,%rbx,4)
 	decl	%ebp
@@ -699,4 +762,250 @@ create_array_test:                      # @create_array_test
 	.size	.L__unnamed_13, 47
 
 
+	.text
+	.globl	"camlLlvm_byte_code/test/quick_sort__code_end"
+"camlLlvm_byte_code/test/quick_sort__code_end":
+	.data
+	.globl	"camlLlvm_byte_code/test/quick_sort__data_end"
+"camlLlvm_byte_code/test/quick_sort__data_end":
+	.quad	0
+	.globl	"camlLlvm_byte_code/test/quick_sort__frametable"
+"camlLlvm_byte_code/test/quick_sort__frametable":
+	.short	57
+	.p2align	3
+                                        # live roots for main
+	.quad	.Ltmp0
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp1
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp2
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp3
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp4
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp5
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp6
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp7
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp8
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp9
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp10
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp11
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp12
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp13
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp14
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp15
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp16
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp17
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp18
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp19
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp20
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp21
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp22
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp23
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp24
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp25
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp26
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp27
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp28
+	.short	40
+	.short	0
+	.p2align	3
+                                        # live roots for print_array
+	.quad	.Ltmp29
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp30
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp31
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp32
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp33
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp34
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp35
+	.short	40
+	.short	0
+	.p2align	3
+                                        # live roots for create_array
+	.quad	.Ltmp36
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp37
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp38
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp39
+	.short	40
+	.short	0
+	.p2align	3
+                                        # live roots for quick_sort
+	.quad	.Ltmp40
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp41
+	.short	24
+	.short	0
+	.p2align	3
+                                        # live roots for partition
+	.quad	.Ltmp42
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp43
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp44
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp45
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp46
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp47
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp48
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp49
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp50
+	.short	88
+	.short	0
+	.p2align	3
+                                        # live roots for sort
+	.quad	.Ltmp51
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp52
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp53
+	.short	40
+	.short	0
+	.p2align	3
+                                        # live roots for create_array_test
+	.quad	.Ltmp54
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp55
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp56
+	.short	40
+	.short	0
+	.p2align	3
 	.section	".note.GNU-stack","",@progbits

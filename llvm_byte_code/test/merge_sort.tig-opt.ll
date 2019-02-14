@@ -33,19 +33,19 @@ source_filename = "Tiger jit"
 @29 = private unnamed_addr constant [48 x i8] c"test/merge_sort.tig::114.23: Array out of bound\00"
 @30 = private unnamed_addr constant [48 x i8] c"test/merge_sort.tig::115.23: Array out of bound\00"
 
-declare void @tig_print(i8*) local_unnamed_addr
+declare void @tig_print(i8*) local_unnamed_addr gc "ocaml"
 
-declare void @print_arr_int_ele(i32) local_unnamed_addr
+declare void @print_arr_int_ele(i32) local_unnamed_addr gc "ocaml"
 
-declare i32 @tig_array_length(i8*) local_unnamed_addr
+declare i32 @tig_array_length(i8*) local_unnamed_addr gc "ocaml"
 
-declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr
+declare void @tig_check_array_bound(i8*, i32, i8*) local_unnamed_addr gc "ocaml"
 
-declare i32 @tig_random(i32) local_unnamed_addr
+declare i32 @tig_random(i32) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_int(i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
-define i32 @main() local_unnamed_addr {
+define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { i32 }
   %0 = call { i32, i32* }* @create_array({ i32 }* %frame_pointer)
@@ -130,7 +130,7 @@ entry:
   ret i32 0
 }
 
-define void @print_array({ i32 }*, { i32, i32* }*) local_unnamed_addr {
+define void @print_array({ i32 }*, { i32, i32* }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
@@ -167,7 +167,7 @@ end:                                              ; preds = %test
   ret void
 }
 
-define { i32, i32* }* @create_array({ i32 }*) local_unnamed_addr {
+define { i32, i32* }* @create_array({ i32 }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
@@ -220,7 +220,7 @@ end12:                                            ; preds = %test10
   ret { i32, i32* }* %array_wrapper
 }
 
-define { i32, i32* }* @merge_sort({ i32 }*, { i32, i32* }*) local_unnamed_addr {
+define { i32, i32* }* @merge_sort({ i32 }*, { i32, i32* }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
@@ -260,7 +260,7 @@ merge:                                            ; preds = %else, %then
 
 declare noalias i8* @malloc(i32) local_unnamed_addr
 
-define { i32, i32* }* @sub_arr({ { i32 }* }*, { i32, i32* }*, i32, i32) local_unnamed_addr {
+define { i32, i32* }* @sub_arr({ { i32 }* }*, { i32, i32* }*, i32, i32) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { { i32 }* }* }
   %arg_address = getelementptr { { { i32 }* }* }, { { { i32 }* }* }* %frame_pointer, i32 0, i32 0
@@ -324,7 +324,7 @@ end18:                                            ; preds = %test16
   ret { i32, i32* }* %array_wrapper
 }
 
-define { i32, i32* }* @merge({ { i32 }* }*, { i32, i32* }*, { i32, i32* }*) local_unnamed_addr {
+define { i32, i32* }* @merge({ { i32 }* }*, { i32, i32* }*, { i32, i32* }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { { i32 }* }* }
   %arg_address = getelementptr { { { i32 }* }* }, { { { i32 }* }* }* %frame_pointer, i32 0, i32 0
@@ -511,7 +511,7 @@ end93:                                            ; preds = %test91
   ret { i32, i32* }* %array_wrapper
 }
 
-define { i32, i32* }* @create_array_test({ i32 }*) local_unnamed_addr {
+define { i32, i32* }* @create_array_test({ i32 }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0

@@ -1,5 +1,11 @@
 	.text
 	.file	"Tiger jit"
+	.globl	"camlLlvm_byte_code/test/static_func__code_begin"
+"camlLlvm_byte_code/test/static_func__code_begin":
+	.data
+	.globl	"camlLlvm_byte_code/test/static_func__data_begin"
+"camlLlvm_byte_code/test/static_func__data_begin":
+	.text
 	.globl	main                    # -- Begin function main
 	.p2align	4, 0x90
 	.type	main,@function
@@ -13,6 +19,7 @@ main:                                   # @main
 	.cfi_offset %rbx, -16
 	movl	$20, %edi
 	callq	malloc
+.Ltmp0:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
@@ -27,11 +34,13 @@ main:                                   # @main
 .LBB0_3:                                # %end
 	movl	$16, %edi
 	callq	malloc
+.Ltmp1:
 	movl	$5, (%rax)
 	movq	%rbx, 8(%rax)
 	movq	%rax, 16(%rsp)
 	movl	$16, %edi
 	callq	malloc
+.Ltmp2:
 	movl	$0, (%rax)
 	movq	$.L__unnamed_1, 8(%rax)
 	movq	%rax, 24(%rsp)
@@ -41,32 +50,41 @@ main:                                   # @main
 	movl	$3, %ecx
 	movl	$4, %r8d
 	callq	f
+.Ltmp3:
 	movq	24(%rsp), %rbx
 	movl	$.L__unnamed_2, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp4:
 	movl	(%rbx), %edi
 	callq	tig_print_int
+.Ltmp5:
 	movq	24(%rsp), %rbx
 	movl	$.L__unnamed_3, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp6:
 	movq	8(%rbx), %rdi
 	callq	tig_print
+.Ltmp7:
 	movq	24(%rsp), %rbx
 	movl	$.L__unnamed_4, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp8:
 	movl	(%rbx), %edi
 	movl	$28, %esi
 	callq	assert_equal_int
+.Ltmp9:
 	movq	24(%rsp), %rbx
 	movl	$.L__unnamed_5, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp10:
 	movq	8(%rbx), %rdi
 	movl	$.L__unnamed_6, %esi
 	callq	assert_equal_string
+.Ltmp11:
 	xorl	%eax, %eax
 	addq	$32, %rsp
 	popq	%rbx
@@ -91,6 +109,7 @@ f:                                      # @f
 	movq	%rsp, %rdi
 	movl	$4, %esi
 	callq	g
+.Ltmp12:
 	addq	$24, %rsp
 	retq
 .Lfunc_end1:
@@ -118,20 +137,25 @@ g:                                      # @g
 	movq	%rdi, 8(%rsp)
 	movl	12(%rdi), %edi
 	callq	tig_print_int
+.Ltmp13:
 	movl	%ebx, %edi
 	callq	tig_print_int
+.Ltmp14:
 	movq	8(%rsp), %rax
 	movl	16(%rax), %edi
 	callq	tig_print_int
+.Ltmp15:
 	movq	8(%rsp), %rax
 	movl	20(%rax), %edi
 	callq	tig_print_int
+.Ltmp16:
 	movq	8(%rsp), %rax
 	movq	(%rax), %rax
 	movq	16(%rax), %r14
 	movl	$.L__unnamed_7, %esi
 	movq	%r14, %rdi
 	callq	tig_check_null_pointer
+.Ltmp17:
 	movq	$.L__unnamed_6, 8(%r14)
 	movq	8(%rsp), %rax
 	movq	(%rax), %rax
@@ -139,6 +163,7 @@ g:                                      # @g
 	movl	$.L__unnamed_8, %esi
 	movq	%r14, %rdi
 	callq	tig_check_null_pointer
+.Ltmp18:
 	movq	8(%rsp), %rax
 	addl	12(%rax), %ebx
 	addl	16(%rax), %ebx
@@ -150,6 +175,7 @@ g:                                      # @g
 	movl	$.L__unnamed_9, %edx
 	movq	%r15, %rdi
 	callq	tig_check_array_bound
+.Ltmp19:
 	movq	8(%r15), %rax
 	addl	16(%rax), %ebx
 	movl	%ebx, (%r14)
@@ -218,4 +244,98 @@ g:                                      # @g
 	.size	.L__unnamed_6, 8
 
 
+	.text
+	.globl	"camlLlvm_byte_code/test/static_func__code_end"
+"camlLlvm_byte_code/test/static_func__code_end":
+	.data
+	.globl	"camlLlvm_byte_code/test/static_func__data_end"
+"camlLlvm_byte_code/test/static_func__data_end":
+	.quad	0
+	.globl	"camlLlvm_byte_code/test/static_func__frametable"
+"camlLlvm_byte_code/test/static_func__frametable":
+	.short	20
+	.p2align	3
+                                        # live roots for main
+	.quad	.Ltmp0
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp1
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp2
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp3
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp4
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp5
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp6
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp7
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp8
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp9
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp10
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp11
+	.short	40
+	.short	0
+	.p2align	3
+                                        # live roots for f
+	.quad	.Ltmp12
+	.short	24
+	.short	0
+	.p2align	3
+                                        # live roots for g
+	.quad	.Ltmp13
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp14
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp15
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp16
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp17
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp18
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp19
+	.short	40
+	.short	0
+	.p2align	3
 	.section	".note.GNU-stack","",@progbits

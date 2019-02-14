@@ -12,51 +12,51 @@ source_filename = "Tiger jit"
 @8 = private unnamed_addr constant [52 x i8] c"test/static_func.tig::27.18: Nil pointer exception!\00"
 @9 = private unnamed_addr constant [8 x i8] c"foo bar\00"
 
-declare void @tig_print_int(i32)
+declare void @tig_print_int(i32) gc "ocaml"
 
-declare void @tig_print(i8*)
+declare void @tig_print(i8*) gc "ocaml"
 
-declare void @print_arr_int_ele(i32)
+declare void @print_arr_int_ele(i32) gc "ocaml"
 
-declare i32* @tig_init_array(i32, i32)
+declare i32* @tig_init_array(i32, i32) gc "ocaml"
 
-declare i32* @tig_init_record(i32)
+declare i32* @tig_init_record(i32) gc "ocaml"
 
-declare i32 @tig_array_length(i8*)
+declare i32 @tig_array_length(i8*) gc "ocaml"
 
-declare i32 @tig_nillable(i8*)
+declare i32 @tig_nillable(i8*) gc "ocaml"
 
-declare void @tig_check_array_bound(i8*, i32, i8*)
+declare void @tig_check_array_bound(i8*, i32, i8*) gc "ocaml"
 
-declare void @tig_check_null_pointer(i8*, i8*)
+declare void @tig_check_null_pointer(i8*, i8*) gc "ocaml"
 
-declare i32 @tig_random(i32)
+declare i32 @tig_random(i32) gc "ocaml"
 
-declare void @tig_exit(i32)
+declare void @tig_exit(i32) gc "ocaml"
 
-declare void @tig_flush()
+declare void @tig_flush() gc "ocaml"
 
-declare i8* @tig_getchar()
+declare i8* @tig_getchar() gc "ocaml"
 
-declare i32 @tig_ord(i8*)
+declare i32 @tig_ord(i8*) gc "ocaml"
 
-declare i8* @tig_chr(i32)
+declare i8* @tig_chr(i32) gc "ocaml"
 
-declare i32 @tig_string_cmp(i8*, i8*)
+declare i32 @tig_string_cmp(i8*, i8*) gc "ocaml"
 
-declare i32 @tig_size(i8*)
+declare i32 @tig_size(i8*) gc "ocaml"
 
-declare i8* @tig_substring(i8*, i32, i32)
+declare i8* @tig_substring(i8*, i32, i32) gc "ocaml"
 
-declare i8* @tig_concat(i8*, i8*)
+declare i8* @tig_concat(i8*, i8*) gc "ocaml"
 
-declare i32 @tig_not(i32)
+declare i32 @tig_not(i32) gc "ocaml"
 
-declare void @assert_equal_int(i32, i32)
+declare void @assert_equal_int(i32, i32) gc "ocaml"
 
-declare void @assert_equal_string(i8*, i8*)
+declare void @assert_equal_string(i8*, i8*) gc "ocaml"
 
-define i32 @main() {
+define i32 @main() gc "ocaml" {
 entry:
   %i = alloca i32
   %frame_pointer = alloca { i32, { i32, i32* }*, { i32, i8* }* }
@@ -134,7 +134,7 @@ end:                                              ; preds = %test
 
 declare noalias i8* @malloc(i32)
 
-define void @f({ i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32) {
+define void @f({ i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32) gc "ocaml" {
 entry:
   %b = alloca i32
   %frame_pointer = alloca { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }
@@ -153,7 +153,7 @@ entry:
   ret void
 }
 
-define void @g({ { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }*, i32) {
+define void @g({ { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }*, i32) gc "ocaml" {
 entry:
   %b = alloca i32
   %frame_pointer = alloca { { { i32, { i32, i32* }*, { i32, i8* }* }*, i32, i32, i32, i32 }* }

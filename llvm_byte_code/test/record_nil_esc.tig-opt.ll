@@ -3,13 +3,13 @@ source_filename = "Tiger jit"
 
 @0 = private unnamed_addr constant [54 x i8] c"test/record_nil_esc.tig::8.19: Nil pointer exception!\00"
 
-declare i32 @tig_nillable(i8*) local_unnamed_addr
+declare i32 @tig_nillable(i8*) local_unnamed_addr gc "ocaml"
 
-declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr
+declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_int(i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
-define i32 @main() local_unnamed_addr {
+define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { i32, { i32, i8* }* }
   %root = getelementptr { i32, { i32, i8* }* }, { i32, { i32, i8* }* }* %frame_pointer, i32 0, i32 1
@@ -30,7 +30,7 @@ entry:
   ret i32 0
 }
 
-define void @f({ i32, { i32, i8* }* }*) local_unnamed_addr {
+define void @f({ i32, { i32, i8* }* }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32, { i32, i8* }* }* }
   %arg_address = getelementptr { { i32, { i32, i8* }* }* }, { { i32, { i32, i8* }* }* }* %frame_pointer, i32 0, i32 0

@@ -1,5 +1,11 @@
 	.text
 	.file	"Tiger jit"
+	.globl	"camlLlvm_byte_code/test/string_cmp__code_begin"
+"camlLlvm_byte_code/test/string_cmp__code_begin":
+	.data
+	.globl	"camlLlvm_byte_code/test/string_cmp__data_begin"
+"camlLlvm_byte_code/test/string_cmp__data_begin":
+	.text
 	.globl	main                    # -- Begin function main
 	.p2align	4, 0x90
 	.type	main,@function
@@ -11,12 +17,15 @@ main:                                   # @main
 	movl	$.L__unnamed_1, %edi
 	movl	$.L__unnamed_1, %esi
 	callq	assert_equal_string
+.Ltmp0:
 	movl	$.L__unnamed_1, %edi
 	movl	$.L__unnamed_2, %esi
 	callq	tig_concat
+.Ltmp1:
 	movl	$.L__unnamed_3, %esi
 	movq	%rax, %rdi
 	callq	assert_equal_string
+.Ltmp2:
 	xorl	%eax, %eax
 	popq	%rcx
 	retq
@@ -43,4 +52,28 @@ main:                                   # @main
 	.size	.L__unnamed_3, 24
 
 
+	.text
+	.globl	"camlLlvm_byte_code/test/string_cmp__code_end"
+"camlLlvm_byte_code/test/string_cmp__code_end":
+	.data
+	.globl	"camlLlvm_byte_code/test/string_cmp__data_end"
+"camlLlvm_byte_code/test/string_cmp__data_end":
+	.quad	0
+	.globl	"camlLlvm_byte_code/test/string_cmp__frametable"
+"camlLlvm_byte_code/test/string_cmp__frametable":
+	.short	3
+	.p2align	3
+                                        # live roots for main
+	.quad	.Ltmp0
+	.short	8
+	.short	0
+	.p2align	3
+	.quad	.Ltmp1
+	.short	8
+	.short	0
+	.p2align	3
+	.quad	.Ltmp2
+	.short	8
+	.short	0
+	.p2align	3
 	.section	".note.GNU-stack","",@progbits

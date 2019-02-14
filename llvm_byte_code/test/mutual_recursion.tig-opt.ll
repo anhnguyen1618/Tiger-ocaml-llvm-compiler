@@ -1,11 +1,11 @@
 ; ModuleID = 'llvm_byte_code/test/mutual_recursion.tig.ll'
 source_filename = "Tiger jit"
 
-declare void @tig_print_int(i32) local_unnamed_addr
+declare void @tig_print_int(i32) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_int(i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
-define i32 @main() local_unnamed_addr {
+define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { i32 }
   %0 = call i32 @a({ i32 }* %frame_pointer)
@@ -16,7 +16,7 @@ entry:
   ret i32 0
 }
 
-define i32 @a({ i32 }*) local_unnamed_addr {
+define i32 @a({ i32 }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
@@ -27,7 +27,7 @@ entry:
   ret i32 %1
 }
 
-define i32 @b({ i32 }*) local_unnamed_addr {
+define i32 @b({ i32 }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0

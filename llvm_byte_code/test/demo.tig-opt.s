@@ -1,5 +1,11 @@
 	.text
 	.file	"Tiger jit"
+	.globl	"camlLlvm_byte_code/test/demo__code_begin"
+"camlLlvm_byte_code/test/demo__code_begin":
+	.data
+	.globl	"camlLlvm_byte_code/test/demo__data_begin"
+"camlLlvm_byte_code/test/demo__data_begin":
+	.text
 	.globl	main                    # -- Begin function main
 	.p2align	4, 0x90
 	.type	main,@function
@@ -19,11 +25,13 @@ main:                                   # @main
 	.cfi_offset %rbp, -16
 	movl	$16, %edi
 	callq	malloc
+.Ltmp0:
 	movq	%rax, %rbx
 	movl	$5, (%rbx)
 	movq	$.L__unnamed_1, 8(%rbx)
 	movl	$40, %edi
 	callq	malloc
+.Ltmp1:
 	movq	%rax, %rbp
 	xorl	%eax, %eax
 	cmpl	$4, %eax
@@ -38,6 +46,7 @@ main:                                   # @main
 .LBB0_3:                                # %end
 	movl	$16, %edi
 	callq	malloc
+.Ltmp2:
 	movq	%rax, %r14
 	movl	$5, (%r14)
 	movq	%rbp, 8(%r14)
@@ -45,11 +54,13 @@ main:                                   # @main
 	movl	$.L__unnamed_2, %edx
 	movq	%r14, %rdi
 	callq	tig_check_array_bound
+.Ltmp3:
 	movq	8(%r14), %rax
 	movq	(%rax), %rbp
 	movl	$.L__unnamed_3, %esi
 	movq	%rbp, %rdi
 	callq	tig_check_null_pointer
+.Ltmp4:
 	movl	(%rbp), %ebp
 	leaq	8(%rsp), %r14
 	testl	%ebp, %ebp
@@ -60,13 +71,17 @@ main:                                   # @main
 	movq	%r14, %rdi
 	movl	%ebp, %esi
 	callq	fib
+.Ltmp5:
 	movl	%eax, %edi
 	callq	tig_print_int
+.Ltmp6:
 	movl	$.L__unnamed_4, %esi
 	movq	%rbx, %rdi
 	callq	tig_check_null_pointer
+.Ltmp7:
 	movq	8(%rbx), %rdi
 	callq	tig_print
+.Ltmp8:
 	decl	%ebp
 	testl	%ebp, %ebp
 	jg	.LBB0_5
@@ -108,11 +123,13 @@ fib:                                    # @fib
 	leal	-1(%rbx), %esi
 	movq	(%rsp), %rdi
 	callq	fib
+.Ltmp9:
 	movl	%eax, %ebp
 	addl	$-2, %ebx
 	movq	(%rsp), %rdi
 	movl	%ebx, %esi
 	callq	fib
+.Ltmp10:
 	addl	%ebp, %eax
 .LBB1_3:                                # %merge
 	addq	$8, %rsp
@@ -149,4 +166,61 @@ fib:                                    # @fib
 	.size	.L__unnamed_4, 45
 
 
+	.text
+	.globl	"camlLlvm_byte_code/test/demo__code_end"
+"camlLlvm_byte_code/test/demo__code_end":
+	.data
+	.globl	"camlLlvm_byte_code/test/demo__data_end"
+"camlLlvm_byte_code/test/demo__data_end":
+	.quad	0
+	.globl	"camlLlvm_byte_code/test/demo__frametable"
+"camlLlvm_byte_code/test/demo__frametable":
+	.short	11
+	.p2align	3
+                                        # live roots for main
+	.quad	.Ltmp0
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp1
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp2
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp3
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp4
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp5
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp6
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp7
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp8
+	.short	40
+	.short	0
+	.p2align	3
+                                        # live roots for fib
+	.quad	.Ltmp9
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp10
+	.short	24
+	.short	0
+	.p2align	3
 	.section	".note.GNU-stack","",@progbits

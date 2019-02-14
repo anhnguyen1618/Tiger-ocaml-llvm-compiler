@@ -4,51 +4,51 @@ source_filename = "Tiger jit"
 @0 = private unnamed_addr constant [47 x i8] c"test/staticlink.tig::10.35: Array out of bound\00"
 @1 = private unnamed_addr constant [46 x i8] c"test/staticlink.tig::12.6: Array out of bound\00"
 
-declare void @tig_print_int(i32)
+declare void @tig_print_int(i32) gc "ocaml"
 
-declare void @tig_print(i8*)
+declare void @tig_print(i8*) gc "ocaml"
 
-declare void @print_arr_int_ele(i32)
+declare void @print_arr_int_ele(i32) gc "ocaml"
 
-declare i32* @tig_init_array(i32, i32)
+declare i32* @tig_init_array(i32, i32) gc "ocaml"
 
-declare i32* @tig_init_record(i32)
+declare i32* @tig_init_record(i32) gc "ocaml"
 
-declare i32 @tig_array_length(i8*)
+declare i32 @tig_array_length(i8*) gc "ocaml"
 
-declare i32 @tig_nillable(i8*)
+declare i32 @tig_nillable(i8*) gc "ocaml"
 
-declare void @tig_check_array_bound(i8*, i32, i8*)
+declare void @tig_check_array_bound(i8*, i32, i8*) gc "ocaml"
 
-declare void @tig_check_null_pointer(i8*, i8*)
+declare void @tig_check_null_pointer(i8*, i8*) gc "ocaml"
 
-declare i32 @tig_random(i32)
+declare i32 @tig_random(i32) gc "ocaml"
 
-declare void @tig_exit(i32)
+declare void @tig_exit(i32) gc "ocaml"
 
-declare void @tig_flush()
+declare void @tig_flush() gc "ocaml"
 
-declare i8* @tig_getchar()
+declare i8* @tig_getchar() gc "ocaml"
 
-declare i32 @tig_ord(i8*)
+declare i32 @tig_ord(i8*) gc "ocaml"
 
-declare i8* @tig_chr(i32)
+declare i8* @tig_chr(i32) gc "ocaml"
 
-declare i32 @tig_string_cmp(i8*, i8*)
+declare i32 @tig_string_cmp(i8*, i8*) gc "ocaml"
 
-declare i32 @tig_size(i8*)
+declare i32 @tig_size(i8*) gc "ocaml"
 
-declare i8* @tig_substring(i8*, i32, i32)
+declare i8* @tig_substring(i8*, i32, i32) gc "ocaml"
 
-declare i8* @tig_concat(i8*, i8*)
+declare i8* @tig_concat(i8*, i8*) gc "ocaml"
 
-declare i32 @tig_not(i32)
+declare i32 @tig_not(i32) gc "ocaml"
 
-declare void @assert_equal_int(i32, i32)
+declare void @assert_equal_int(i32, i32) gc "ocaml"
 
-declare void @assert_equal_string(i8*, i8*)
+declare void @assert_equal_string(i8*, i8*) gc "ocaml"
 
-define i32 @main() {
+define i32 @main() gc "ocaml" {
 entry:
   %i = alloca i32
   %x = alloca i32
@@ -101,7 +101,7 @@ end:                                              ; preds = %test
 
 declare noalias i8* @malloc(i32)
 
-define i32 @nested_function({ i32, i32, { i32, i32* }* }*, i32) {
+define i32 @nested_function({ i32, i32, { i32, i32* }* }*, i32) gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32, i32, { i32, i32* }* }*, i32, i32 }
   %arg_address = getelementptr { { i32, i32, { i32, i32* }* }*, i32, i32 }, { { i32, i32, { i32, i32* }* }*, i32, i32 }* %frame_pointer, i32 0, i32 0
@@ -124,7 +124,7 @@ entry:
   ret i32 %3
 }
 
-define i32 @f({ { i32, i32, { i32, i32* }* }*, i32, i32 }*) {
+define i32 @f({ { i32, i32, { i32, i32* }* }*, i32, i32 }*) gc "ocaml" {
 entry:
   %frame_pointer = alloca { { { i32, i32, { i32, i32* }* }*, i32, i32 }* }
   %arg_address = getelementptr { { { i32, i32, { i32, i32* }* }*, i32, i32 }* }, { { { i32, i32, { i32, i32* }* }*, i32, i32 }* }* %frame_pointer, i32 0, i32 0

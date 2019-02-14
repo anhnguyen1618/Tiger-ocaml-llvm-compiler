@@ -11,15 +11,15 @@ source_filename = "Tiger jit"
 @7 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::21.5: Nil pointer exception!\00"
 @8 = private unnamed_addr constant [51 x i8] c"test/binary_tree.tig::22.5: Nil pointer exception!\00"
 
-declare void @tig_print_int(i32) local_unnamed_addr
+declare void @tig_print_int(i32) local_unnamed_addr gc "ocaml"
 
-declare i32 @tig_nillable(i8*) local_unnamed_addr
+declare i32 @tig_nillable(i8*) local_unnamed_addr gc "ocaml"
 
-declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr
+declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr gc "ocaml"
 
-declare void @assert_equal_int(i32, i32) local_unnamed_addr
+declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
-define i32 @main() local_unnamed_addr {
+define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { i32 }
   %malloccall = tail call i8* @malloc(i32 ptrtoint ({ i32, i8*, i8* }* getelementptr ({ i32, i8*, i8* }, { i32, i8*, i8* }* null, i32 1) to i32))
@@ -115,7 +115,7 @@ entry:
   ret i32 0
 }
 
-define i32 @eval_sum({ i32 }*, { i32, i8*, i8* }*) local_unnamed_addr {
+define i32 @eval_sum({ i32 }*, { i32, i8*, i8* }*) local_unnamed_addr gc "ocaml" {
 entry:
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0

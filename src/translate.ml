@@ -232,8 +232,8 @@ let while_exp (eval_test_exp: unit -> exp) (eval_body_exp: break_block -> unit):
   L.position_at_end test_block builder;
 
   let test_val = eval_test_exp () in
-  let cond_val = L.build_icmp L.Icmp.Eq test_val (int_exp 1) "cond" builder in
-  ignore(L.build_cond_br cond_val loop_block end_block builder);
+  let cond_val = L.build_icmp L.Icmp.Eq test_val (int_exp 0) "cond" builder in
+  ignore(L.build_cond_br cond_val end_block loop_block builder);
 
   L.position_at_end loop_block builder;
   eval_body_exp(end_block);
@@ -392,8 +392,8 @@ let if_exp
   ignore(L.build_br test_block builder);
   L.position_at_end test_block builder;
   let test_val = gen_test_val () in
-  let cond_val = L.build_icmp L.Icmp.Eq test_val (int_exp 1) "cond" builder in
-  ignore(L.build_cond_br cond_val then_block else_block builder);
+  let cond_val = L.build_icmp L.Icmp.Eq test_val (int_exp 0) "cond" builder in
+  ignore(L.build_cond_br cond_val else_block then_block builder);
 
   L.position_at_end then_block builder;
   let (then_val, gen_else_val) = gen_then_else() in

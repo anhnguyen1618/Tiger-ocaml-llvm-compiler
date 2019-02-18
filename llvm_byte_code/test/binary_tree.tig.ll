@@ -196,8 +196,8 @@ test:                                             ; preds = %entry
   %root1 = load { i32, i8*, i8* }*, { i32, i8*, i8* }** %root
   %2 = bitcast { i32, i8*, i8* }* %root1 to i8*
   %3 = call i32 @tig_nillable(i8* %2)
-  %cond = icmp eq i32 %3, 1
-  br i1 %cond, label %then, label %else
+  %cond = icmp eq i32 %3, 0
+  br i1 %cond, label %else, label %then
 
 then:                                             ; preds = %test
   store i32 0, i32* %if_result_addr

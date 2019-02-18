@@ -72,8 +72,8 @@ test:                                             ; preds = %loop, %entry
   %i1 = load i32, i32* %i
   %lt_tmp = icmp slt i32 %i1, 5
   %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %i2 = load i32, i32* %i

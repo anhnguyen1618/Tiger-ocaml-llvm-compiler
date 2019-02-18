@@ -81,8 +81,8 @@ test:                                             ; preds = %loop, %entry
   %i5 = load i32, i32* %i
   %lt_tmp = icmp slt i32 %i5, %array_size2
   %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %i6 = load i32, i32* %i
@@ -118,8 +118,8 @@ test11:                                           ; preds = %loop12, %end
   %counter14 = load i32, i32* %counter
   %gt_tmp = icmp sgt i32 %counter14, 0
   %bool_tmp15 = zext i1 %gt_tmp to i32
-  %cond16 = icmp eq i32 %bool_tmp15, 1
-  br i1 %cond16, label %loop12, label %end13
+  %cond16 = icmp eq i32 %bool_tmp15, 0
+  br i1 %cond16, label %end13, label %loop12
 
 loop12:                                           ; preds = %test11
   %counter17 = load i32, i32* %counter
@@ -157,8 +157,8 @@ test:                                             ; preds = %entry
   %n1 = load i32, i32* %n
   %eq_tmp = icmp eq i32 %n1, 0
   %bool_tmp = zext i1 %eq_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %then, label %else
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %else, label %then
 
 then:                                             ; preds = %test
   store i32 0, i32* %if_result_addr15
@@ -175,8 +175,8 @@ test2:                                            ; preds = %else
   %n6 = load i32, i32* %n
   %eq_tmp7 = icmp eq i32 %n6, 1
   %bool_tmp8 = zext i1 %eq_tmp7 to i32
-  %cond9 = icmp eq i32 %bool_tmp8, 1
-  br i1 %cond9, label %then3, label %else4
+  %cond9 = icmp eq i32 %bool_tmp8, 0
+  br i1 %cond9, label %else4, label %then3
 
 then3:                                            ; preds = %test2
   store i32 1, i32* %if_result_addr

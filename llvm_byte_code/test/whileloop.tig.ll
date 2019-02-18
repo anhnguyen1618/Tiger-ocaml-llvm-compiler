@@ -62,8 +62,8 @@ test:                                             ; preds = %merge, %entry
   %a1 = load i32, i32* %a
   %lt_tmp = icmp slt i32 %a1, 5
   %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %a2 = load i32, i32* %a
@@ -81,8 +81,8 @@ test3:                                            ; preds = %loop
   %a4 = load i32, i32* %a
   %eq_tmp = icmp eq i32 %a4, 3
   %bool_tmp5 = zext i1 %eq_tmp to i32
-  %cond6 = icmp eq i32 %bool_tmp5, 1
-  br i1 %cond6, label %then, label %else
+  %cond6 = icmp eq i32 %bool_tmp5, 0
+  br i1 %cond6, label %else, label %then
 
 then:                                             ; preds = %test3
   br label %end

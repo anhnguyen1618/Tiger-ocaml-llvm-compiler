@@ -208,8 +208,8 @@ test:                                             ; preds = %loop, %entry
   %i5 = load i32, i32* %i
   %ge_tmp = icmp sge i32 %_limit4, %i5
   %bool_tmp = zext i1 %ge_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %arr6 = load { i32, i32* }*, { i32, i32* }** %arr
@@ -254,8 +254,8 @@ test:                                             ; preds = %loop, %entry
   %i2 = load i32, i32* %i
   %lt_tmp = icmp slt i32 %i2, %size1
   %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %i3 = load i32, i32* %i
@@ -286,8 +286,8 @@ test10:                                           ; preds = %loop11, %end
   %i14 = load i32, i32* %i7
   %ge_tmp = icmp sge i32 %_limit13, %i14
   %bool_tmp15 = zext i1 %ge_tmp to i32
-  %cond16 = icmp eq i32 %bool_tmp15, 1
-  br i1 %cond16, label %loop11, label %end12
+  %cond16 = icmp eq i32 %bool_tmp15, 0
+  br i1 %cond16, label %end12, label %loop11
 
 loop11:                                           ; preds = %test10
   %i17 = load i32, i32* %i7
@@ -340,8 +340,8 @@ test:                                             ; preds = %loop, %entry
   %size8 = load i32, i32* %size
   %gt_tmp = icmp sgt i32 %size8, 1
   %bool_tmp = zext i1 %gt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %size9 = load i32, i32* %size
@@ -379,8 +379,8 @@ test:                                             ; preds = %loop, %entry
   %index2 = load i32, i32* %index
   %ge_tmp = icmp sge i32 %index2, 0
   %bool_tmp = zext i1 %ge_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %index3 = load i32, i32* %index
@@ -538,8 +538,8 @@ test8:                                            ; preds = %test
   %size13 = load i32, i32* %size
   %lt_tmp = icmp slt i32 %right_index12, %size13
   %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %then9, label %else10
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %else10, label %then9
 
 then9:                                            ; preds = %test8
   %fp_addr_in_sl14 = getelementptr { { { i32 }*, i32, { i32, i32* }* }* }, { { { i32 }*, i32, { i32, i32* }* }* }* %frame_pointer, i32 0, i32 0
@@ -565,8 +565,8 @@ else10:                                           ; preds = %test8
 
 merge11:                                          ; preds = %else10, %then9
   %if_result = load i32, i32* %if_result_addr
-  %cond25 = icmp eq i32 %if_result, 1
-  br i1 %cond25, label %then, label %else
+  %cond25 = icmp eq i32 %if_result, 0
+  br i1 %cond25, label %else, label %then
 
 test38:                                           ; preds = %merge
   br label %test42
@@ -602,8 +602,8 @@ test42:                                           ; preds = %test38
   %size47 = load i32, i32* %size
   %lt_tmp48 = icmp slt i32 %left_index46, %size47
   %bool_tmp49 = zext i1 %lt_tmp48 to i32
-  %cond50 = icmp eq i32 %bool_tmp49, 1
-  br i1 %cond50, label %then43, label %else44
+  %cond50 = icmp eq i32 %bool_tmp49, 0
+  br i1 %cond50, label %else44, label %then43
 
 then43:                                           ; preds = %test42
   %fp_addr_in_sl51 = getelementptr { { { i32 }*, i32, { i32, i32* }* }* }, { { { i32 }*, i32, { i32, i32* }* }* }* %frame_pointer, i32 0, i32 0
@@ -629,8 +629,8 @@ else44:                                           ; preds = %test42
 
 merge45:                                          ; preds = %else44, %then43
   %if_result64 = load i32, i32* %if_result_addr63
-  %cond65 = icmp eq i32 %if_result64, 1
-  br i1 %cond65, label %then39, label %else40
+  %cond65 = icmp eq i32 %if_result64, 0
+  br i1 %cond65, label %else40, label %then39
 
 test78:                                           ; preds = %merge41
   %largest82 = load i32, i32* %largest
@@ -647,8 +647,8 @@ test78:                                           ; preds = %merge41
   %arr_ele91 = load i32, i32* %arr_ele_addr90
   %neq_tmp = icmp ne i32 %largest82, %arr_ele91
   %bool_tmp92 = zext i1 %neq_tmp to i32
-  %cond93 = icmp eq i32 %bool_tmp92, 1
-  br i1 %cond93, label %then79, label %else80
+  %cond93 = icmp eq i32 %bool_tmp92, 0
+  br i1 %cond93, label %else80, label %then79
 
 then79:                                           ; preds = %test78
   %index94 = load i32, i32* %index
@@ -695,8 +695,8 @@ test:                                             ; preds = %loop, %entry
   %i2 = load i32, i32* %i
   %lt_tmp = icmp slt i32 %i2, %size1
   %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %i3 = load i32, i32* %i
@@ -727,8 +727,8 @@ test10:                                           ; preds = %loop11, %end
   %i14 = load i32, i32* %i7
   %ge_tmp = icmp sge i32 %_limit13, %i14
   %bool_tmp15 = zext i1 %ge_tmp to i32
-  %cond16 = icmp eq i32 %bool_tmp15, 1
-  br i1 %cond16, label %loop11, label %end12
+  %cond16 = icmp eq i32 %bool_tmp15, 0
+  br i1 %cond16, label %end12, label %loop11
 
 loop11:                                           ; preds = %test10
   %i17 = load i32, i32* %i7

@@ -21,8 +21,8 @@ test:                                             ; preds = %loop, %entry
   %i.0 = phi i32 [ 0, %entry ], [ %add_tmp, %loop ]
   %lt_tmp = icmp slt i32 %i.0, 7
   %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %Element = getelementptr i32, i32* %array_init, i32 %i.0

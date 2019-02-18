@@ -33,8 +33,8 @@ test:                                             ; preds = %loop, %entry
   %i.0 = phi i32 [ 0, %entry ], [ %add_tmp, %loop ]
   %lt_tmp = icmp slt i32 %i.0, 5
   %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %Element5 = getelementptr { i32, i8* }*, { i32, i8* }** %array_init, i32 %i.0
@@ -57,8 +57,8 @@ test11:                                           ; preds = %loop12, %end
   %i10.0 = phi i32 [ 0, %end ], [ %add_tmp20, %loop12 ]
   %lt_tmp15 = icmp slt i32 %i10.0, 5
   %bool_tmp16 = zext i1 %lt_tmp15 to i32
-  %cond17 = icmp eq i32 %bool_tmp16, 1
-  br i1 %cond17, label %loop12, label %end13
+  %cond17 = icmp eq i32 %bool_tmp16, 0
+  br i1 %cond17, label %end13, label %loop12
 
 loop12:                                           ; preds = %test11
   %Element19 = getelementptr { i32, i8* }*, { i32, i8* }** %array_init9, i32 %i10.0
@@ -81,8 +81,8 @@ test29:                                           ; preds = %loop30, %end13
   %i28.0 = phi i32 [ 0, %end13 ], [ %add_tmp38, %loop30 ]
   %lt_tmp33 = icmp slt i32 %i28.0, 5
   %bool_tmp34 = zext i1 %lt_tmp33 to i32
-  %cond35 = icmp eq i32 %bool_tmp34, 1
-  br i1 %cond35, label %loop30, label %end31
+  %cond35 = icmp eq i32 %bool_tmp34, 0
+  br i1 %cond35, label %end31, label %loop30
 
 loop30:                                           ; preds = %test29
   %Element37 = getelementptr { i32, i8* }*, { i32, i8* }** %array_init27, i32 %i28.0
@@ -158,8 +158,8 @@ entry:
 test:                                             ; preds = %entry
   %2 = bitcast { i32, i8* }* %1 to i8*
   %3 = call i32 @tig_nillable(i8* %2)
-  %cond = icmp eq i32 %3, 1
-  br i1 %cond, label %then, label %else
+  %cond = icmp eq i32 %3, 0
+  br i1 %cond, label %else, label %then
 
 then:                                             ; preds = %test
   br label %merge
@@ -172,6 +172,6 @@ else:                                             ; preds = %test
   br label %merge
 
 merge:                                            ; preds = %else, %then
-  %if_result_addr.0 = phi i32 [ 0, %then ], [ %field_var, %else ]
+  %if_result_addr.0 = phi i32 [ %field_var, %else ], [ 0, %then ]
   ret i32 %if_result_addr.0
 }

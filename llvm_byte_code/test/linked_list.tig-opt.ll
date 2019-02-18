@@ -119,8 +119,8 @@ test:                                             ; preds = %loop, %entry
   %23 = call i32 @tig_nillable(i8* %22)
   %eq_tmp = icmp eq i32 %23, 0
   %bool_tmp = zext i1 %eq_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end, label %loop
 
 loop:                                             ; preds = %test
   %24 = bitcast { i32, i8* }* %current_node.0 to i8*

@@ -1,17 +1,16 @@
-	.text
-	.file	"Tiger jit"
-	.globl	"camlLlvm_byte_code/test/whileloop__code_begin"
-"camlLlvm_byte_code/test/whileloop__code_begin":
-	.data
-	.globl	"camlLlvm_byte_code/test/whileloop__data_begin"
-"camlLlvm_byte_code/test/whileloop__data_begin":
-	.text
-	.globl	main                    # -- Begin function main
+	.section	__TEXT,__text,regular,pure_instructions
+	.macosx_version_min 10, 14
+	.globl	"_camlLlvm_byte_code/test/whileloop__code_begin"
+"_camlLlvm_byte_code/test/whileloop__code_begin":
+	.section	__DATA,__data
+	.globl	"_camlLlvm_byte_code/test/whileloop__data_begin"
+"_camlLlvm_byte_code/test/whileloop__data_begin":
+	.section	__TEXT,__text,regular,pure_instructions
+	.globl	_main                   ## -- Begin function main
 	.p2align	4, 0x90
-	.type	main,@function
-main:                                   # @main
+_main:                                  ## @main
 	.cfi_startproc
-# %bb.0:                                # %entry
+## %bb.0:                               ## %entry
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
 	pushq	%rbx
@@ -21,63 +20,61 @@ main:                                   # @main
 	.cfi_offset %rbx, -24
 	.cfi_offset %rbp, -16
 	xorl	%ebx, %ebx
-	cmpl	$5, %ebx
-	jl	.LBB0_2
-	jmp	.LBB0_4
+	cmpl	$4, %ebx
+	jle	LBB0_2
+	jmp	LBB0_3
 	.p2align	4, 0x90
-.LBB0_3:                                # %merge
-                                        #   in Loop: Header=BB0_2 Depth=1
+LBB0_4:                                 ## %else
+                                        ##   in Loop: Header=BB0_2 Depth=1
 	incl	%ebx
-	cmpl	$5, %ebx
-	jge	.LBB0_4
-.LBB0_2:                                # %test3
-                                        # =>This Inner Loop Header: Depth=1
+	cmpl	$4, %ebx
+	jg	LBB0_3
+LBB0_2:                                 ## %loop
+                                        ## =>This Inner Loop Header: Depth=1
 	movl	%ebx, %edi
-	callq	tig_print_int
-.Ltmp0:
+	callq	_tig_print_int
+Ltmp0:
 	cmpl	$3, %ebx
-	jne	.LBB0_3
-.LBB0_4:                                # %end
+	jne	LBB0_4
+LBB0_3:                                 ## %end
 	leal	2(%rbx), %ebp
 	movl	$3, %esi
 	movl	%ebx, %edi
-	callq	assert_equal_int
-.Ltmp1:
+	callq	_assert_equal_int
+Ltmp1:
 	movl	$5, %esi
 	movl	%ebp, %edi
-	callq	assert_equal_int
-.Ltmp2:
+	callq	_assert_equal_int
+Ltmp2:
 	xorl	%eax, %eax
 	addq	$8, %rsp
 	popq	%rbx
 	popq	%rbp
 	retq
-.Lfunc_end0:
-	.size	main, .Lfunc_end0-main
 	.cfi_endproc
-                                        # -- End function
+                                        ## -- End function
 
-	.globl	"camlLlvm_byte_code/test/whileloop__code_end"
-"camlLlvm_byte_code/test/whileloop__code_end":
-	.data
-	.globl	"camlLlvm_byte_code/test/whileloop__data_end"
-"camlLlvm_byte_code/test/whileloop__data_end":
+	.globl	"_camlLlvm_byte_code/test/whileloop__code_end"
+"_camlLlvm_byte_code/test/whileloop__code_end":
+	.section	__DATA,__data
+	.globl	"_camlLlvm_byte_code/test/whileloop__data_end"
+"_camlLlvm_byte_code/test/whileloop__data_end":
 	.quad	0
-	.globl	"camlLlvm_byte_code/test/whileloop__frametable"
-"camlLlvm_byte_code/test/whileloop__frametable":
+	.globl	"_camlLlvm_byte_code/test/whileloop__frametable"
+"_camlLlvm_byte_code/test/whileloop__frametable":
 	.short	3
 	.p2align	3
-                                        # live roots for main
-	.quad	.Ltmp0
+                                        ## live roots for main
+	.quad	Ltmp0
 	.short	24
 	.short	0
 	.p2align	3
-	.quad	.Ltmp1
+	.quad	Ltmp1
 	.short	24
 	.short	0
 	.p2align	3
-	.quad	.Ltmp2
+	.quad	Ltmp2
 	.short	24
 	.short	0
 	.p2align	3
-	.section	".note.GNU-stack","",@progbits
+.subsections_via_symbols

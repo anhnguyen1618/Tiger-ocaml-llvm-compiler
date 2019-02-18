@@ -1,17 +1,16 @@
-	.text
-	.file	"Tiger jit"
-	.globl	"camlLlvm_byte_code/test/mutual_recursion__code_begin"
-"camlLlvm_byte_code/test/mutual_recursion__code_begin":
-	.data
-	.globl	"camlLlvm_byte_code/test/mutual_recursion__data_begin"
-"camlLlvm_byte_code/test/mutual_recursion__data_begin":
-	.text
-	.globl	main                    # -- Begin function main
+	.section	__TEXT,__text,regular,pure_instructions
+	.macosx_version_min 10, 14
+	.globl	"_camlLlvm_byte_code/test/mutual_recursion__code_begin"
+"_camlLlvm_byte_code/test/mutual_recursion__code_begin":
+	.section	__DATA,__data
+	.globl	"_camlLlvm_byte_code/test/mutual_recursion__data_begin"
+"_camlLlvm_byte_code/test/mutual_recursion__data_begin":
+	.section	__TEXT,__text,regular,pure_instructions
+	.globl	_main                   ## -- Begin function main
 	.p2align	4, 0x90
-	.type	main,@function
-main:                                   # @main
+_main:                                  ## @main
 	.cfi_startproc
-# %bb.0:                                # %entry
+## %bb.0:                               ## %entry
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
 	pushq	%rbx
@@ -22,97 +21,89 @@ main:                                   # @main
 	.cfi_offset %rbp, -16
 	movq	%rsp, %rbx
 	movq	%rbx, %rdi
-	callq	a
-.Ltmp0:
+	callq	_a
+Ltmp0:
 	movl	%eax, %edi
-	callq	tig_print_int
-.Ltmp1:
+	callq	_tig_print_int
+Ltmp1:
 	movq	%rbx, %rdi
-	callq	a
-.Ltmp2:
+	callq	_a
+Ltmp2:
 	movl	%eax, %ebp
 	movq	%rbx, %rdi
-	callq	b
-.Ltmp3:
+	callq	_b
+Ltmp3:
 	movl	%ebp, %edi
 	movl	%eax, %esi
-	callq	assert_equal_int
-.Ltmp4:
+	callq	_assert_equal_int
+Ltmp4:
 	xorl	%eax, %eax
 	addq	$8, %rsp
 	popq	%rbx
 	popq	%rbp
 	retq
-.Lfunc_end0:
-	.size	main, .Lfunc_end0-main
 	.cfi_endproc
-                                        # -- End function
-	.globl	a                       # -- Begin function a
+                                        ## -- End function
+	.globl	_a                      ## -- Begin function a
 	.p2align	4, 0x90
-	.type	a,@function
-a:                                      # @a
+_a:                                     ## @a
 	.cfi_startproc
-# %bb.0:                                # %entry
+## %bb.0:                               ## %entry
 	pushq	%rax
 	.cfi_def_cfa_offset 16
 	movq	%rdi, (%rsp)
-	callq	b
-.Ltmp5:
+	callq	_b
+Ltmp5:
 	popq	%rcx
 	retq
-.Lfunc_end1:
-	.size	a, .Lfunc_end1-a
 	.cfi_endproc
-                                        # -- End function
-	.globl	b                       # -- Begin function b
+                                        ## -- End function
+	.globl	_b                      ## -- Begin function b
 	.p2align	4, 0x90
-	.type	b,@function
-b:                                      # @b
+_b:                                     ## @b
 	.cfi_startproc
-# %bb.0:                                # %entry
+## %bb.0:                               ## %entry
 	movq	%rdi, -8(%rsp)
 	movl	$4, %eax
 	retq
-.Lfunc_end2:
-	.size	b, .Lfunc_end2-b
 	.cfi_endproc
-                                        # -- End function
+                                        ## -- End function
 
-	.globl	"camlLlvm_byte_code/test/mutual_recursion__code_end"
-"camlLlvm_byte_code/test/mutual_recursion__code_end":
-	.data
-	.globl	"camlLlvm_byte_code/test/mutual_recursion__data_end"
-"camlLlvm_byte_code/test/mutual_recursion__data_end":
+	.globl	"_camlLlvm_byte_code/test/mutual_recursion__code_end"
+"_camlLlvm_byte_code/test/mutual_recursion__code_end":
+	.section	__DATA,__data
+	.globl	"_camlLlvm_byte_code/test/mutual_recursion__data_end"
+"_camlLlvm_byte_code/test/mutual_recursion__data_end":
 	.quad	0
-	.globl	"camlLlvm_byte_code/test/mutual_recursion__frametable"
-"camlLlvm_byte_code/test/mutual_recursion__frametable":
+	.globl	"_camlLlvm_byte_code/test/mutual_recursion__frametable"
+"_camlLlvm_byte_code/test/mutual_recursion__frametable":
 	.short	6
 	.p2align	3
-                                        # live roots for main
-	.quad	.Ltmp0
+                                        ## live roots for main
+	.quad	Ltmp0
 	.short	24
 	.short	0
 	.p2align	3
-	.quad	.Ltmp1
+	.quad	Ltmp1
 	.short	24
 	.short	0
 	.p2align	3
-	.quad	.Ltmp2
+	.quad	Ltmp2
 	.short	24
 	.short	0
 	.p2align	3
-	.quad	.Ltmp3
+	.quad	Ltmp3
 	.short	24
 	.short	0
 	.p2align	3
-	.quad	.Ltmp4
+	.quad	Ltmp4
 	.short	24
 	.short	0
 	.p2align	3
-                                        # live roots for a
-	.quad	.Ltmp5
+                                        ## live roots for a
+	.quad	Ltmp5
 	.short	8
 	.short	0
 	.p2align	3
-                                        # live roots for b
-	.section	".note.GNU-stack","",@progbits
+                                        ## live roots for b
+.subsections_via_symbols

@@ -1,79 +1,71 @@
-	.text
-	.file	"Tiger jit"
-	.globl	"camlLlvm_byte_code/test/string_cmp__code_begin"
-"camlLlvm_byte_code/test/string_cmp__code_begin":
-	.data
-	.globl	"camlLlvm_byte_code/test/string_cmp__data_begin"
-"camlLlvm_byte_code/test/string_cmp__data_begin":
-	.text
-	.globl	main                    # -- Begin function main
+	.section	__TEXT,__text,regular,pure_instructions
+	.macosx_version_min 10, 14
+	.globl	"_camlLlvm_byte_code/test/string_cmp__code_begin"
+"_camlLlvm_byte_code/test/string_cmp__code_begin":
+	.section	__DATA,__data
+	.globl	"_camlLlvm_byte_code/test/string_cmp__data_begin"
+"_camlLlvm_byte_code/test/string_cmp__data_begin":
+	.section	__TEXT,__text,regular,pure_instructions
+	.globl	_main                   ## -- Begin function main
 	.p2align	4, 0x90
-	.type	main,@function
-main:                                   # @main
+_main:                                  ## @main
 	.cfi_startproc
-# %bb.0:                                # %entry
-	pushq	%rax
+## %bb.0:                               ## %entry
+	pushq	%rbx
 	.cfi_def_cfa_offset 16
-	movl	$.L__unnamed_1, %edi
-	movl	$.L__unnamed_1, %esi
-	callq	assert_equal_string
-.Ltmp0:
-	movl	$.L__unnamed_1, %edi
-	movl	$.L__unnamed_2, %esi
-	callq	tig_concat
-.Ltmp1:
-	movl	$.L__unnamed_3, %esi
+	.cfi_offset %rbx, -16
+	leaq	L___unnamed_1(%rip), %rbx
+	movq	%rbx, %rdi
+	movq	%rbx, %rsi
+	callq	_assert_equal_string
+Ltmp0:
+	leaq	L___unnamed_2(%rip), %rsi
+	movq	%rbx, %rdi
+	callq	_tig_concat
+Ltmp1:
+	leaq	L___unnamed_3(%rip), %rsi
 	movq	%rax, %rdi
-	callq	assert_equal_string
-.Ltmp2:
+	callq	_assert_equal_string
+Ltmp2:
 	xorl	%eax, %eax
-	popq	%rcx
+	popq	%rbx
 	retq
-.Lfunc_end0:
-	.size	main, .Lfunc_end0-main
 	.cfi_endproc
-                                        # -- End function
-	.type	.L__unnamed_1,@object   # @0
-	.section	.rodata.str1.1,"aMS",@progbits,1
-.L__unnamed_1:
+                                        ## -- End function
+	.section	__TEXT,__cstring,cstring_literals
+L___unnamed_1:                          ## @0
 	.asciz	"test string"
-	.size	.L__unnamed_1, 12
 
-	.type	.L__unnamed_2,@object   # @1
-.L__unnamed_2:
+L___unnamed_2:                          ## @1
 	.asciz	"-hello world"
-	.size	.L__unnamed_2, 13
 
-	.type	.L__unnamed_3,@object   # @2
-	.section	.rodata.str1.16,"aMS",@progbits,1
-	.p2align	4
-.L__unnamed_3:
+	.p2align	4               ## @2
+L___unnamed_3:
 	.asciz	"test string-hello world"
-	.size	.L__unnamed_3, 24
 
 
-	.text
-	.globl	"camlLlvm_byte_code/test/string_cmp__code_end"
-"camlLlvm_byte_code/test/string_cmp__code_end":
-	.data
-	.globl	"camlLlvm_byte_code/test/string_cmp__data_end"
-"camlLlvm_byte_code/test/string_cmp__data_end":
+	.section	__TEXT,__text,regular,pure_instructions
+	.globl	"_camlLlvm_byte_code/test/string_cmp__code_end"
+"_camlLlvm_byte_code/test/string_cmp__code_end":
+	.section	__DATA,__data
+	.globl	"_camlLlvm_byte_code/test/string_cmp__data_end"
+"_camlLlvm_byte_code/test/string_cmp__data_end":
 	.quad	0
-	.globl	"camlLlvm_byte_code/test/string_cmp__frametable"
-"camlLlvm_byte_code/test/string_cmp__frametable":
+	.globl	"_camlLlvm_byte_code/test/string_cmp__frametable"
+"_camlLlvm_byte_code/test/string_cmp__frametable":
 	.short	3
 	.p2align	3
-                                        # live roots for main
-	.quad	.Ltmp0
+                                        ## live roots for main
+	.quad	Ltmp0
 	.short	8
 	.short	0
 	.p2align	3
-	.quad	.Ltmp1
+	.quad	Ltmp1
 	.short	8
 	.short	0
 	.p2align	3
-	.quad	.Ltmp2
+	.quad	Ltmp2
 	.short	8
 	.short	0
 	.p2align	3
-	.section	".note.GNU-stack","",@progbits
+.subsections_via_symbols

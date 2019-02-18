@@ -29,8 +29,8 @@ entry:
 test:                                             ; preds = %entry
   %eq_tmp = icmp eq i32 %1, 0
   %bool_tmp = zext i1 %eq_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %then, label %else
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %else, label %then
 
 then:                                             ; preds = %test
   br label %merge
@@ -39,14 +39,14 @@ else:                                             ; preds = %test
   br label %test2
 
 merge:                                            ; preds = %merge5, %then
-  %if_result_addr15.0 = phi i32 [ 0, %then ], [ %if_result_addr.0, %merge5 ]
+  %if_result_addr15.0 = phi i32 [ %if_result_addr.0, %merge5 ], [ 0, %then ]
   ret i32 %if_result_addr15.0
 
 test2:                                            ; preds = %else
   %eq_tmp7 = icmp eq i32 %1, 1
   %bool_tmp8 = zext i1 %eq_tmp7 to i32
-  %cond9 = icmp eq i32 %bool_tmp8, 1
-  br i1 %cond9, label %then3, label %else4
+  %cond9 = icmp eq i32 %bool_tmp8, 0
+  br i1 %cond9, label %else4, label %then3
 
 then3:                                            ; preds = %test2
   br label %merge5
@@ -64,6 +64,6 @@ else4:                                            ; preds = %test2
   br label %merge5
 
 merge5:                                           ; preds = %else4, %then3
-  %if_result_addr.0 = phi i32 [ 1, %then3 ], [ %add_tmp, %else4 ]
+  %if_result_addr.0 = phi i32 [ %add_tmp, %else4 ], [ 1, %then3 ]
   br label %merge
 }

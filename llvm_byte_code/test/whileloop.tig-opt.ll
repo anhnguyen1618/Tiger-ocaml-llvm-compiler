@@ -14,8 +14,8 @@ test:                                             ; preds = %merge, %entry
   %b.0 = phi i32 [ 2, %entry ], [ %add_tmp, %merge ]
   %lt_tmp = icmp slt i32 %a.0, 5
   %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %loop, label %end.loopexit
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %end.loopexit, label %loop
 
 loop:                                             ; preds = %test
   call void @tig_print_int(i32 %a.0)
@@ -36,8 +36,8 @@ end:                                              ; preds = %end.loopexit, %then
 test3:                                            ; preds = %loop
   %eq_tmp = icmp eq i32 %a.0, 3
   %bool_tmp5 = zext i1 %eq_tmp to i32
-  %cond6 = icmp eq i32 %bool_tmp5, 1
-  br i1 %cond6, label %then, label %else
+  %cond6 = icmp eq i32 %bool_tmp5, 0
+  br i1 %cond6, label %else, label %then
 
 then:                                             ; preds = %test3
   %a.0.lcssa3 = phi i32 [ %a.0, %test3 ]

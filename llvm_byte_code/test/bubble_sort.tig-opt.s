@@ -11,45 +11,36 @@
 _main:                                  ## @main
 	.cfi_startproc
 ## %bb.0:                               ## %entry
-	pushq	%r15
-	.cfi_def_cfa_offset 16
 	pushq	%r14
-	.cfi_def_cfa_offset 24
+	.cfi_def_cfa_offset 16
 	pushq	%rbx
+	.cfi_def_cfa_offset 24
+	pushq	%rax
 	.cfi_def_cfa_offset 32
-	subq	$16, %rsp
-	.cfi_def_cfa_offset 48
-	.cfi_offset %rbx, -32
-	.cfi_offset %r14, -24
-	.cfi_offset %r15, -16
-	leaq	8(%rsp), %r14
-	movq	%r14, %rdi
+	.cfi_offset %rbx, -24
+	.cfi_offset %r14, -16
 	callq	_create_array
 Ltmp0:
-	movq	%rax, %r15
-	movq	%r14, %rdi
+	movq	%rax, %r14
 	callq	_create_array_test
 Ltmp1:
 	movq	%rax, %rbx
 	leaq	L___unnamed_1(%rip), %rdi
 	callq	_tig_print
 Ltmp2:
-	movq	%r14, %rdi
-	movq	%r15, %rsi
+	movq	%r14, %rsi
 	callq	_print_array
 Ltmp3:
 	leaq	L___unnamed_2(%rip), %rdi
 	callq	_tig_print
 Ltmp4:
-	movq	%r14, %rdi
-	movq	%r15, %rsi
+	movq	%r14, %rsi
 	callq	_bubble_sort
 Ltmp5:
 	leaq	L___unnamed_3(%rip), %rdi
 	callq	_tig_print
 Ltmp6:
-	movq	%r14, %rdi
-	movq	%r15, %rsi
+	movq	%r14, %rsi
 	callq	_print_array
 Ltmp7:
 	leaq	L___unnamed_4(%rip), %rdx
@@ -102,7 +93,6 @@ Ltmp16:
 	xorl	%esi, %esi
 	callq	_assert_equal_int
 Ltmp17:
-	movq	%r14, %rdi
 	movq	%rbx, %rsi
 	callq	_bubble_sort
 Ltmp18:
@@ -157,10 +147,9 @@ Ltmp27:
 	callq	_assert_equal_int
 Ltmp28:
 	xorl	%eax, %eax
-	addq	$16, %rsp
+	addq	$8, %rsp
 	popq	%rbx
 	popq	%r14
-	popq	%r15
 	retq
 	.cfi_endproc
                                         ## -- End function
@@ -184,7 +173,6 @@ _print_array:                           ## @print_array
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
 	movq	%rsi, %rbx
-	movq	%rdi, (%rsp)
 	leaq	L___unnamed_14(%rip), %rdi
 	callq	_tig_print
 Ltmp29:
@@ -221,14 +209,12 @@ LBB1_3:                                 ## %end
 	callq	_tig_print
 Ltmp34:
 	leaq	L___unnamed_17(%rip), %rdi
-	callq	_tig_print
-Ltmp35:
 	addq	$8, %rsp
 	popq	%rbx
 	popq	%r14
 	popq	%r15
 	popq	%rbp
-	retq
+	jmp	_tig_print              ## TAILCALL
 	.cfi_endproc
                                         ## -- End function
 	.globl	_create_array           ## -- Begin function create_array
@@ -250,32 +236,31 @@ _create_array:                          ## @create_array
 	.cfi_offset %r12, -32
 	.cfi_offset %r14, -24
 	.cfi_offset %r15, -16
-	movq	%rdi, (%rsp)
 	movl	$32, %edi
 	callq	_malloc
-Ltmp36:
+Ltmp35:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$7, %eax
-	jg	LBB2_3
+	ja	LBB2_3
 	.p2align	4, 0x90
 LBB2_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
 	movl	$1, (%rbx,%rax,4)
 	incq	%rax
 	cmpl	$7, %eax
-	jle	LBB2_2
+	jbe	LBB2_2
 LBB2_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
-Ltmp37:
+Ltmp36:
 	movq	%rax, %r14
 	movl	$8, (%rax)
 	movq	%rbx, 8(%rax)
 	xorl	%ebx, %ebx
 	leaq	L___unnamed_18(%rip), %r15
 	cmpl	$7, %ebx
-	jg	LBB2_6
+	ja	LBB2_6
 	.p2align	4, 0x90
 LBB2_5:                                 ## %loop11
                                         ## =>This Inner Loop Header: Depth=1
@@ -283,15 +268,15 @@ LBB2_5:                                 ## %loop11
 	movl	%ebx, %esi
 	movq	%r15, %rdx
 	callq	_tig_check_array_bound
-Ltmp38:
+Ltmp37:
 	movq	8(%r14), %r12
 	movl	$50, %edi
 	callq	_tig_random
-Ltmp39:
+Ltmp38:
 	movl	%eax, (%r12,%rbx,4)
 	incq	%rbx
 	cmpl	$7, %ebx
-	jle	LBB2_5
+	jbe	LBB2_5
 LBB2_6:                                 ## %end12
 	movq	%r14, %rax
 	addq	$8, %rsp
@@ -319,8 +304,8 @@ _bubble_sort:                           ## @bubble_sort
 	.cfi_def_cfa_offset 48
 	pushq	%rbx
 	.cfi_def_cfa_offset 56
-	subq	$40, %rsp
-	.cfi_def_cfa_offset 96
+	pushq	%rax
+	.cfi_def_cfa_offset 64
 	.cfi_offset %rbx, -56
 	.cfi_offset %r12, -48
 	.cfi_offset %r13, -40
@@ -328,83 +313,76 @@ _bubble_sort:                           ## @bubble_sort
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
 	movq	%rsi, %rbx
-	movq	%rdi, 32(%rsp)
 	movq	%rsi, %rdi
 	callq	_tig_array_length
-Ltmp40:
-	xorl	%edi, %edi
+Ltmp39:
 	addl	$-2, %eax
-	movl	%eax, 16(%rsp)          ## 4-byte Spill
+	movl	%eax, 4(%rsp)           ## 4-byte Spill
+	xorl	%edi, %edi
 	jmp	LBB3_1
 	.p2align	4, 0x90
 LBB3_4:                                 ##   in Loop: Header=BB3_1 Depth=1
-	movl	12(%rsp), %edi          ## 4-byte Reload
+	movl	(%rsp), %edi            ## 4-byte Reload
 LBB3_1:                                 ## %test
                                         ## =>This Loop Header: Depth=1
                                         ##     Child Loop BB3_3 Depth 2
 	callq	_tig_not
-Ltmp41:
+Ltmp40:
 	testl	%eax, %eax
-	je	LBB3_8
-## %bb.2:                               ## %loop
+	je	LBB3_7
+## %bb.2:                               ## %test6.outer.preheader
                                         ##   in Loop: Header=BB3_1 Depth=1
-	movl	$1, %r12d
-	movl	$1, 12(%rsp)            ## 4-byte Folded Spill
+	xorl	%r13d, %r13d
+	movl	$1, (%rsp)              ## 4-byte Folded Spill
 	jmp	LBB3_3
-	.p2align	4, 0x90
-LBB3_7:                                 ## %merge
+LBB3_6:                                 ## %then
                                         ##   in Loop: Header=BB3_3 Depth=2
-	incl	%r12d
-LBB3_3:                                 ## %test6
-                                        ##   Parent Loop BB3_1 Depth=1
-                                        ## =>  This Inner Loop Header: Depth=2
-	leal	-1(%r12), %r14d
-	cmpl	%r14d, 16(%rsp)         ## 4-byte Folded Reload
-	jl	LBB3_4
-## %bb.5:                               ## %loop7
-                                        ##   in Loop: Header=BB3_3 Depth=2
+	leal	-1(%r12), %esi
 	movq	%rbx, %rdi
-	movl	%r14d, %esi
 	leaq	L___unnamed_19(%rip), %rdx
 	callq	_tig_check_array_bound
-Ltmp42:
+Ltmp43:
 	movq	8(%rbx), %rax
-	movslq	%r14d, %rcx
-	movq	%rcx, 24(%rsp)          ## 8-byte Spill
-	movl	(%rax,%rcx,4), %r13d
+	movl	%ebp, (%rax,%r15,4)
 	movq	%rbx, %rdi
 	movl	%r12d, %esi
 	leaq	L___unnamed_20(%rip), %rdx
 	callq	_tig_check_array_bound
-Ltmp43:
-	movq	8(%rbx), %rax
-	movslq	%r12d, %rbp
-	movl	(%rax,%rbp,4), %r15d
-	movl	%r13d, 20(%rsp)         ## 4-byte Spill
-	cmpl	%r15d, %r13d
-	jle	LBB3_7
-## %bb.6:                               ## %then
-                                        ##   in Loop: Header=BB3_3 Depth=2
-	movq	%rbx, %rdi
-	movl	%r14d, %esi
-	leaq	L___unnamed_21(%rip), %rdx
-	callq	_tig_check_array_bound
 Ltmp44:
 	movq	8(%rbx), %rax
-	movq	24(%rsp), %rcx          ## 8-byte Reload
-	movl	%r15d, (%rax,%rcx,4)
+	movl	%r14d, (%rax,%r12,4)
+	movl	$0, (%rsp)              ## 4-byte Folded Spill
+	movl	%r12d, %r13d
+	.p2align	4, 0x90
+LBB3_3:                                 ## %test6
+                                        ##   Parent Loop BB3_1 Depth=1
+                                        ## =>  This Inner Loop Header: Depth=2
+	cmpl	%r13d, 4(%rsp)          ## 4-byte Folded Reload
+	jl	LBB3_4
+## %bb.5:                               ## %loop7
+                                        ##   in Loop: Header=BB3_3 Depth=2
 	movq	%rbx, %rdi
-	movl	%r12d, %esi
+	movl	%r13d, %esi
+	leaq	L___unnamed_21(%rip), %rdx
+	callq	_tig_check_array_bound
+Ltmp41:
+	movq	8(%rbx), %rax
+	movslq	%r13d, %r15
+	movl	(%rax,%r15,4), %r14d
+	incl	%r13d
+	movq	%rbx, %rdi
+	movl	%r13d, %esi
 	leaq	L___unnamed_22(%rip), %rdx
 	callq	_tig_check_array_bound
-Ltmp45:
+Ltmp42:
 	movq	8(%rbx), %rax
-	movl	20(%rsp), %ecx          ## 4-byte Reload
-	movl	%ecx, (%rax,%rbp,4)
-	movl	$0, 12(%rsp)            ## 4-byte Folded Spill
-	jmp	LBB3_7
-LBB3_8:                                 ## %end
-	addq	$40, %rsp
+	movslq	%r13d, %r12
+	movl	(%rax,%r12,4), %ebp
+	cmpl	%ebp, %r14d
+	jle	LBB3_3
+	jmp	LBB3_6
+LBB3_7:                                 ## %end
+	addq	$8, %rsp
 	popq	%rbx
 	popq	%r12
 	popq	%r13
@@ -433,25 +411,24 @@ _create_array_test:                     ## @create_array_test
 	.cfi_offset %r14, -32
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
-	movq	%rdi, (%rsp)
 	movl	$20, %edi
 	callq	_malloc
-Ltmp46:
+Ltmp45:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
-	jg	LBB4_3
+	ja	LBB4_3
 	.p2align	4, 0x90
 LBB4_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
 	movl	$1, (%rbx,%rax,4)
 	incq	%rax
 	cmpl	$4, %eax
-	jle	LBB4_2
+	jbe	LBB4_2
 LBB4_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
-Ltmp47:
+Ltmp46:
 	movq	%rax, %r14
 	movl	$5, (%rax)
 	movq	%rbx, 8(%rax)
@@ -459,7 +436,7 @@ Ltmp47:
 	xorl	%ebx, %ebx
 	leaq	L___unnamed_23(%rip), %r15
 	cmpl	$4, %ebx
-	jg	LBB4_6
+	ja	LBB4_6
 	.p2align	4, 0x90
 LBB4_5:                                 ## %loop11
                                         ## =>This Inner Loop Header: Depth=1
@@ -467,13 +444,13 @@ LBB4_5:                                 ## %loop11
 	movl	%ebx, %esi
 	movq	%r15, %rdx
 	callq	_tig_check_array_bound
-Ltmp48:
+Ltmp47:
 	movq	8(%r14), %rax
 	movl	%ebp, (%rax,%rbx,4)
 	decl	%ebp
 	incq	%rbx
 	cmpl	$4, %ebx
-	jle	LBB4_5
+	jbe	LBB4_5
 LBB4_6:                                 ## %end12
 	movq	%r14, %rax
 	addq	$8, %rsp
@@ -503,19 +480,19 @@ L___unnamed_18:
 	.asciz	"test/bubble_sort.tig::16.41: Array out of bound"
 
 	.p2align	4               ## @5
-L___unnamed_19:
+L___unnamed_21:
 	.asciz	"test/bubble_sort.tig::30.46: Array out of bound"
 
 	.p2align	4               ## @6
-L___unnamed_20:
+L___unnamed_22:
 	.asciz	"test/bubble_sort.tig::31.43: Array out of bound"
 
 	.p2align	4               ## @7
-L___unnamed_21:
+L___unnamed_19:
 	.asciz	"test/bubble_sort.tig::35.35: Array out of bound"
 
 	.p2align	4               ## @8
-L___unnamed_22:
+L___unnamed_20:
 	.asciz	"test/bubble_sort.tig::36.35: Array out of bound"
 
 	.p2align	4               ## @9
@@ -581,123 +558,123 @@ L___unnamed_13:
 	.quad	0
 	.globl	"_camlLlvm_byte_code/test/bubble_sort__frametable"
 "_camlLlvm_byte_code/test/bubble_sort__frametable":
-	.short	49
+	.short	48
 	.p2align	3
                                         ## live roots for main
 	.quad	Ltmp0
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp1
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp2
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp3
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp4
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp5
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp6
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp7
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp8
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp9
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp10
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp11
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp12
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp13
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp14
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp15
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp16
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp17
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp18
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp19
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp20
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp21
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp22
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp23
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp24
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp25
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp26
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp27
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp28
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
                                         ## live roots for print_array
@@ -725,11 +702,11 @@ L___unnamed_13:
 	.short	40
 	.short	0
 	.p2align	3
+                                        ## live roots for create_array
 	.quad	Ltmp35
 	.short	40
 	.short	0
 	.p2align	3
-                                        ## live roots for create_array
 	.quad	Ltmp36
 	.short	40
 	.short	0
@@ -742,45 +719,41 @@ L___unnamed_13:
 	.short	40
 	.short	0
 	.p2align	3
+                                        ## live roots for bubble_sort
 	.quad	Ltmp39
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
-                                        ## live roots for bubble_sort
 	.quad	Ltmp40
-	.short	88
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp41
-	.short	88
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp42
-	.short	88
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp43
-	.short	88
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp44
-	.short	88
-	.short	0
-	.p2align	3
-	.quad	Ltmp45
-	.short	88
+	.short	56
 	.short	0
 	.p2align	3
                                         ## live roots for create_array_test
+	.quad	Ltmp45
+	.short	40
+	.short	0
+	.p2align	3
 	.quad	Ltmp46
 	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp47
-	.short	40
-	.short	0
-	.p2align	3
-	.quad	Ltmp48
 	.short	40
 	.short	0
 	.p2align	3

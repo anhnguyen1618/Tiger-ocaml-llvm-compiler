@@ -45,25 +45,17 @@ Ltmp4:
 	.globl	_f                      ## -- Begin function f
 	.p2align	4, 0x90
 _f:                                     ## @f
-	.cfi_startproc
 ## %bb.0:                               ## %entry
 	pushq	%rbx
-	.cfi_def_cfa_offset 16
-	subq	$16, %rsp
-	.cfi_def_cfa_offset 32
-	.cfi_offset %rbx, -16
 	movq	%rdi, %rbx
-	movq	%rdi, 8(%rsp)
 	movl	$16, %edi
 	callq	_malloc
 Ltmp5:
 	movl	$5, (%rax)
 	movq	$0, 8(%rax)
 	movq	%rax, 8(%rbx)
-	addq	$16, %rsp
 	popq	%rbx
 	retq
-	.cfi_endproc
                                         ## -- End function
 	.section	__TEXT,__cstring,cstring_literals
 	.p2align	4               ## @0
@@ -105,7 +97,7 @@ L___unnamed_1:
 	.p2align	3
                                         ## live roots for f
 	.quad	Ltmp5
-	.short	24
+	.short	8
 	.short	0
 	.p2align	3
 .subsections_via_symbols

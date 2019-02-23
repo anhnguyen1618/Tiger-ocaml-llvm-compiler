@@ -23,14 +23,14 @@ Ltmp0:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$6, %eax
-	jg	LBB0_3
+	ja	LBB0_3
 	.p2align	4, 0x90
 LBB0_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
 	movl	$4, (%rbx,%rax,4)
 	incq	%rax
 	cmpl	$6, %eax
-	jle	LBB0_2
+	jbe	LBB0_2
 LBB0_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
@@ -103,18 +103,19 @@ Ltmp9:
 _f:                                     ## @f
 	.cfi_startproc
 ## %bb.0:                               ## %entry
-	pushq	%r14
+	pushq	%rbp
 	.cfi_def_cfa_offset 16
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 24
-	pushq	%rax
+	pushq	%rbx
 	.cfi_def_cfa_offset 32
-	.cfi_offset %rbx, -24
-	.cfi_offset %r14, -16
-	movq	%rdi, (%rsp)
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
+	.cfi_offset %rbp, -16
+	movq	%rdi, %rbx
 	movq	(%rdi), %rax
-	movl	4(%rax), %ebx
-	addl	8(%rdi), %ebx
+	movl	8(%rdi), %ebp
+	addl	4(%rax), %ebp
 	movq	8(%rax), %r14
 	leaq	L___unnamed_2(%rip), %rdx
 	movl	$2, %esi
@@ -122,13 +123,12 @@ _f:                                     ## @f
 	callq	_tig_check_array_bound
 Ltmp10:
 	movq	8(%r14), %rax
-	addl	8(%rax), %ebx
-	movq	(%rsp), %rax
-	addl	12(%rax), %ebx
-	movl	%ebx, %eax
-	addq	$8, %rsp
+	addl	8(%rax), %ebp
+	addl	12(%rbx), %ebp
+	movl	%ebp, %eax
 	popq	%rbx
 	popq	%r14
+	popq	%rbp
 	retq
 	.cfi_endproc
                                         ## -- End function

@@ -22,25 +22,22 @@ _main:                                  ## @main
 	.cfi_offset %rbx, -32
 	.cfi_offset %r14, -24
 	.cfi_offset %r15, -16
-	leaq	8(%rsp), %r14
-	movq	%r14, %rdi
 	callq	_create_array
 Ltmp0:
 	movq	%rax, %r15
-	movq	%r14, %rdi
 	callq	_create_array_test
 Ltmp1:
 	movq	%rax, %rbx
 	leaq	L___unnamed_1(%rip), %rdi
 	callq	_tig_print
 Ltmp2:
-	movq	%r14, %rdi
 	movq	%r15, %rsi
 	callq	_print_array
 Ltmp3:
 	leaq	L___unnamed_2(%rip), %rdi
 	callq	_tig_print
 Ltmp4:
+	leaq	8(%rsp), %r14
 	movq	%r14, %rdi
 	movq	%r15, %rsi
 	callq	_binary_sort
@@ -48,7 +45,6 @@ Ltmp5:
 	leaq	L___unnamed_3(%rip), %rdi
 	callq	_tig_print
 Ltmp6:
-	movq	%r14, %rdi
 	movq	%r15, %rsi
 	callq	_print_array
 Ltmp7:
@@ -184,7 +180,6 @@ _print_array:                           ## @print_array
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
 	movq	%rsi, %rbx
-	movq	%rdi, (%rsp)
 	leaq	L___unnamed_14(%rip), %rdi
 	callq	_tig_print
 Ltmp29:
@@ -221,14 +216,12 @@ LBB1_3:                                 ## %end
 	callq	_tig_print
 Ltmp34:
 	leaq	L___unnamed_17(%rip), %rdi
-	callq	_tig_print
-Ltmp35:
 	addq	$8, %rsp
 	popq	%rbx
 	popq	%r14
 	popq	%r15
 	popq	%rbp
-	retq
+	jmp	_tig_print              ## TAILCALL
 	.cfi_endproc
                                         ## -- End function
 	.globl	_create_array           ## -- Begin function create_array
@@ -250,32 +243,31 @@ _create_array:                          ## @create_array
 	.cfi_offset %r12, -32
 	.cfi_offset %r14, -24
 	.cfi_offset %r15, -16
-	movq	%rdi, (%rsp)
 	movl	$32, %edi
 	callq	_malloc
-Ltmp36:
+Ltmp35:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$7, %eax
-	jg	LBB2_3
+	ja	LBB2_3
 	.p2align	4, 0x90
 LBB2_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
 	movl	$1, (%rbx,%rax,4)
 	incq	%rax
 	cmpl	$7, %eax
-	jle	LBB2_2
+	jbe	LBB2_2
 LBB2_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
-Ltmp37:
+Ltmp36:
 	movq	%rax, %r14
 	movl	$8, (%rax)
 	movq	%rbx, 8(%rax)
 	xorl	%ebx, %ebx
 	leaq	L___unnamed_18(%rip), %r15
 	cmpl	$7, %ebx
-	jg	LBB2_6
+	ja	LBB2_6
 	.p2align	4, 0x90
 LBB2_5:                                 ## %loop11
                                         ## =>This Inner Loop Header: Depth=1
@@ -283,15 +275,15 @@ LBB2_5:                                 ## %loop11
 	movl	%ebx, %esi
 	movq	%r15, %rdx
 	callq	_tig_check_array_bound
-Ltmp38:
+Ltmp37:
 	movq	8(%r14), %r12
 	movl	$50, %edi
 	callq	_tig_random
-Ltmp39:
+Ltmp38:
 	movl	%eax, (%r12,%rbx,4)
 	incq	%rbx
 	cmpl	$7, %ebx
-	jle	LBB2_5
+	jbe	LBB2_5
 LBB2_6:                                 ## %end12
 	movq	%r14, %rax
 	addq	$8, %rsp
@@ -318,11 +310,11 @@ _binary_sort:                           ## @binary_sort
 	leaq	8(%rsp), %rbx
 	movq	%rbx, %rdi
 	callq	_build_binary_tree
-Ltmp40:
+Ltmp39:
 	movq	%rbx, %rdi
 	movq	%rax, %rsi
 	callq	_in_order_traversing
-Ltmp41:
+Ltmp40:
 	addq	$32, %rsp
 	popq	%rbx
 	retq
@@ -350,15 +342,15 @@ _build_binary_tree:                     ## @build_binary_tree
 	.cfi_offset %r14, -32
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
+	movq	%rdi, %rbx
 	movq	%rdi, (%rsp)
 	movq	$0, 8(%rsp)
 	movq	16(%rdi), %rdi
 	callq	_tig_array_length
-Ltmp42:
-	movq	(%rsp), %rax
-	movq	16(%rax), %rdi
+Ltmp41:
+	movq	16(%rbx), %rdi
 	callq	_tig_array_length
-Ltmp43:
+Ltmp42:
 	movl	%eax, %r12d
 	decl	%r12d
 	xorl	%ebp, %ebp
@@ -375,13 +367,13 @@ LBB4_2:                                 ## %loop
 	movl	%ebp, %esi
 	movq	%r14, %rdx
 	callq	_tig_check_array_bound
-Ltmp44:
+Ltmp43:
 	movq	8(%rbx), %rax
 	movslq	%ebp, %rcx
 	movl	(%rax,%rcx,4), %esi
 	movq	%r15, %rdi
 	callq	_add_node
-Ltmp45:
+Ltmp44:
 	incl	%ebp
 	cmpl	%ebp, %r12d
 	jge	LBB4_2
@@ -401,41 +393,47 @@ LBB4_3:                                 ## %end
 _add_node:                              ## @add_node
 	.cfi_startproc
 ## %bb.0:                               ## %entry
-	pushq	%rbx
+	pushq	%rbp
 	.cfi_def_cfa_offset 16
+	pushq	%r14
+	.cfi_def_cfa_offset 24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
 	subq	$32, %rsp
-	.cfi_def_cfa_offset 48
-	.cfi_offset %rbx, -16
-	movl	%esi, %ebx
+	.cfi_def_cfa_offset 64
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
+	.cfi_offset %rbp, -16
+	movl	%esi, %ebp
+	movq	%rdi, %r14
 	movq	%rdi, 8(%rsp)
 	movl	%esi, 24(%rsp)
 	movl	$24, %edi
 	callq	_malloc
-Ltmp46:
-	movl	%ebx, (%rax)
-	movq	$0, 8(%rax)
+Ltmp45:
+	movq	%rax, %rbx
+	movl	%ebp, (%rax)
 	movq	$0, 16(%rax)
+	movq	$0, 8(%rax)
 	movq	%rax, 16(%rsp)
-	movq	8(%rsp), %rax
-	movq	8(%rax), %rdi
+	movq	8(%r14), %rdi
 	callq	_tig_nillable
-Ltmp47:
+Ltmp46:
 	testl	%eax, %eax
 	je	LBB5_2
 ## %bb.1:                               ## %then
-	movq	8(%rsp), %rax
-	movq	16(%rsp), %rcx
-	movq	%rcx, 8(%rax)
+	movq	%rbx, 8(%r14)
 	jmp	LBB5_3
 LBB5_2:                                 ## %else
-	movq	8(%rsp), %rax
-	movq	8(%rax), %rsi
+	movq	8(%r14), %rsi
 	leaq	8(%rsp), %rdi
 	callq	_insert_node
-Ltmp48:
+Ltmp47:
 LBB5_3:                                 ## %merge
 	addq	$32, %rsp
 	popq	%rbx
+	popq	%r14
+	popq	%rbp
 	retq
 	.cfi_endproc
                                         ## -- End function
@@ -444,105 +442,120 @@ LBB5_3:                                 ## %merge
 _insert_node:                           ## @insert_node
 	.cfi_startproc
 ## %bb.0:                               ## %entry
-	pushq	%rbx
+	pushq	%rbp
 	.cfi_def_cfa_offset 16
-	subq	$16, %rsp
+	pushq	%r15
+	.cfi_def_cfa_offset 24
+	pushq	%r14
 	.cfi_def_cfa_offset 32
-	.cfi_offset %rbx, -16
+	pushq	%r13
+	.cfi_def_cfa_offset 40
+	pushq	%r12
+	.cfi_def_cfa_offset 48
+	pushq	%rbx
+	.cfi_def_cfa_offset 56
+	pushq	%rax
+	.cfi_def_cfa_offset 64
+	.cfi_offset %rbx, -56
+	.cfi_offset %r12, -48
+	.cfi_offset %r13, -40
+	.cfi_offset %r14, -32
+	.cfi_offset %r15, -24
+	.cfi_offset %rbp, -16
 	movq	%rsi, %rbx
-	movq	%rdi, 8(%rsp)
-	leaq	L___unnamed_20(%rip), %rsi
+	movq	%rdi, %r14
+	leaq	L___unnamed_20(%rip), %r15
+	leaq	L___unnamed_21(%rip), %r12
+	leaq	L___unnamed_22(%rip), %rbp
+	leaq	L___unnamed_23(%rip), %r13
+	jmp	LBB6_1
+	.p2align	4, 0x90
+LBB6_9:                                 ## %then44
+                                        ##   in Loop: Header=BB6_1 Depth=1
 	movq	%rbx, %rdi
+	leaq	L___unnamed_24(%rip), %rsi
+	callq	_tig_check_null_pointer
+Ltmp56:
+	addq	$16, %rbx
+	movq	(%rbx), %rbx
+LBB6_1:                                 ## %tailrecurse
+                                        ## =>This Inner Loop Header: Depth=1
+	movq	%rbx, %rdi
+	movq	%r15, %rsi
+	callq	_tig_check_null_pointer
+Ltmp48:
+	movl	(%rbx), %eax
+	cmpl	16(%r14), %eax
+	jg	LBB6_6
+## %bb.2:                               ## %then2
+                                        ##   in Loop: Header=BB6_1 Depth=1
+	movq	%rbx, %rdi
+	movq	%r13, %rsi
 	callq	_tig_check_null_pointer
 Ltmp49:
+	movq	16(%rbx), %rdi
+	callq	_tig_nillable
+Ltmp50:
+	testl	%eax, %eax
+	jne	LBB6_3
+LBB6_6:                                 ## %test18
+                                        ##   in Loop: Header=BB6_1 Depth=1
+	movq	%rbx, %rdi
+	movq	%r12, %rsi
+	callq	_tig_check_null_pointer
+Ltmp52:
 	movl	(%rbx), %eax
-	movq	8(%rsp), %rcx
-	cmpl	16(%rcx), %eax
-	jg	LBB6_1
-## %bb.4:                               ## %then2
-	leaq	L___unnamed_21(%rip), %rsi
+	cmpl	16(%r14), %eax
+	jle	LBB6_8
+## %bb.7:                               ## %then19
+                                        ##   in Loop: Header=BB6_1 Depth=1
+	movq	%rbx, %rdi
+	leaq	L___unnamed_25(%rip), %rsi
+	callq	_tig_check_null_pointer
+Ltmp53:
+	movq	8(%rbx), %rdi
+	callq	_tig_nillable
+Ltmp54:
+	testl	%eax, %eax
+	jne	LBB6_5
+LBB6_8:                                 ## %test43
+                                        ##   in Loop: Header=BB6_1 Depth=1
+	movq	%rbx, %rdi
+	movq	%rbp, %rsi
+	callq	_tig_check_null_pointer
+Ltmp55:
+	movl	(%rbx), %eax
+	cmpl	16(%r14), %eax
+	jle	LBB6_9
+## %bb.10:                              ## %else45
+                                        ##   in Loop: Header=BB6_1 Depth=1
+	movq	%rbx, %rdi
+	leaq	L___unnamed_26(%rip), %rsi
+	callq	_tig_check_null_pointer
+Ltmp57:
+	addq	$8, %rbx
+	movq	(%rbx), %rbx
+	jmp	LBB6_1
+LBB6_3:                                 ## %then
+	leaq	L___unnamed_27(%rip), %rsi
+	leaq	16(%rbx), %rbp
+	jmp	LBB6_4
+LBB6_5:                                 ## %then15
+	leaq	L___unnamed_28(%rip), %rsi
+	leaq	8(%rbx), %rbp
+LBB6_4:                                 ## %merge
 	movq	%rbx, %rdi
 	callq	_tig_check_null_pointer
 Ltmp51:
-	movq	16(%rbx), %rdi
-	callq	_tig_nillable
-Ltmp52:
-	testl	%eax, %eax
-	je	LBB6_2
-LBB6_6:                                 ## %then
-	leaq	L___unnamed_22(%rip), %rsi
-	movq	%rbx, %rdi
-	callq	_tig_check_null_pointer
-Ltmp53:
-	movq	8(%rsp), %rax
-	movq	8(%rax), %rax
-	movq	%rax, 16(%rbx)
-	jmp	LBB6_7
-LBB6_1:
-	xorl	%eax, %eax
-	testl	%eax, %eax
-	jne	LBB6_6
-LBB6_2:                                 ## %else
-	leaq	L___unnamed_23(%rip), %rsi
-	movq	%rbx, %rdi
-	callq	_tig_check_null_pointer
-Ltmp50:
-	movl	(%rbx), %eax
-	movq	8(%rsp), %rcx
-	cmpl	16(%rcx), %eax
-	jle	LBB6_3
-## %bb.8:                               ## %then19
-	leaq	L___unnamed_24(%rip), %rsi
-	movq	%rbx, %rdi
-	callq	_tig_check_null_pointer
-Ltmp54:
-	movq	8(%rbx), %rdi
-	callq	_tig_nillable
-Ltmp55:
-	testl	%eax, %eax
-	je	LBB6_13
-LBB6_10:                                ## %then15
-	leaq	L___unnamed_25(%rip), %rsi
-	movq	%rbx, %rdi
-	callq	_tig_check_null_pointer
-Ltmp56:
-	movq	8(%rsp), %rax
-	movq	8(%rax), %rax
-	movq	%rax, 8(%rbx)
-	jmp	LBB6_7
-LBB6_3:
-	xorl	%eax, %eax
-	testl	%eax, %eax
-	jne	LBB6_10
-LBB6_13:                                ## %else16
-	leaq	L___unnamed_26(%rip), %rsi
-	movq	%rbx, %rdi
-	callq	_tig_check_null_pointer
-Ltmp59:
-	movl	(%rbx), %eax
-	movq	8(%rsp), %rcx
-	cmpl	16(%rcx), %eax
-	jg	LBB6_14
-## %bb.11:                              ## %then44
-	leaq	L___unnamed_27(%rip), %rsi
-	movq	%rbx, %rdi
-	callq	_tig_check_null_pointer
-Ltmp57:
-	movq	16(%rbx), %rsi
-	jmp	LBB6_12
-LBB6_14:                                ## %else45
-	leaq	L___unnamed_28(%rip), %rsi
-	movq	%rbx, %rdi
-	callq	_tig_check_null_pointer
-Ltmp60:
-	movq	8(%rbx), %rsi
-LBB6_12:                                ## %merge
-	movq	8(%rsp), %rdi
-	callq	_insert_node
-Ltmp58:
-LBB6_7:                                 ## %merge
-	addq	$16, %rsp
+	movq	8(%r14), %rax
+	movq	%rax, (%rbp)
+	addq	$8, %rsp
 	popq	%rbx
+	popq	%r12
+	popq	%r13
+	popq	%r14
+	popq	%r15
+	popq	%rbp
 	retq
 	.cfi_endproc
                                         ## -- End function
@@ -551,63 +564,76 @@ LBB6_7:                                 ## %merge
 _in_order_traversing:                   ## @in_order_traversing
 	.cfi_startproc
 ## %bb.0:                               ## %entry
-	pushq	%r15
+	pushq	%rbp
 	.cfi_def_cfa_offset 16
-	pushq	%r14
+	pushq	%r15
 	.cfi_def_cfa_offset 24
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 32
-	subq	$16, %rsp
+	pushq	%r13
+	.cfi_def_cfa_offset 40
+	pushq	%r12
 	.cfi_def_cfa_offset 48
-	.cfi_offset %rbx, -32
-	.cfi_offset %r14, -24
-	.cfi_offset %r15, -16
+	pushq	%rbx
+	.cfi_def_cfa_offset 56
+	pushq	%rax
+	.cfi_def_cfa_offset 64
+	.cfi_offset %rbx, -56
+	.cfi_offset %r12, -48
+	.cfi_offset %r13, -40
+	.cfi_offset %r14, -32
+	.cfi_offset %r15, -24
+	.cfi_offset %rbp, -16
 	movq	%rsi, %rbx
-	movq	%rdi, 8(%rsp)
-	movq	%rsi, %rdi
-	callq	_tig_nillable
-Ltmp61:
-	testl	%eax, %eax
-	jne	LBB7_2
-## %bb.1:                               ## %else
-	leaq	L___unnamed_29(%rip), %rsi
+	movq	%rdi, %r14
+	leaq	L___unnamed_29(%rip), %r13
+	jmp	LBB7_1
+	.p2align	4, 0x90
+LBB7_2:                                 ## %else
+                                        ##   in Loop: Header=BB7_1 Depth=1
 	movq	%rbx, %rdi
+	leaq	L___unnamed_30(%rip), %rsi
+	callq	_tig_check_null_pointer
+Ltmp59:
+	movq	8(%rbx), %rsi
+	movq	%r14, %rdi
+	callq	_in_order_traversing
+Ltmp60:
+	movslq	8(%r14), %r15
+	movq	16(%r14), %r12
+	movq	%r12, %rdi
+	movl	%r15d, %esi
+	leaq	L___unnamed_31(%rip), %rdx
+	callq	_tig_check_array_bound
+Ltmp61:
+	movq	8(%r12), %rbp
+	movq	%rbx, %rdi
+	leaq	L___unnamed_32(%rip), %rsi
 	callq	_tig_check_null_pointer
 Ltmp62:
-	movq	8(%rbx), %rsi
-	movq	8(%rsp), %rdi
-	callq	_in_order_traversing
-Ltmp63:
-	movq	8(%rsp), %rax
-	movslq	8(%rax), %r14
-	movq	16(%rax), %r15
-	leaq	L___unnamed_30(%rip), %rdx
-	movq	%r15, %rdi
-	movl	%r14d, %esi
-	callq	_tig_check_array_bound
-Ltmp64:
-	movq	8(%r15), %r15
-	leaq	L___unnamed_31(%rip), %rsi
-	movq	%rbx, %rdi
-	callq	_tig_check_null_pointer
-Ltmp65:
 	movl	(%rbx), %eax
-	movl	%eax, (%r15,%r14,4)
-	movq	8(%rsp), %rax
-	incl	8(%rax)
-	leaq	L___unnamed_32(%rip), %rsi
+	movl	%eax, (%rbp,%r15,4)
+	incl	8(%r14)
 	movq	%rbx, %rdi
+	movq	%r13, %rsi
 	callq	_tig_check_null_pointer
-Ltmp66:
-	movq	16(%rbx), %rsi
-	movq	8(%rsp), %rdi
-	callq	_in_order_traversing
-Ltmp67:
-LBB7_2:                                 ## %merge
-	addq	$16, %rsp
+Ltmp63:
+	movq	16(%rbx), %rbx
+LBB7_1:                                 ## %tailrecurse
+                                        ## =>This Inner Loop Header: Depth=1
+	movq	%rbx, %rdi
+	callq	_tig_nillable
+Ltmp58:
+	testl	%eax, %eax
+	je	LBB7_2
+## %bb.3:                               ## %merge
+	addq	$8, %rsp
 	popq	%rbx
+	popq	%r12
+	popq	%r13
 	popq	%r14
 	popq	%r15
+	popq	%rbp
 	retq
 	.cfi_endproc
                                         ## -- End function
@@ -630,25 +656,24 @@ _create_array_test:                     ## @create_array_test
 	.cfi_offset %r14, -32
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
-	movq	%rdi, (%rsp)
 	movl	$20, %edi
 	callq	_malloc
-Ltmp68:
+Ltmp64:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
-	jg	LBB8_3
+	ja	LBB8_3
 	.p2align	4, 0x90
 LBB8_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
 	movl	$1, (%rbx,%rax,4)
 	incq	%rax
 	cmpl	$4, %eax
-	jle	LBB8_2
+	jbe	LBB8_2
 LBB8_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
-Ltmp69:
+Ltmp65:
 	movq	%rax, %r14
 	movl	$5, (%rax)
 	movq	%rbx, 8(%rax)
@@ -656,7 +681,7 @@ Ltmp69:
 	xorl	%ebx, %ebx
 	leaq	L___unnamed_33(%rip), %r15
 	cmpl	$4, %ebx
-	jg	LBB8_6
+	ja	LBB8_6
 	.p2align	4, 0x90
 LBB8_5:                                 ## %loop11
                                         ## =>This Inner Loop Header: Depth=1
@@ -664,13 +689,13 @@ LBB8_5:                                 ## %loop11
 	movl	%ebx, %esi
 	movq	%r15, %rdx
 	callq	_tig_check_array_bound
-Ltmp70:
+Ltmp66:
 	movq	8(%r14), %rax
 	movl	%ebp, (%rax,%rbx,4)
 	decl	%ebp
 	incq	%rbx
 	cmpl	$4, %ebx
-	jle	LBB8_5
+	jbe	LBB8_5
 LBB8_6:                                 ## %end12
 	movq	%r14, %rax
 	addq	$8, %rsp
@@ -704,35 +729,35 @@ L___unnamed_20:
 	.asciz	"test/binary_sort.tig::35.47: Nil pointer exception!"
 
 	.p2align	4               ## @6
-L___unnamed_21:
+L___unnamed_23:
 	.asciz	"test/binary_sort.tig::35.79: Nil pointer exception!"
 
 	.p2align	4               ## @7
-L___unnamed_22:
+L___unnamed_27:
 	.asciz	"test/binary_sort.tig::36.49: Nil pointer exception!"
 
 	.p2align	4               ## @8
-L___unnamed_23:
+L___unnamed_21:
 	.asciz	"test/binary_sort.tig::37.52: Nil pointer exception!"
 
 	.p2align	4               ## @9
-L___unnamed_24:
+L___unnamed_25:
 	.asciz	"test/binary_sort.tig::37.83: Nil pointer exception!"
 
 	.p2align	4               ## @10
-L___unnamed_25:
+L___unnamed_28:
 	.asciz	"test/binary_sort.tig::38.49: Nil pointer exception!"
 
 	.p2align	4               ## @11
-L___unnamed_26:
+L___unnamed_22:
 	.asciz	"test/binary_sort.tig::39.52: Nil pointer exception!"
 
 	.p2align	4               ## @12
-L___unnamed_27:
+L___unnamed_24:
 	.asciz	"test/binary_sort.tig::40.61: Nil pointer exception!"
 
 	.p2align	4               ## @13
-L___unnamed_28:
+L___unnamed_26:
 	.asciz	"test/binary_sort.tig::41.61: Nil pointer exception!"
 
 	.p2align	4               ## @14
@@ -740,19 +765,19 @@ L___unnamed_19:
 	.asciz	"test/binary_sort.tig::49.36: Array out of bound"
 
 	.p2align	4               ## @15
-L___unnamed_29:
+L___unnamed_30:
 	.asciz	"test/binary_sort.tig::57.48: Nil pointer exception!"
 
 	.p2align	4               ## @16
-L___unnamed_30:
+L___unnamed_31:
 	.asciz	"test/binary_sort.tig::58.23: Array out of bound"
 
 	.p2align	4               ## @17
-L___unnamed_31:
+L___unnamed_32:
 	.asciz	"test/binary_sort.tig::58.44: Nil pointer exception!"
 
 	.p2align	4               ## @18
-L___unnamed_32:
+L___unnamed_29:
 	.asciz	"test/binary_sort.tig::60.48: Nil pointer exception!"
 
 	.p2align	4               ## @19
@@ -818,7 +843,7 @@ L___unnamed_13:
 	.quad	0
 	.globl	"_camlLlvm_byte_code/test/binary_sort__frametable"
 "_camlLlvm_byte_code/test/binary_sort__frametable":
-	.short	71
+	.short	67
 	.p2align	3
                                         ## live roots for main
 	.quad	Ltmp0
@@ -962,11 +987,11 @@ L___unnamed_13:
 	.short	40
 	.short	0
 	.p2align	3
+                                        ## live roots for create_array
 	.quad	Ltmp35
 	.short	40
 	.short	0
 	.p2align	3
-                                        ## live roots for create_array
 	.quad	Ltmp36
 	.short	40
 	.short	0
@@ -979,20 +1004,20 @@ L___unnamed_13:
 	.short	40
 	.short	0
 	.p2align	3
+                                        ## live roots for binary_sort
 	.quad	Ltmp39
 	.short	40
 	.short	0
 	.p2align	3
-                                        ## live roots for binary_sort
 	.quad	Ltmp40
 	.short	40
 	.short	0
 	.p2align	3
+                                        ## live roots for build_binary_tree
 	.quad	Ltmp41
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
-                                        ## live roots for build_binary_tree
 	.quad	Ltmp42
 	.short	56
 	.short	0
@@ -1005,85 +1030,86 @@ L___unnamed_13:
 	.short	56
 	.short	0
 	.p2align	3
+                                        ## live roots for add_node
 	.quad	Ltmp45
 	.short	56
 	.short	0
 	.p2align	3
-                                        ## live roots for add_node
 	.quad	Ltmp46
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp47
-	.short	40
-	.short	0
-	.p2align	3
-	.quad	Ltmp48
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
                                         ## live roots for insert_node
+	.quad	Ltmp48
+	.short	56
+	.short	0
+	.p2align	3
 	.quad	Ltmp49
-	.short	24
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp50
-	.short	24
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp51
-	.short	24
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp52
-	.short	24
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp53
-	.short	24
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp54
-	.short	24
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp55
-	.short	24
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp56
-	.short	24
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp57
-	.short	24
-	.short	0
-	.p2align	3
-	.quad	Ltmp58
-	.short	24
-	.short	0
-	.p2align	3
-	.quad	Ltmp59
-	.short	24
-	.short	0
-	.p2align	3
-	.quad	Ltmp60
-	.short	24
+	.short	56
 	.short	0
 	.p2align	3
                                         ## live roots for in_order_traversing
+	.quad	Ltmp58
+	.short	56
+	.short	0
+	.p2align	3
+	.quad	Ltmp59
+	.short	56
+	.short	0
+	.p2align	3
+	.quad	Ltmp60
+	.short	56
+	.short	0
+	.p2align	3
 	.quad	Ltmp61
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp62
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp63
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
+                                        ## live roots for create_array_test
 	.quad	Ltmp64
 	.short	40
 	.short	0
@@ -1093,23 +1119,6 @@ L___unnamed_13:
 	.short	0
 	.p2align	3
 	.quad	Ltmp66
-	.short	40
-	.short	0
-	.p2align	3
-	.quad	Ltmp67
-	.short	40
-	.short	0
-	.p2align	3
-                                        ## live roots for create_array_test
-	.quad	Ltmp68
-	.short	40
-	.short	0
-	.p2align	3
-	.quad	Ltmp69
-	.short	40
-	.short	0
-	.p2align	3
-	.quad	Ltmp70
 	.short	40
 	.short	0
 	.p2align	3

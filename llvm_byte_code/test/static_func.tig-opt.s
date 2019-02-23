@@ -22,14 +22,14 @@ Ltmp0:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
-	jg	LBB0_3
+	ja	LBB0_3
 	.p2align	4, 0x90
 LBB0_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
 	movl	$9, (%rbx,%rax,4)
 	incq	%rax
 	cmpl	$4, %eax
-	jle	LBB0_2
+	jbe	LBB0_2
 LBB0_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
@@ -46,7 +46,6 @@ Ltmp2:
 	movq	%rax, 24(%rsp)
 	leaq	8(%rsp), %rdi
 	movl	$1, %esi
-	movl	$2, %edx
 	movl	$3, %ecx
 	movl	$4, %r8d
 	callq	_f
@@ -116,35 +115,30 @@ Ltmp12:
 _g:                                     ## @g
 	.cfi_startproc
 ## %bb.0:                               ## %entry
-	pushq	%r15
+	pushq	%rbp
 	.cfi_def_cfa_offset 16
 	pushq	%r14
 	.cfi_def_cfa_offset 24
 	pushq	%rbx
 	.cfi_def_cfa_offset 32
-	subq	$16, %rsp
-	.cfi_def_cfa_offset 48
 	.cfi_offset %rbx, -32
 	.cfi_offset %r14, -24
-	.cfi_offset %r15, -16
-	movl	%esi, %ebx
-	movq	%rdi, 8(%rsp)
+	.cfi_offset %rbp, -16
+	movl	%esi, %ebp
+	movq	%rdi, %rbx
 	movl	12(%rdi), %edi
 	callq	_tig_print_int
 Ltmp13:
-	movl	%ebx, %edi
+	movl	%ebp, %edi
 	callq	_tig_print_int
 Ltmp14:
-	movq	8(%rsp), %rax
-	movl	16(%rax), %edi
+	movl	16(%rbx), %edi
 	callq	_tig_print_int
 Ltmp15:
-	movq	8(%rsp), %rax
-	movl	20(%rax), %edi
+	movl	20(%rbx), %edi
 	callq	_tig_print_int
 Ltmp16:
-	movq	8(%rsp), %rax
-	movq	(%rax), %rax
+	movq	(%rbx), %rax
 	movq	16(%rax), %r14
 	leaq	L___unnamed_7(%rip), %rsi
 	movq	%r14, %rdi
@@ -152,32 +146,29 @@ Ltmp16:
 Ltmp17:
 	leaq	L___unnamed_6(%rip), %rax
 	movq	%rax, 8(%r14)
-	movq	8(%rsp), %rax
-	movq	(%rax), %rax
+	movq	(%rbx), %rax
 	movq	16(%rax), %r14
 	leaq	L___unnamed_8(%rip), %rsi
 	movq	%r14, %rdi
 	callq	_tig_check_null_pointer
 Ltmp18:
-	movq	8(%rsp), %rax
-	addl	12(%rax), %ebx
-	addl	16(%rax), %ebx
-	addl	20(%rax), %ebx
-	addl	8(%rax), %ebx
-	movq	(%rax), %rax
-	movq	8(%rax), %r15
+	addl	12(%rbx), %ebp
+	addl	16(%rbx), %ebp
+	addl	20(%rbx), %ebp
+	addl	8(%rbx), %ebp
+	movq	(%rbx), %rax
+	movq	8(%rax), %rbx
 	leaq	L___unnamed_9(%rip), %rdx
 	movl	$4, %esi
-	movq	%r15, %rdi
+	movq	%rbx, %rdi
 	callq	_tig_check_array_bound
 Ltmp19:
-	movq	8(%r15), %rax
-	addl	16(%rax), %ebx
-	movl	%ebx, (%r14)
-	addq	$16, %rsp
+	movq	8(%rbx), %rax
+	addl	16(%rax), %ebp
+	movl	%ebp, (%r14)
 	popq	%rbx
 	popq	%r14
-	popq	%r15
+	popq	%rbp
 	retq
 	.cfi_endproc
                                         ## -- End function
@@ -284,31 +275,31 @@ L___unnamed_6:                          ## @8
 	.p2align	3
                                         ## live roots for g
 	.quad	Ltmp13
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp14
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp15
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp16
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp17
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp18
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	Ltmp19
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 .subsections_via_symbols

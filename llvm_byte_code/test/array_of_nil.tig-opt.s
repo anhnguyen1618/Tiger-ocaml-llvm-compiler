@@ -21,8 +21,6 @@ _main:                                  ## @main
 	.cfi_def_cfa_offset 40
 	pushq	%rbx
 	.cfi_def_cfa_offset 48
-	subq	$16, %rsp
-	.cfi_def_cfa_offset 64
 	.cfi_offset %rbx, -48
 	.cfi_offset %r12, -40
 	.cfi_offset %r13, -32
@@ -34,70 +32,66 @@ Ltmp0:
 	movq	%rax, %r14
 	movl	$1, (%rax)
 	movq	$0, 8(%rax)
-	leaq	8(%rsp), %rdi
-	callq	_f
-Ltmp1:
-	movq	%rax, %rbx
 	movl	$40, %edi
 	callq	_malloc
-Ltmp2:
-	movq	%rax, %r12
+Ltmp1:
+	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
-	jg	LBB0_3
+	ja	LBB0_3
 	.p2align	4, 0x90
 LBB0_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
-	movq	%rbx, (%r12,%rax,8)
+	movq	$0, (%rbx,%rax,8)
 	incq	%rax
 	cmpl	$4, %eax
-	jle	LBB0_2
+	jbe	LBB0_2
 LBB0_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
-Ltmp3:
+Ltmp2:
 	movq	%rax, %r15
 	movl	$5, (%rax)
-	movq	%r12, 8(%rax)
+	movq	%rbx, 8(%rax)
 	movl	$40, %edi
 	callq	_malloc
-Ltmp4:
+Ltmp3:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
-	jg	LBB0_6
+	ja	LBB0_6
 	.p2align	4, 0x90
 LBB0_5:                                 ## %loop12
                                         ## =>This Inner Loop Header: Depth=1
 	movq	$0, (%rbx,%rax,8)
 	incq	%rax
 	cmpl	$4, %eax
-	jle	LBB0_5
+	jbe	LBB0_5
 LBB0_6:                                 ## %end13
 	movl	$16, %edi
 	callq	_malloc
-Ltmp5:
+Ltmp4:
 	movq	%rax, %r12
 	movl	$5, (%rax)
 	movq	%rbx, 8(%rax)
 	movl	$40, %edi
 	callq	_malloc
-Ltmp6:
+Ltmp5:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
-	jg	LBB0_9
+	ja	LBB0_9
 	.p2align	4, 0x90
 LBB0_8:                                 ## %loop30
                                         ## =>This Inner Loop Header: Depth=1
 	movq	$0, (%rbx,%rax,8)
 	incq	%rax
 	cmpl	$4, %eax
-	jle	LBB0_8
+	jbe	LBB0_8
 LBB0_9:                                 ## %end31
 	movl	$16, %edi
 	callq	_malloc
-Ltmp7:
+Ltmp6:
 	movq	%rax, %r13
 	movl	$5, (%rax)
 	movq	%rbx, 8(%rax)
@@ -105,72 +99,67 @@ Ltmp7:
 	movl	$1, %esi
 	movq	%r15, %rdi
 	callq	_tig_check_array_bound
-Ltmp8:
+Ltmp7:
 	movq	8(%r15), %rax
 	movq	8(%rax), %rdi
 	callq	_tig_nillable
-Ltmp9:
+Ltmp8:
 	movl	$1, %esi
 	movl	%eax, %edi
 	callq	_assert_equal_int
-Ltmp10:
+Ltmp9:
 	leaq	L___unnamed_2(%rip), %rdx
 	movl	$1, %esi
 	movq	%r12, %rdi
 	callq	_tig_check_array_bound
-Ltmp11:
+Ltmp10:
 	movq	8(%r12), %rax
 	movq	8(%rax), %rdi
 	callq	_tig_nillable
-Ltmp12:
+Ltmp11:
 	movl	$1, %esi
 	movl	%eax, %edi
 	callq	_assert_equal_int
-Ltmp13:
+Ltmp12:
 	leaq	L___unnamed_3(%rip), %rdx
 	movl	$1, %esi
 	movq	%r13, %rdi
 	callq	_tig_check_array_bound
-Ltmp14:
+Ltmp13:
 	movq	8(%r13), %rax
 	movq	8(%rax), %rdi
 	callq	_tig_nillable
-Ltmp15:
+Ltmp14:
 	movl	$1, %esi
 	movl	%eax, %edi
 	callq	_assert_equal_int
-Ltmp16:
-	leaq	8(%rsp), %rbx
+Ltmp15:
 	xorl	%esi, %esi
-	movq	%rbx, %rdi
 	callq	_g
-Ltmp17:
+Ltmp16:
 	xorl	%esi, %esi
 	movl	%eax, %edi
 	callq	_assert_equal_int
-Ltmp18:
-	movq	%rbx, %rdi
+Ltmp17:
 	movq	%r14, %rsi
 	callq	_g
-Ltmp19:
+Ltmp18:
 	movl	$1, %esi
 	movl	%eax, %edi
 	callq	_assert_equal_int
-Ltmp20:
+Ltmp19:
 	leaq	L___unnamed_4(%rip), %rsi
 	movq	%r14, %rdi
 	callq	_tig_check_null_pointer
-Ltmp21:
+Ltmp20:
 	movq	8(%r14), %rsi
-	movq	%rbx, %rdi
 	callq	_g
-Ltmp22:
+Ltmp21:
 	xorl	%esi, %esi
 	movl	%eax, %edi
 	callq	_assert_equal_int
-Ltmp23:
+Ltmp22:
 	xorl	%eax, %eax
-	addq	$16, %rsp
 	popq	%rbx
 	popq	%r12
 	popq	%r13
@@ -182,12 +171,9 @@ Ltmp23:
 	.globl	_f                      ## -- Begin function f
 	.p2align	4, 0x90
 _f:                                     ## @f
-	.cfi_startproc
 ## %bb.0:                               ## %entry
-	movq	%rdi, -8(%rsp)
 	xorl	%eax, %eax
 	retq
-	.cfi_endproc
                                         ## -- End function
 	.globl	_g                      ## -- Begin function g
 	.p2align	4, 0x90
@@ -196,26 +182,24 @@ _g:                                     ## @g
 ## %bb.0:                               ## %entry
 	pushq	%rbx
 	.cfi_def_cfa_offset 16
-	subq	$16, %rsp
-	.cfi_def_cfa_offset 32
 	.cfi_offset %rbx, -16
 	movq	%rsi, %rbx
-	movq	%rdi, 8(%rsp)
 	movq	%rsi, %rdi
 	callq	_tig_nillable
-Ltmp24:
+Ltmp23:
 	movl	%eax, %ecx
 	xorl	%eax, %eax
 	testl	%ecx, %ecx
-	jne	LBB2_2
-## %bb.1:                               ## %else
+	je	LBB2_1
+## %bb.2:                               ## %merge
+	popq	%rbx
+	retq
+LBB2_1:                                 ## %else
 	leaq	L___unnamed_5(%rip), %rsi
 	movq	%rbx, %rdi
 	callq	_tig_check_null_pointer
-Ltmp25:
+Ltmp24:
 	movl	(%rbx), %eax
-LBB2_2:                                 ## %merge
-	addq	$16, %rsp
 	popq	%rbx
 	retq
 	.cfi_endproc
@@ -251,113 +235,109 @@ L___unnamed_4:
 	.quad	0
 	.globl	"_camlLlvm_byte_code/test/array_of_nil__frametable"
 "_camlLlvm_byte_code/test/array_of_nil__frametable":
-	.short	26
+	.short	25
 	.p2align	3
                                         ## live roots for main
 	.quad	Ltmp0
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp1
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp2
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp3
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp4
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp5
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp6
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp7
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp8
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp9
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp10
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp11
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp12
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp13
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp14
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp15
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp16
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp17
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp18
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp19
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp20
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp21
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	Ltmp22
-	.short	56
-	.short	0
-	.p2align	3
-	.quad	Ltmp23
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
                                         ## live roots for f
                                         ## live roots for g
-	.quad	Ltmp24
-	.short	24
+	.quad	Ltmp23
+	.short	8
 	.short	0
 	.p2align	3
-	.quad	Ltmp25
-	.short	24
+	.quad	Ltmp24
+	.short	8
 	.short	0
 	.p2align	3
 .subsections_via_symbols

@@ -7,20 +7,7 @@ declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
 define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
-  br label %test
-
-test:                                             ; preds = %entry
-  br i1 true, label %else, label %then
-
-then:                                             ; preds = %test
-  br label %merge
-
-else:                                             ; preds = %test
-  br label %merge
-
-merge:                                            ; preds = %else, %then
-  %if_result_addr.0 = phi i32 [ -8, %else ], [ 6, %then ]
-  call void @tig_print_int(i32 %if_result_addr.0)
-  call void @assert_equal_int(i32 %if_result_addr.0, i32 -8)
+  tail call void @tig_print_int(i32 -8)
+  tail call void @assert_equal_int(i32 -8, i32 -8)
   ret i32 0
 }

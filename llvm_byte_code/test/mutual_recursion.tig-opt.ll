@@ -7,30 +7,21 @@ declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
 define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
-  %frame_pointer = alloca { i32 }
-  %0 = call i32 @a({ i32 }* %frame_pointer)
-  call void @tig_print_int(i32 %0)
-  %1 = call i32 @a({ i32 }* %frame_pointer)
-  %2 = call i32 @b({ i32 }* %frame_pointer)
-  call void @assert_equal_int(i32 %1, i32 %2)
+  tail call void @tig_print_int(i32 4)
+  tail call void @assert_equal_int(i32 4, i32 4)
   ret i32 0
 }
 
-define i32 @a({ i32 }*) local_unnamed_addr gc "ocaml" {
+; Function Attrs: norecurse nounwind readnone
+define i32 @a({ i32 }* nocapture readnone) local_unnamed_addr #0 gc "ocaml" {
 entry:
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
-  %fp_addr_in_sl = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr = load { i32 }*, { i32 }** %fp_addr_in_sl
-  %1 = call i32 @b({ i32 }* %fp_addr)
-  ret i32 %1
-}
-
-define i32 @b({ i32 }*) local_unnamed_addr gc "ocaml" {
-entry:
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
   ret i32 4
 }
+
+; Function Attrs: norecurse nounwind readnone
+define i32 @b({ i32 }* nocapture readnone) local_unnamed_addr #0 gc "ocaml" {
+entry:
+  ret i32 4
+}
+
+attributes #0 = { norecurse nounwind readnone }

@@ -19,31 +19,27 @@ declare void @assert_equal_string(i8*, i8*) local_unnamed_addr gc "ocaml"
 
 define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
-  %malloccall = tail call i8* @malloc(i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32))
-  %record_init = bitcast i8* %malloccall to { i8* }*
-  %Element = getelementptr { i8* }, { i8* }* %record_init, i32 0, i32 0
-  store i8* getelementptr inbounds ([12 x i8], [12 x i8]* @2, i32 0, i32 0), i8** %Element
-  %0 = bitcast { i8* }* %record_init to i8*
-  call void @tig_check_null_pointer(i8* %0, i8* getelementptr inbounds ([42 x i8], [42 x i8]* @0, i32 0, i32 0))
-  %element = getelementptr { i8* }, { i8* }* %record_init, i32 0, i32 0
-  %field_var = load i8*, i8** %element
-  call void @tig_print(i8* %field_var)
-  %1 = bitcast { i8* }* %record_init to i8*
-  call void @tig_check_null_pointer(i8* %1, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @1, i32 0, i32 0))
-  %element3 = getelementptr { i8* }, { i8* }* %record_init, i32 0, i32 0
-  %field_var4 = load i8*, i8** %element3
-  call void @assert_equal_string(i8* %field_var4, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @2, i32 0, i32 0))
-  %2 = bitcast { i8* }* %record_init to i8*
-  %3 = call i32 @tig_nillable(i8* %2)
-  call void @tig_print_int(i32 %3)
-  %4 = bitcast { i8* }* %record_init to i8*
-  %5 = call i32 @tig_nillable(i8* %4)
-  call void @assert_equal_int(i32 %5, i32 0)
-  %6 = call i32 @tig_nillable(i8* null)
-  call void @tig_print_int(i32 %6)
-  %7 = call i32 @tig_nillable(i8* null)
-  call void @assert_equal_int(i32 %7, i32 1)
+  %malloccall = tail call i8* @malloc(i32 8)
+  %Element = bitcast i8* %malloccall to i8**
+  store i8* getelementptr inbounds ([12 x i8], [12 x i8]* @2, i64 0, i64 0), i8** %Element, align 8
+  tail call void @tig_check_null_pointer(i8* %malloccall, i8* getelementptr inbounds ([42 x i8], [42 x i8]* @0, i64 0, i64 0))
+  %field_var = load i8*, i8** %Element, align 8
+  tail call void @tig_print(i8* %field_var)
+  tail call void @tig_check_null_pointer(i8* %malloccall, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @1, i64 0, i64 0))
+  %field_var4 = load i8*, i8** %Element, align 8
+  tail call void @assert_equal_string(i8* %field_var4, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @2, i64 0, i64 0))
+  %0 = tail call i32 @tig_nillable(i8* %malloccall)
+  tail call void @tig_print_int(i32 %0)
+  %1 = tail call i32 @tig_nillable(i8* %malloccall)
+  tail call void @assert_equal_int(i32 %1, i32 0)
+  %2 = tail call i32 @tig_nillable(i8* null)
+  tail call void @tig_print_int(i32 %2)
+  %3 = tail call i32 @tig_nillable(i8* null)
+  tail call void @assert_equal_int(i32 %3, i32 1)
   ret i32 0
 }
 
-declare noalias i8* @malloc(i32) local_unnamed_addr
+; Function Attrs: nounwind
+declare noalias i8* @malloc(i32) local_unnamed_addr #0
+
+attributes #0 = { nounwind }

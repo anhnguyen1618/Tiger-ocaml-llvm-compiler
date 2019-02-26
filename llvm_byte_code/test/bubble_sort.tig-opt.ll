@@ -41,312 +41,250 @@ declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
 define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
-  %frame_pointer = alloca { i32 }
-  %0 = call { i32, i32* }* @create_array({ i32 }* %frame_pointer)
-  %1 = call { i32, i32* }* @create_array_test({ i32 }* %frame_pointer)
-  call void @tig_print(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @10, i32 0, i32 0))
-  call void @print_array({ i32 }* %frame_pointer, { i32, i32* }* %0)
-  call void @tig_print(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @11, i32 0, i32 0))
-  call void @bubble_sort({ i32 }* %frame_pointer, { i32, i32* }* %0)
-  call void @tig_print(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @12, i32 0, i32 0))
-  call void @print_array({ i32 }* %frame_pointer, { i32, i32* }* %0)
+  %0 = tail call { i32, i32* }* @create_array({ i32 }* undef)
+  %1 = tail call { i32, i32* }* @create_array_test({ i32 }* undef)
+  tail call void @tig_print(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @10, i64 0, i64 0))
+  tail call void @print_array({ i32 }* undef, { i32, i32* }* %0)
+  tail call void @tig_print(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @11, i64 0, i64 0))
+  tail call void @bubble_sort({ i32 }* undef, { i32, i32* }* %0)
+  tail call void @tig_print(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @12, i64 0, i64 0))
+  tail call void @print_array({ i32 }* undef, { i32, i32* }* %0)
   %2 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %2, i32 0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @13, i32 0, i32 0))
-  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr = load i32*, i32** %array_pointer
-  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 0
-  %arr_ele = load i32, i32* %arr_ele_addr
-  call void @assert_equal_int(i32 %arr_ele, i32 4)
-  %3 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %3, i32 1, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @14, i32 0, i32 0))
-  %array_pointer6 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr7 = load i32*, i32** %array_pointer6
-  %arr_ele_addr8 = getelementptr i32, i32* %arr_addr7, i32 1
-  %arr_ele9 = load i32, i32* %arr_ele_addr8
-  call void @assert_equal_int(i32 %arr_ele9, i32 3)
-  %4 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %4, i32 2, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @15, i32 0, i32 0))
-  %array_pointer11 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr12 = load i32*, i32** %array_pointer11
-  %arr_ele_addr13 = getelementptr i32, i32* %arr_addr12, i32 2
-  %arr_ele14 = load i32, i32* %arr_ele_addr13
-  call void @assert_equal_int(i32 %arr_ele14, i32 2)
-  %5 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %5, i32 3, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @16, i32 0, i32 0))
-  %array_pointer16 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr17 = load i32*, i32** %array_pointer16
-  %arr_ele_addr18 = getelementptr i32, i32* %arr_addr17, i32 3
-  %arr_ele19 = load i32, i32* %arr_ele_addr18
-  call void @assert_equal_int(i32 %arr_ele19, i32 1)
-  %6 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %6, i32 4, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @17, i32 0, i32 0))
-  %array_pointer21 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr22 = load i32*, i32** %array_pointer21
-  %arr_ele_addr23 = getelementptr i32, i32* %arr_addr22, i32 4
-  %arr_ele24 = load i32, i32* %arr_ele_addr23
-  call void @assert_equal_int(i32 %arr_ele24, i32 0)
-  call void @bubble_sort({ i32 }* %frame_pointer, { i32, i32* }* %1)
-  %7 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %7, i32 0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @18, i32 0, i32 0))
-  %array_pointer27 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr28 = load i32*, i32** %array_pointer27
-  %arr_ele_addr29 = getelementptr i32, i32* %arr_addr28, i32 0
-  %arr_ele30 = load i32, i32* %arr_ele_addr29
-  call void @assert_equal_int(i32 %arr_ele30, i32 0)
-  %8 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %8, i32 1, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @19, i32 0, i32 0))
-  %array_pointer32 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr33 = load i32*, i32** %array_pointer32
-  %arr_ele_addr34 = getelementptr i32, i32* %arr_addr33, i32 1
-  %arr_ele35 = load i32, i32* %arr_ele_addr34
-  call void @assert_equal_int(i32 %arr_ele35, i32 1)
-  %9 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %9, i32 2, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @20, i32 0, i32 0))
-  %array_pointer37 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr38 = load i32*, i32** %array_pointer37
-  %arr_ele_addr39 = getelementptr i32, i32* %arr_addr38, i32 2
-  %arr_ele40 = load i32, i32* %arr_ele_addr39
-  call void @assert_equal_int(i32 %arr_ele40, i32 2)
-  %10 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %10, i32 3, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @21, i32 0, i32 0))
-  %array_pointer42 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr43 = load i32*, i32** %array_pointer42
-  %arr_ele_addr44 = getelementptr i32, i32* %arr_addr43, i32 3
-  %arr_ele45 = load i32, i32* %arr_ele_addr44
-  call void @assert_equal_int(i32 %arr_ele45, i32 3)
-  %11 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %11, i32 4, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @22, i32 0, i32 0))
-  %array_pointer47 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr48 = load i32*, i32** %array_pointer47
-  %arr_ele_addr49 = getelementptr i32, i32* %arr_addr48, i32 4
-  %arr_ele50 = load i32, i32* %arr_ele_addr49
-  call void @assert_equal_int(i32 %arr_ele50, i32 4)
+  tail call void @tig_check_array_bound(i8* %2, i32 0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @13, i64 0, i64 0))
+  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %1, i64 0, i32 1
+  %arr_addr = load i32*, i32** %array_pointer, align 8
+  %arr_ele = load i32, i32* %arr_addr, align 4
+  tail call void @assert_equal_int(i32 %arr_ele, i32 4)
+  tail call void @tig_check_array_bound(i8* %2, i32 1, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @14, i64 0, i64 0))
+  %arr_addr7 = load i32*, i32** %array_pointer, align 8
+  %arr_ele_addr8 = getelementptr i32, i32* %arr_addr7, i64 1
+  %arr_ele9 = load i32, i32* %arr_ele_addr8, align 4
+  tail call void @assert_equal_int(i32 %arr_ele9, i32 3)
+  tail call void @tig_check_array_bound(i8* %2, i32 2, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @15, i64 0, i64 0))
+  %arr_addr12 = load i32*, i32** %array_pointer, align 8
+  %arr_ele_addr13 = getelementptr i32, i32* %arr_addr12, i64 2
+  %arr_ele14 = load i32, i32* %arr_ele_addr13, align 4
+  tail call void @assert_equal_int(i32 %arr_ele14, i32 2)
+  tail call void @tig_check_array_bound(i8* %2, i32 3, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @16, i64 0, i64 0))
+  %arr_addr17 = load i32*, i32** %array_pointer, align 8
+  %arr_ele_addr18 = getelementptr i32, i32* %arr_addr17, i64 3
+  %arr_ele19 = load i32, i32* %arr_ele_addr18, align 4
+  tail call void @assert_equal_int(i32 %arr_ele19, i32 1)
+  tail call void @tig_check_array_bound(i8* %2, i32 4, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @17, i64 0, i64 0))
+  %arr_addr22 = load i32*, i32** %array_pointer, align 8
+  %arr_ele_addr23 = getelementptr i32, i32* %arr_addr22, i64 4
+  %arr_ele24 = load i32, i32* %arr_ele_addr23, align 4
+  tail call void @assert_equal_int(i32 %arr_ele24, i32 0)
+  tail call void @bubble_sort({ i32 }* undef, { i32, i32* }* %1)
+  tail call void @tig_check_array_bound(i8* %2, i32 0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @18, i64 0, i64 0))
+  %arr_addr28 = load i32*, i32** %array_pointer, align 8
+  %arr_ele30 = load i32, i32* %arr_addr28, align 4
+  tail call void @assert_equal_int(i32 %arr_ele30, i32 0)
+  tail call void @tig_check_array_bound(i8* %2, i32 1, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @19, i64 0, i64 0))
+  %arr_addr33 = load i32*, i32** %array_pointer, align 8
+  %arr_ele_addr34 = getelementptr i32, i32* %arr_addr33, i64 1
+  %arr_ele35 = load i32, i32* %arr_ele_addr34, align 4
+  tail call void @assert_equal_int(i32 %arr_ele35, i32 1)
+  tail call void @tig_check_array_bound(i8* %2, i32 2, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @20, i64 0, i64 0))
+  %arr_addr38 = load i32*, i32** %array_pointer, align 8
+  %arr_ele_addr39 = getelementptr i32, i32* %arr_addr38, i64 2
+  %arr_ele40 = load i32, i32* %arr_ele_addr39, align 4
+  tail call void @assert_equal_int(i32 %arr_ele40, i32 2)
+  tail call void @tig_check_array_bound(i8* %2, i32 3, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @21, i64 0, i64 0))
+  %arr_addr43 = load i32*, i32** %array_pointer, align 8
+  %arr_ele_addr44 = getelementptr i32, i32* %arr_addr43, i64 3
+  %arr_ele45 = load i32, i32* %arr_ele_addr44, align 4
+  tail call void @assert_equal_int(i32 %arr_ele45, i32 3)
+  tail call void @tig_check_array_bound(i8* %2, i32 4, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @22, i64 0, i64 0))
+  %arr_addr48 = load i32*, i32** %array_pointer, align 8
+  %arr_ele_addr49 = getelementptr i32, i32* %arr_addr48, i64 4
+  %arr_ele50 = load i32, i32* %arr_ele_addr49, align 4
+  tail call void @assert_equal_int(i32 %arr_ele50, i32 4)
   ret i32 0
 }
 
-define void @print_array({ i32 }*, { i32, i32* }*) local_unnamed_addr gc "ocaml" {
+define void @print_array({ i32 }* nocapture readnone, { i32, i32* }*) local_unnamed_addr gc "ocaml" {
 entry:
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
-  call void @tig_print(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  tail call void @tig_print(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i64 0, i64 0))
   %2 = bitcast { i32, i32* }* %1 to i8*
-  %3 = call i32 @tig_array_length(i8* %2)
-  %4 = bitcast { i32, i32* }* %1 to i8*
-  %5 = call i32 @tig_array_length(i8* %4)
-  %minus_tmp3 = sub i32 %5, 1
+  %3 = tail call i32 @tig_array_length(i8* %2)
+  %4 = tail call i32 @tig_array_length(i8* %2)
+  %minus_tmp3 = add i32 %4, -1
+  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %1, i64 0, i32 1
   br label %test
 
 test:                                             ; preds = %loop, %entry
   %i.0 = phi i32 [ 0, %entry ], [ %add_tmp, %loop ]
-  %ge_tmp = icmp sge i32 %minus_tmp3, %i.0
-  %bool_tmp = zext i1 %ge_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 0
-  br i1 %cond, label %end, label %loop
+  %ge_tmp = icmp slt i32 %minus_tmp3, %i.0
+  br i1 %ge_tmp, label %end, label %loop
 
 loop:                                             ; preds = %test
-  %6 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %6, i32 %i.0, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @1, i32 0, i32 0))
-  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr = load i32*, i32** %array_pointer
-  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 %i.0
-  %arr_ele = load i32, i32* %arr_ele_addr
-  call void @print_arr_int_ele(i32 %arr_ele)
+  tail call void @tig_check_array_bound(i8* %2, i32 %i.0, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @1, i64 0, i64 0))
+  %arr_addr = load i32*, i32** %array_pointer, align 8
+  %5 = sext i32 %i.0 to i64
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i64 %5
+  %arr_ele = load i32, i32* %arr_ele_addr, align 4
+  tail call void @print_arr_int_ele(i32 %arr_ele)
   %add_tmp = add i32 %i.0, 1
   br label %test
 
 end:                                              ; preds = %test
-  call void @tig_print(i8* getelementptr inbounds ([1 x i8], [1 x i8]* @2, i32 0, i32 0))
-  call void @tig_print(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
+  tail call void @tig_print(i8* getelementptr inbounds ([1 x i8], [1 x i8]* @2, i64 0, i64 0))
+  tail call void @tig_print(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i64 0, i64 0))
   ret void
 }
 
-define { i32, i32* }* @create_array({ i32 }*) local_unnamed_addr gc "ocaml" {
+define { i32, i32* }* @create_array({ i32 }* nocapture readnone) local_unnamed_addr gc "ocaml" {
 entry:
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
   %malloccall = tail call i8* @malloc(i32 32)
   %array_init = bitcast i8* %malloccall to i32*
   br label %test
 
 test:                                             ; preds = %loop, %entry
   %i.0 = phi i32 [ 0, %entry ], [ %add_tmp, %loop ]
-  %lt_tmp = icmp slt i32 %i.0, 8
-  %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 0
-  br i1 %cond, label %end, label %loop
+  %lt_tmp = icmp ugt i32 %i.0, 7
+  br i1 %lt_tmp, label %end, label %loop
 
 loop:                                             ; preds = %test
-  %Element = getelementptr i32, i32* %array_init, i32 %i.0
-  store i32 1, i32* %Element
-  %add_tmp = add i32 %i.0, 1
+  %1 = zext i32 %i.0 to i64
+  %Element = getelementptr i32, i32* %array_init, i64 %1
+  store i32 1, i32* %Element, align 4
+  %add_tmp = add nuw nsw i32 %i.0, 1
   br label %test
 
 end:                                              ; preds = %test
-  %malloccall4 = tail call i8* @malloc(i32 ptrtoint ({ i32, i32* }* getelementptr ({ i32, i32* }, { i32, i32* }* null, i32 1) to i32))
-  %array_wrapper = bitcast i8* %malloccall4 to { i32, i32* }*
-  %array_info = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 0
-  store i32 8, i32* %array_info
-  %array_info5 = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 1
-  store i32* %array_init, i32** %array_info5
+  %malloccall4 = tail call i8* @malloc(i32 16)
+  %array_info = bitcast i8* %malloccall4 to i32*
+  store i32 8, i32* %array_info, align 4
+  %array_info5 = getelementptr i8, i8* %malloccall4, i64 8
+  %2 = bitcast i8* %array_info5 to i32**
+  %3 = bitcast i8* %array_info5 to i8**
+  store i8* %malloccall, i8** %3, align 8
   br label %test10
 
 test10:                                           ; preds = %loop11, %end
   %i7.0 = phi i32 [ 0, %end ], [ %add_tmp19, %loop11 ]
-  %ge_tmp = icmp sge i32 7, %i7.0
-  %bool_tmp15 = zext i1 %ge_tmp to i32
-  %cond16 = icmp eq i32 %bool_tmp15, 0
-  br i1 %cond16, label %end12, label %loop11
+  %ge_tmp = icmp ugt i32 %i7.0, 7
+  br i1 %ge_tmp, label %end12, label %loop11
 
 loop11:                                           ; preds = %test10
-  %1 = bitcast { i32, i32* }* %array_wrapper to i8*
-  call void @tig_check_array_bound(i8* %1, i32 %i7.0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @4, i32 0, i32 0))
-  %array_addr_ptr = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 1
-  %arr_addr = load i32*, i32** %array_addr_ptr
-  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 %i7.0
-  %2 = call i32 @tig_random(i32 50)
-  store i32 %2, i32* %arr_ele_addr
-  %add_tmp19 = add i32 %i7.0, 1
+  tail call void @tig_check_array_bound(i8* %malloccall4, i32 %i7.0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @4, i64 0, i64 0))
+  %arr_addr = load i32*, i32** %2, align 8
+  %4 = zext i32 %i7.0 to i64
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i64 %4
+  %5 = tail call i32 @tig_random(i32 50)
+  store i32 %5, i32* %arr_ele_addr, align 4
+  %add_tmp19 = add nuw nsw i32 %i7.0, 1
   br label %test10
 
 end12:                                            ; preds = %test10
+  %array_wrapper = bitcast i8* %malloccall4 to { i32, i32* }*
   ret { i32, i32* }* %array_wrapper
 }
 
-define void @bubble_sort({ i32 }*, { i32, i32* }*) local_unnamed_addr gc "ocaml" {
+define void @bubble_sort({ i32 }* nocapture readnone, { i32, i32* }*) local_unnamed_addr gc "ocaml" {
 entry:
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
   %2 = bitcast { i32, i32* }* %1 to i8*
-  %3 = call i32 @tig_array_length(i8* %2)
+  %3 = tail call i32 @tig_array_length(i8* %2)
+  %minus_tmp5 = add i32 %3, -2
+  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %1, i64 0, i32 1
   br label %test
 
-test:                                             ; preds = %end8, %entry
-  %should_stop.0 = phi i32 [ 0, %entry ], [ %is_sorted.0.lcssa, %end8 ]
-  %4 = call i32 @tig_not(i32 %should_stop.0)
+test:                                             ; preds = %test6, %entry
+  %should_stop.0 = phi i32 [ 0, %entry ], [ %is_sorted.0.ph, %test6 ]
+  %4 = tail call i32 @tig_not(i32 %should_stop.0)
   %cond = icmp eq i32 %4, 0
-  br i1 %cond, label %end, label %loop
-
-loop:                                             ; preds = %test
-  %minus_tmp5 = sub i32 %3, 2
-  br label %test6
+  br i1 %cond, label %end, label %test6.outer
 
 end:                                              ; preds = %test
   ret void
 
-test6:                                            ; preds = %merge, %loop
-  %i.0 = phi i32 [ 0, %loop ], [ %add_tmp37, %merge ]
-  %is_sorted.0 = phi i32 [ 1, %loop ], [ %is_sorted.1, %merge ]
-  %ge_tmp = icmp sge i32 %minus_tmp5, %i.0
-  %bool_tmp = zext i1 %ge_tmp to i32
-  %cond11 = icmp eq i32 %bool_tmp, 0
-  br i1 %cond11, label %end8, label %loop7
+test6:                                            ; preds = %test6.outer, %loop7
+  %i.0 = phi i32 [ %add_tmp, %loop7 ], [ %i.0.ph, %test6.outer ]
+  %ge_tmp = icmp slt i32 %minus_tmp5, %i.0
+  br i1 %ge_tmp, label %test, label %loop7
 
 loop7:                                            ; preds = %test6
-  %5 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %5, i32 %i.0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @5, i32 0, i32 0))
-  %array_pointer = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr = load i32*, i32** %array_pointer
-  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 %i.0
-  %arr_ele = load i32, i32* %arr_ele_addr
+  tail call void @tig_check_array_bound(i8* %2, i32 %i.0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @5, i64 0, i64 0))
+  %arr_addr = load i32*, i32** %array_pointer, align 8
+  %5 = sext i32 %i.0 to i64
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i64 %5
+  %arr_ele = load i32, i32* %arr_ele_addr, align 4
   %add_tmp = add i32 %i.0, 1
-  %6 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %6, i32 %add_tmp, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @6, i32 0, i32 0))
-  %array_pointer16 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr17 = load i32*, i32** %array_pointer16
-  %arr_ele_addr18 = getelementptr i32, i32* %arr_addr17, i32 %add_tmp
-  %arr_ele19 = load i32, i32* %arr_ele_addr18
-  br label %test20
-
-end8:                                             ; preds = %test6
-  %is_sorted.0.lcssa = phi i32 [ %is_sorted.0, %test6 ]
-  br label %test
-
-test20:                                           ; preds = %loop7
+  tail call void @tig_check_array_bound(i8* %2, i32 %add_tmp, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @6, i64 0, i64 0))
+  %arr_addr17 = load i32*, i32** %array_pointer, align 8
+  %6 = sext i32 %add_tmp to i64
+  %arr_ele_addr18 = getelementptr i32, i32* %arr_addr17, i64 %6
+  %arr_ele19 = load i32, i32* %arr_ele_addr18, align 4
   %gt_tmp = icmp sgt i32 %arr_ele, %arr_ele19
-  %bool_tmp23 = zext i1 %gt_tmp to i32
-  %cond24 = icmp eq i32 %bool_tmp23, 0
-  br i1 %cond24, label %else, label %then
+  br i1 %gt_tmp, label %then, label %test6
 
-then:                                             ; preds = %test20
-  %7 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %7, i32 %i.0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @7, i32 0, i32 0))
-  %array_addr_ptr = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr26 = load i32*, i32** %array_addr_ptr
-  %arr_ele_addr27 = getelementptr i32, i32* %arr_addr26, i32 %i.0
-  store i32 %arr_ele19, i32* %arr_ele_addr27
-  %add_tmp30 = add i32 %i.0, 1
-  %8 = bitcast { i32, i32* }* %1 to i8*
-  call void @tig_check_array_bound(i8* %8, i32 %add_tmp30, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @8, i32 0, i32 0))
-  %array_addr_ptr32 = getelementptr { i32, i32* }, { i32, i32* }* %1, i32 0, i32 1
-  %arr_addr33 = load i32*, i32** %array_addr_ptr32
-  %arr_ele_addr34 = getelementptr i32, i32* %arr_addr33, i32 %add_tmp30
-  store i32 %arr_ele, i32* %arr_ele_addr34
-  br label %merge
+then:                                             ; preds = %loop7
+  tail call void @tig_check_array_bound(i8* nonnull %2, i32 %i.0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @7, i64 0, i64 0))
+  %arr_addr26 = load i32*, i32** %array_pointer, align 8
+  %arr_ele_addr27 = getelementptr i32, i32* %arr_addr26, i64 %5
+  store i32 %arr_ele19, i32* %arr_ele_addr27, align 4
+  tail call void @tig_check_array_bound(i8* nonnull %2, i32 %add_tmp, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @8, i64 0, i64 0))
+  %arr_addr33 = load i32*, i32** %array_pointer, align 8
+  %arr_ele_addr34 = getelementptr i32, i32* %arr_addr33, i64 %6
+  store i32 %arr_ele, i32* %arr_ele_addr34, align 4
+  br label %test6.outer
 
-else:                                             ; preds = %test20
-  br label %merge
-
-merge:                                            ; preds = %else, %then
-  %is_sorted.1 = phi i32 [ %is_sorted.0, %else ], [ 0, %then ]
-  %add_tmp37 = add i32 %i.0, 1
+test6.outer:                                      ; preds = %test, %then
+  %is_sorted.0.ph = phi i32 [ 0, %then ], [ 1, %test ]
+  %i.0.ph = phi i32 [ %add_tmp, %then ], [ 0, %test ]
   br label %test6
 }
 
-declare noalias i8* @malloc(i32) local_unnamed_addr
+; Function Attrs: nounwind
+declare noalias i8* @malloc(i32) local_unnamed_addr #0
 
-define { i32, i32* }* @create_array_test({ i32 }*) local_unnamed_addr gc "ocaml" {
+define { i32, i32* }* @create_array_test({ i32 }* nocapture readnone) local_unnamed_addr gc "ocaml" {
 entry:
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
   %malloccall = tail call i8* @malloc(i32 20)
   %array_init = bitcast i8* %malloccall to i32*
   br label %test
 
 test:                                             ; preds = %loop, %entry
   %i.0 = phi i32 [ 0, %entry ], [ %add_tmp, %loop ]
-  %lt_tmp = icmp slt i32 %i.0, 5
-  %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 0
-  br i1 %cond, label %end, label %loop
+  %lt_tmp = icmp ugt i32 %i.0, 4
+  br i1 %lt_tmp, label %end, label %loop
 
 loop:                                             ; preds = %test
-  %Element = getelementptr i32, i32* %array_init, i32 %i.0
-  store i32 1, i32* %Element
-  %add_tmp = add i32 %i.0, 1
+  %1 = zext i32 %i.0 to i64
+  %Element = getelementptr i32, i32* %array_init, i64 %1
+  store i32 1, i32* %Element, align 4
+  %add_tmp = add nuw nsw i32 %i.0, 1
   br label %test
 
 end:                                              ; preds = %test
-  %malloccall4 = tail call i8* @malloc(i32 ptrtoint ({ i32, i32* }* getelementptr ({ i32, i32* }, { i32, i32* }* null, i32 1) to i32))
-  %array_wrapper = bitcast i8* %malloccall4 to { i32, i32* }*
-  %array_info = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 0
-  store i32 5, i32* %array_info
-  %array_info5 = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 1
-  store i32* %array_init, i32** %array_info5
+  %malloccall4 = tail call i8* @malloc(i32 16)
+  %array_info = bitcast i8* %malloccall4 to i32*
+  store i32 5, i32* %array_info, align 4
+  %array_info5 = getelementptr i8, i8* %malloccall4, i64 8
+  %2 = bitcast i8* %array_info5 to i32**
+  %3 = bitcast i8* %array_info5 to i8**
+  store i8* %malloccall, i8** %3, align 8
   br label %test10
 
 test10:                                           ; preds = %loop11, %end
   %i7.0 = phi i32 [ 0, %end ], [ %add_tmp23, %loop11 ]
-  %ge_tmp = icmp sge i32 4, %i7.0
-  %bool_tmp15 = zext i1 %ge_tmp to i32
-  %cond16 = icmp eq i32 %bool_tmp15, 0
-  br i1 %cond16, label %end12, label %loop11
+  %ge_tmp = icmp ugt i32 %i7.0, 4
+  br i1 %ge_tmp, label %end12, label %loop11
 
 loop11:                                           ; preds = %test10
-  %1 = bitcast { i32, i32* }* %array_wrapper to i8*
-  call void @tig_check_array_bound(i8* %1, i32 %i7.0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @9, i32 0, i32 0))
-  %array_addr_ptr = getelementptr { i32, i32* }, { i32, i32* }* %array_wrapper, i32 0, i32 1
-  %arr_addr = load i32*, i32** %array_addr_ptr
-  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i32 %i7.0
-  %minus_tmp20 = sub i32 5, %i7.0
-  %minus_tmp21 = sub i32 %minus_tmp20, 1
-  store i32 %minus_tmp21, i32* %arr_ele_addr
-  %add_tmp23 = add i32 %i7.0, 1
+  tail call void @tig_check_array_bound(i8* %malloccall4, i32 %i7.0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @9, i64 0, i64 0))
+  %arr_addr = load i32*, i32** %2, align 8
+  %4 = zext i32 %i7.0 to i64
+  %arr_ele_addr = getelementptr i32, i32* %arr_addr, i64 %4
+  %minus_tmp21 = sub nsw i32 4, %i7.0
+  store i32 %minus_tmp21, i32* %arr_ele_addr, align 4
+  %add_tmp23 = add nuw nsw i32 %i7.0, 1
   br label %test10
 
 end12:                                            ; preds = %test10
+  %array_wrapper = bitcast i8* %malloccall4 to { i32, i32* }*
   ret { i32, i32* }* %array_wrapper
 }
+
+attributes #0 = { nounwind }

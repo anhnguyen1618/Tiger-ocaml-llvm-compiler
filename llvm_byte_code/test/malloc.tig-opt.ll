@@ -25,136 +25,114 @@ declare void @assert_equal_int(i32, i32) local_unnamed_addr gc "ocaml"
 
 define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
-  %frame_pointer = alloca { i32, { i32, { i32 }** }* }
-  %malloccall = tail call i8* @malloc(i32 ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32))
-  %record_init = bitcast i8* %malloccall to { i32 }*
-  %Element = getelementptr { i32 }, { i32 }* %record_init, i32 0, i32 0
-  store i32 5, i32* %Element
-  %malloccall2 = tail call i8* @malloc(i32 mul (i32 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i32), i32 2))
+  %frame_pointer = alloca { i32, { i32, { i32 }** }* }, align 8
+  %malloccall = tail call i8* @malloc(i32 4)
+  %Element = bitcast i8* %malloccall to i32*
+  store i32 5, i32* %Element, align 4
+  %malloccall2 = tail call i8* @malloc(i32 16)
   %array_init = bitcast i8* %malloccall2 to { i32 }**
   br label %test
 
 test:                                             ; preds = %loop, %entry
   %i.0 = phi i32 [ 0, %entry ], [ %add_tmp, %loop ]
-  %lt_tmp = icmp slt i32 %i.0, 2
-  %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 0
-  br i1 %cond, label %end, label %loop
+  %lt_tmp = icmp ugt i32 %i.0, 1
+  br i1 %lt_tmp, label %end, label %loop
 
 loop:                                             ; preds = %test
-  %Element5 = getelementptr { i32 }*, { i32 }** %array_init, i32 %i.0
-  store { i32 }* %record_init, { i32 }** %Element5
-  %add_tmp = add i32 %i.0, 1
+  %0 = zext i32 %i.0 to i64
+  %Element5 = getelementptr { i32 }*, { i32 }** %array_init, i64 %0
+  %1 = bitcast { i32 }** %Element5 to i8**
+  store i8* %malloccall, i8** %1, align 8
+  %add_tmp = add nuw nsw i32 %i.0, 1
   br label %test
 
 end:                                              ; preds = %test
-  %malloccall6 = tail call i8* @malloc(i32 ptrtoint ({ i32, { i32 }** }* getelementptr ({ i32, { i32 }** }, { i32, { i32 }** }* null, i32 1) to i32))
-  %array_wrapper = bitcast i8* %malloccall6 to { i32, { i32 }** }*
-  %array_info = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %array_wrapper, i32 0, i32 0
-  store i32 2, i32* %array_info
-  %array_info7 = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %array_wrapper, i32 0, i32 1
-  store { i32 }** %array_init, { i32 }*** %array_info7
-  %var_dec = getelementptr { i32, { i32, { i32 }** }* }, { i32, { i32, { i32 }** }* }* %frame_pointer, i32 0, i32 1
-  store { i32, { i32 }** }* %array_wrapper, { i32, { i32 }** }** %var_dec
-  %0 = call { i32, { i32 }** }* @create_rec({ i32, { i32, { i32 }** }* }* %frame_pointer)
-  %arr = getelementptr { i32, { i32, { i32 }** }* }, { i32, { i32, { i32 }** }* }* %frame_pointer, i32 0, i32 1
-  %arr8 = load { i32, { i32 }** }*, { i32, { i32 }** }** %arr
-  %1 = bitcast { i32, { i32 }** }* %arr8 to i8*
-  call void @tig_check_array_bound(i8* %1, i32 0, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @1, i32 0, i32 0))
-  %array_pointer = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %arr8, i32 0, i32 1
-  %arr_addr = load { i32 }**, { i32 }*** %array_pointer
-  %arr_ele_addr = getelementptr { i32 }*, { i32 }** %arr_addr, i32 0
-  %arr_ele = load { i32 }*, { i32 }** %arr_ele_addr
-  %2 = bitcast { i32 }* %arr_ele to i8*
-  call void @tig_check_null_pointer(i8* %2, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @2, i32 0, i32 0))
-  %element = getelementptr { i32 }, { i32 }* %arr_ele, i32 0, i32 0
-  %field_var = load i32, i32* %element
-  call void @tig_print_int(i32 %field_var)
-  %arr9 = getelementptr { i32, { i32, { i32 }** }* }, { i32, { i32, { i32 }** }* }* %frame_pointer, i32 0, i32 1
-  %arr10 = load { i32, { i32 }** }*, { i32, { i32 }** }** %arr9
-  %3 = bitcast { i32, { i32 }** }* %arr10 to i8*
-  call void @tig_check_array_bound(i8* %3, i32 0, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @3, i32 0, i32 0))
-  %array_pointer11 = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %arr10, i32 0, i32 1
-  %arr_addr12 = load { i32 }**, { i32 }*** %array_pointer11
-  %arr_ele_addr13 = getelementptr { i32 }*, { i32 }** %arr_addr12, i32 0
-  %arr_ele14 = load { i32 }*, { i32 }** %arr_ele_addr13
-  %4 = bitcast { i32 }* %arr_ele14 to i8*
-  call void @tig_check_null_pointer(i8* %4, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @4, i32 0, i32 0))
-  %element15 = getelementptr { i32 }, { i32 }* %arr_ele14, i32 0, i32 0
-  %field_var16 = load i32, i32* %element15
-  call void @assert_equal_int(i32 %field_var16, i32 5)
-  %5 = bitcast { i32, { i32 }** }* %0 to i8*
-  call void @tig_check_array_bound(i8* %5, i32 1, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @5, i32 0, i32 0))
-  %array_pointer18 = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %0, i32 0, i32 1
-  %arr_addr19 = load { i32 }**, { i32 }*** %array_pointer18
-  %arr_ele_addr20 = getelementptr { i32 }*, { i32 }** %arr_addr19, i32 1
-  %arr_ele21 = load { i32 }*, { i32 }** %arr_ele_addr20
-  %6 = bitcast { i32 }* %arr_ele21 to i8*
-  call void @tig_check_null_pointer(i8* %6, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @6, i32 0, i32 0))
-  %element22 = getelementptr { i32 }, { i32 }* %arr_ele21, i32 0, i32 0
-  %field_var23 = load i32, i32* %element22
-  call void @tig_print_int(i32 %field_var23)
-  %7 = bitcast { i32, { i32 }** }* %0 to i8*
-  call void @tig_check_array_bound(i8* %7, i32 1, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @7, i32 0, i32 0))
-  %array_pointer25 = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %0, i32 0, i32 1
-  %arr_addr26 = load { i32 }**, { i32 }*** %array_pointer25
-  %arr_ele_addr27 = getelementptr { i32 }*, { i32 }** %arr_addr26, i32 1
-  %arr_ele28 = load { i32 }*, { i32 }** %arr_ele_addr27
-  %8 = bitcast { i32 }* %arr_ele28 to i8*
-  call void @tig_check_null_pointer(i8* %8, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @8, i32 0, i32 0))
-  %element29 = getelementptr { i32 }, { i32 }* %arr_ele28, i32 0, i32 0
-  %field_var30 = load i32, i32* %element29
-  call void @assert_equal_int(i32 %field_var30, i32 6)
-  %arr31 = getelementptr { i32, { i32, { i32 }** }* }, { i32, { i32, { i32 }** }* }* %frame_pointer, i32 0, i32 1
-  %load_left = load { i32, { i32 }** }*, { i32, { i32 }** }** %arr31
-  %9 = bitcast { i32, { i32 }** }* %load_left to i8*
-  call void @tig_check_array_bound(i8* %9, i32 1, i8* getelementptr inbounds ([42 x i8], [42 x i8]* @9, i32 0, i32 0))
-  %array_addr_ptr = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %load_left, i32 0, i32 1
-  %arr_addr32 = load { i32 }**, { i32 }*** %array_addr_ptr
-  %arr_ele_addr33 = getelementptr { i32 }*, { i32 }** %arr_addr32, i32 1
-  %load_left34 = load { i32 }*, { i32 }** %arr_ele_addr33
-  %10 = bitcast { i32 }* %load_left34 to i8*
-  call void @tig_check_null_pointer(i8* %10, i8* getelementptr inbounds ([46 x i8], [46 x i8]* @10, i32 0, i32 0))
-  %element_left = getelementptr { i32 }, { i32 }* %load_left34, i32 0, i32 0
-  store i32 5, i32* %element_left
-  %11 = bitcast { i32, { i32 }** }* %0 to i8*
-  call void @tig_check_array_bound(i8* %11, i32 1, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @11, i32 0, i32 0))
-  %array_pointer36 = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %0, i32 0, i32 1
-  %arr_addr37 = load { i32 }**, { i32 }*** %array_pointer36
-  %arr_ele_addr38 = getelementptr { i32 }*, { i32 }** %arr_addr37, i32 1
-  %arr_ele39 = load { i32 }*, { i32 }** %arr_ele_addr38
+  %malloccall6 = tail call i8* @malloc(i32 16)
+  %array_info = bitcast i8* %malloccall6 to i32*
+  store i32 2, i32* %array_info, align 4
+  %array_info7 = getelementptr i8, i8* %malloccall6, i64 8
+  %2 = bitcast i8* %array_info7 to i8**
+  store i8* %malloccall2, i8** %2, align 8
+  %var_dec = getelementptr inbounds { i32, { i32, { i32 }** }* }, { i32, { i32, { i32 }** }* }* %frame_pointer, i64 0, i32 1
+  %3 = bitcast { i32, { i32 }** }** %var_dec to i8**
+  store i8* %malloccall6, i8** %3, align 8
+  %4 = call { i32, { i32 }** }* @create_rec({ i32, { i32, { i32 }** }* }* nonnull %frame_pointer)
+  tail call void @tig_check_array_bound(i8* %malloccall6, i32 0, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @1, i64 0, i64 0))
+  %5 = bitcast i8* %array_info7 to { i32 }***
+  %arr_addr = load { i32 }**, { i32 }*** %5, align 8
+  %arr_ele = load { i32 }*, { i32 }** %arr_addr, align 8
+  %6 = bitcast { i32 }* %arr_ele to i8*
+  tail call void @tig_check_null_pointer(i8* %6, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @2, i64 0, i64 0))
+  %element = getelementptr { i32 }, { i32 }* %arr_ele, i64 0, i32 0
+  %field_var = load i32, i32* %element, align 4
+  tail call void @tig_print_int(i32 %field_var)
+  tail call void @tig_check_array_bound(i8* %malloccall6, i32 0, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @3, i64 0, i64 0))
+  %arr_addr12 = load { i32 }**, { i32 }*** %5, align 8
+  %arr_ele14 = load { i32 }*, { i32 }** %arr_addr12, align 8
+  %7 = bitcast { i32 }* %arr_ele14 to i8*
+  tail call void @tig_check_null_pointer(i8* %7, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @4, i64 0, i64 0))
+  %element15 = getelementptr { i32 }, { i32 }* %arr_ele14, i64 0, i32 0
+  %field_var16 = load i32, i32* %element15, align 4
+  tail call void @assert_equal_int(i32 %field_var16, i32 5)
+  %8 = bitcast { i32, { i32 }** }* %4 to i8*
+  tail call void @tig_check_array_bound(i8* %8, i32 1, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @5, i64 0, i64 0))
+  %array_pointer18 = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %4, i64 0, i32 1
+  %arr_addr19 = load { i32 }**, { i32 }*** %array_pointer18, align 8
+  %arr_ele_addr20 = getelementptr { i32 }*, { i32 }** %arr_addr19, i64 1
+  %arr_ele21 = load { i32 }*, { i32 }** %arr_ele_addr20, align 8
+  %9 = bitcast { i32 }* %arr_ele21 to i8*
+  tail call void @tig_check_null_pointer(i8* %9, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @6, i64 0, i64 0))
+  %element22 = getelementptr { i32 }, { i32 }* %arr_ele21, i64 0, i32 0
+  %field_var23 = load i32, i32* %element22, align 4
+  tail call void @tig_print_int(i32 %field_var23)
+  tail call void @tig_check_array_bound(i8* %8, i32 1, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @7, i64 0, i64 0))
+  %arr_addr26 = load { i32 }**, { i32 }*** %array_pointer18, align 8
+  %arr_ele_addr27 = getelementptr { i32 }*, { i32 }** %arr_addr26, i64 1
+  %arr_ele28 = load { i32 }*, { i32 }** %arr_ele_addr27, align 8
+  %10 = bitcast { i32 }* %arr_ele28 to i8*
+  tail call void @tig_check_null_pointer(i8* %10, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @8, i64 0, i64 0))
+  %element29 = getelementptr { i32 }, { i32 }* %arr_ele28, i64 0, i32 0
+  %field_var30 = load i32, i32* %element29, align 4
+  tail call void @assert_equal_int(i32 %field_var30, i32 6)
+  tail call void @tig_check_array_bound(i8* %malloccall6, i32 1, i8* getelementptr inbounds ([42 x i8], [42 x i8]* @9, i64 0, i64 0))
+  %arr_addr32 = load { i32 }**, { i32 }*** %5, align 8
+  %arr_ele_addr33 = getelementptr { i32 }*, { i32 }** %arr_addr32, i64 1
+  %load_left34 = load { i32 }*, { i32 }** %arr_ele_addr33, align 8
+  %11 = bitcast { i32 }* %load_left34 to i8*
+  tail call void @tig_check_null_pointer(i8* %11, i8* getelementptr inbounds ([46 x i8], [46 x i8]* @10, i64 0, i64 0))
+  %element_left = getelementptr { i32 }, { i32 }* %load_left34, i64 0, i32 0
+  store i32 5, i32* %element_left, align 4
+  tail call void @tig_check_array_bound(i8* %8, i32 1, i8* getelementptr inbounds ([43 x i8], [43 x i8]* @11, i64 0, i64 0))
+  %arr_addr37 = load { i32 }**, { i32 }*** %array_pointer18, align 8
+  %arr_ele_addr38 = getelementptr { i32 }*, { i32 }** %arr_addr37, i64 1
+  %arr_ele39 = load { i32 }*, { i32 }** %arr_ele_addr38, align 8
   %12 = bitcast { i32 }* %arr_ele39 to i8*
-  call void @tig_check_null_pointer(i8* %12, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @12, i32 0, i32 0))
-  %element40 = getelementptr { i32 }, { i32 }* %arr_ele39, i32 0, i32 0
-  %field_var41 = load i32, i32* %element40
-  call void @assert_equal_int(i32 %field_var41, i32 5)
+  tail call void @tig_check_null_pointer(i8* %12, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @12, i64 0, i64 0))
+  %element40 = getelementptr { i32 }, { i32 }* %arr_ele39, i64 0, i32 0
+  %field_var41 = load i32, i32* %element40, align 4
+  tail call void @assert_equal_int(i32 %field_var41, i32 5)
   ret i32 0
 }
 
-declare noalias i8* @malloc(i32) local_unnamed_addr
+; Function Attrs: nounwind
+declare noalias i8* @malloc(i32) local_unnamed_addr #0
 
-define { i32, { i32 }** }* @create_rec({ i32, { i32, { i32 }** }* }*) local_unnamed_addr gc "ocaml" {
+define { i32, { i32 }** }* @create_rec({ i32, { i32, { i32 }** }* }* nocapture readonly) local_unnamed_addr gc "ocaml" {
 entry:
-  %frame_pointer = alloca { { i32, { i32, { i32 }** }* }* }
-  %arg_address = getelementptr { { i32, { i32, { i32 }** }* }* }, { { i32, { i32, { i32 }** }* }* }* %frame_pointer, i32 0, i32 0
-  store { i32, { i32, { i32 }** }* }* %0, { i32, { i32, { i32 }** }* }** %arg_address
-  %malloccall = tail call i8* @malloc(i32 ptrtoint (i32* getelementptr (i32, i32* null, i32 1) to i32))
-  %record_init = bitcast i8* %malloccall to { i32 }*
-  %Element = getelementptr { i32 }, { i32 }* %record_init, i32 0, i32 0
-  store i32 6, i32* %Element
-  %fp_addr_in_sl = getelementptr { { i32, { i32, { i32 }** }* }* }, { { i32, { i32, { i32 }** }* }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr = load { i32, { i32, { i32 }** }* }*, { i32, { i32, { i32 }** }* }** %fp_addr_in_sl
-  %arr = getelementptr { i32, { i32, { i32 }** }* }, { i32, { i32, { i32 }** }* }* %fp_addr, i32 0, i32 1
-  %load_left = load { i32, { i32 }** }*, { i32, { i32 }** }** %arr
+  %malloccall = tail call i8* @malloc(i32 4)
+  %Element = bitcast i8* %malloccall to i32*
+  store i32 6, i32* %Element, align 4
+  %arr = getelementptr { i32, { i32, { i32 }** }* }, { i32, { i32, { i32 }** }* }* %0, i64 0, i32 1
+  %load_left = load { i32, { i32 }** }*, { i32, { i32 }** }** %arr, align 8
   %1 = bitcast { i32, { i32 }** }* %load_left to i8*
-  call void @tig_check_array_bound(i8* %1, i32 1, i8* getelementptr inbounds ([42 x i8], [42 x i8]* @0, i32 0, i32 0))
-  %array_addr_ptr = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %load_left, i32 0, i32 1
-  %arr_addr = load { i32 }**, { i32 }*** %array_addr_ptr
-  %arr_ele_addr = getelementptr { i32 }*, { i32 }** %arr_addr, i32 1
-  store { i32 }* %record_init, { i32 }** %arr_ele_addr
-  %fp_addr_in_sl2 = getelementptr { { i32, { i32, { i32 }** }* }* }, { { i32, { i32, { i32 }** }* }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr3 = load { i32, { i32, { i32 }** }* }*, { i32, { i32, { i32 }** }* }** %fp_addr_in_sl2
-  %arr4 = getelementptr { i32, { i32, { i32 }** }* }, { i32, { i32, { i32 }** }* }* %fp_addr3, i32 0, i32 1
-  %arr5 = load { i32, { i32 }** }*, { i32, { i32 }** }** %arr4
+  tail call void @tig_check_array_bound(i8* %1, i32 1, i8* getelementptr inbounds ([42 x i8], [42 x i8]* @0, i64 0, i64 0))
+  %array_addr_ptr = getelementptr { i32, { i32 }** }, { i32, { i32 }** }* %load_left, i64 0, i32 1
+  %arr_addr = load { i32 }**, { i32 }*** %array_addr_ptr, align 8
+  %arr_ele_addr = getelementptr { i32 }*, { i32 }** %arr_addr, i64 1
+  %2 = bitcast { i32 }** %arr_ele_addr to i8**
+  store i8* %malloccall, i8** %2, align 8
+  %arr5 = load { i32, { i32 }** }*, { i32, { i32 }** }** %arr, align 8
   ret { i32, { i32 }** }* %arr5
 }
+
+attributes #0 = { nounwind }

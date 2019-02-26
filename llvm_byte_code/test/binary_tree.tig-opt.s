@@ -36,50 +36,50 @@ _main:                                  ## @main
 Ltmp0:
 	movq	%rax, %r15
 	movl	$5, (%rax)
-	movq	$0, 8(%rax)
 	movq	$0, 16(%rax)
+	movq	$0, 8(%rax)
 	movl	$24, %edi
 	callq	_malloc
 Ltmp1:
 	movq	%rax, 8(%rsp)           ## 8-byte Spill
 	movl	$1, (%rax)
-	movq	$0, 8(%rax)
 	movq	$0, 16(%rax)
+	movq	$0, 8(%rax)
 	movl	$24, %edi
 	callq	_malloc
 Ltmp2:
 	movq	%rax, %rbx
 	movl	$2, (%rax)
-	movq	$0, 8(%rax)
 	movq	$0, 16(%rax)
+	movq	$0, 8(%rax)
 	movl	$24, %edi
 	callq	_malloc
 Ltmp3:
 	movq	%rax, %r12
 	movl	$3, (%rax)
-	movq	$0, 8(%rax)
 	movq	$0, 16(%rax)
+	movq	$0, 8(%rax)
 	movl	$24, %edi
 	callq	_malloc
 Ltmp4:
 	movq	%rax, %r13
 	movl	$6, (%rax)
-	movq	$0, 8(%rax)
 	movq	$0, 16(%rax)
+	movq	$0, 8(%rax)
 	movl	$24, %edi
 	callq	_malloc
 Ltmp5:
 	movq	%rax, %rbp
 	movl	$8, (%rax)
-	movq	$0, 8(%rax)
 	movq	$0, 16(%rax)
+	movq	$0, 8(%rax)
 	movl	$24, %edi
 	callq	_malloc
 Ltmp6:
 	movq	%rax, %r14
 	movl	$9, (%rax)
-	movq	$0, 8(%rax)
 	movq	$0, 16(%rax)
+	movq	$0, 8(%rax)
 	leaq	L___unnamed_1(%rip), %rsi
 	movq	%r15, %rdi
 	callq	_tig_check_null_pointer
@@ -145,68 +145,83 @@ _eval_sum:                              ## @eval_sum
 ## %bb.0:                               ## %entry
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
-	pushq	%r14
+	pushq	%r15
 	.cfi_def_cfa_offset 24
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 32
-	subq	$16, %rsp
+	pushq	%r13
+	.cfi_def_cfa_offset 40
+	pushq	%r12
 	.cfi_def_cfa_offset 48
-	.cfi_offset %rbx, -32
-	.cfi_offset %r14, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 56
+	pushq	%rax
+	.cfi_def_cfa_offset 64
+	.cfi_offset %rbx, -56
+	.cfi_offset %r12, -48
+	.cfi_offset %r13, -40
+	.cfi_offset %r14, -32
+	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
 	movq	%rsi, %rbx
-	movq	%rdi, 8(%rsp)
-	movq	%rsi, %rdi
-	callq	_tig_nillable
-Ltmp17:
-	movl	%eax, %ecx
-	xorl	%eax, %eax
-	testl	%ecx, %ecx
-	jne	LBB1_2
-## %bb.1:                               ## %else
-	leaq	L___unnamed_7(%rip), %rsi
+	movq	%rdi, %r14
+	xorl	%ebp, %ebp
+	leaq	L___unnamed_7(%rip), %r12
+	leaq	L___unnamed_8(%rip), %r13
+	jmp	LBB1_1
+	.p2align	4, 0x90
+LBB1_2:                                 ## %else
+                                        ##   in Loop: Header=BB1_1 Depth=1
 	movq	%rbx, %rdi
+	leaq	L___unnamed_9(%rip), %rsi
 	callq	_tig_check_null_pointer
 Ltmp18:
-	movl	(%rbx), %r14d
-	leaq	L___unnamed_8(%rip), %rsi
+	addl	(%rbx), %ebp
 	movq	%rbx, %rdi
+	movq	%r12, %rsi
 	callq	_tig_check_null_pointer
 Ltmp19:
 	movq	8(%rbx), %rsi
-	movq	8(%rsp), %rdi
+	movq	%r14, %rdi
 	callq	_eval_sum
 Ltmp20:
-	movl	%eax, %ebp
-	addl	%r14d, %ebp
-	leaq	L___unnamed_9(%rip), %rsi
+	movl	%eax, %r15d
 	movq	%rbx, %rdi
+	movq	%r13, %rsi
 	callq	_tig_check_null_pointer
 Ltmp21:
-	movq	16(%rbx), %rsi
-	movq	8(%rsp), %rdi
-	callq	_eval_sum
-Ltmp22:
-	addl	%ebp, %eax
-LBB1_2:                                 ## %merge
-	addq	$16, %rsp
+	movq	16(%rbx), %rbx
+	addl	%r15d, %ebp
+LBB1_1:                                 ## %tailrecurse
+                                        ## =>This Inner Loop Header: Depth=1
+	movq	%rbx, %rdi
+	callq	_tig_nillable
+Ltmp17:
+	testl	%eax, %eax
+	je	LBB1_2
+## %bb.3:                               ## %merge
+	movl	%ebp, %eax
+	addq	$8, %rsp
 	popq	%rbx
+	popq	%r12
+	popq	%r13
 	popq	%r14
+	popq	%r15
 	popq	%rbp
 	retq
 	.cfi_endproc
                                         ## -- End function
 	.section	__TEXT,__cstring,cstring_literals
 	.p2align	4               ## @0
-L___unnamed_7:
+L___unnamed_9:
 	.asciz	"test/binary_tree.tig::7.17: Nil pointer exception!"
 
 	.p2align	4               ## @1
-L___unnamed_8:
+L___unnamed_7:
 	.asciz	"test/binary_tree.tig::7.38: Nil pointer exception!"
 
 	.p2align	4               ## @2
-L___unnamed_9:
+L___unnamed_8:
 	.asciz	"test/binary_tree.tig::7.60: Nil pointer exception!"
 
 	.p2align	4               ## @3
@@ -243,7 +258,7 @@ L___unnamed_6:
 	.quad	0
 	.globl	"_camlLlvm_byte_code/test/binary_tree__frametable"
 "_camlLlvm_byte_code/test/binary_tree__frametable":
-	.short	23
+	.short	22
 	.p2align	3
                                         ## live roots for main
 	.quad	Ltmp0
@@ -316,27 +331,23 @@ L___unnamed_6:
 	.p2align	3
                                         ## live roots for eval_sum
 	.quad	Ltmp17
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp18
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp19
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp20
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	Ltmp21
-	.short	40
-	.short	0
-	.p2align	3
-	.quad	Ltmp22
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
 .subsections_via_symbols

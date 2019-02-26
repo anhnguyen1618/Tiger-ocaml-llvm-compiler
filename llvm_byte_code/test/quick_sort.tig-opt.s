@@ -22,25 +22,22 @@ _main:                                  ## @main
 	.cfi_offset %rbx, -32
 	.cfi_offset %r14, -24
 	.cfi_offset %r15, -16
-	leaq	8(%rsp), %r14
-	movq	%r14, %rdi
 	callq	_create_array
 Ltmp0:
 	movq	%rax, %r15
-	movq	%r14, %rdi
 	callq	_create_array_test
 Ltmp1:
 	movq	%rax, %rbx
 	leaq	L___unnamed_1(%rip), %rdi
 	callq	_tig_print
 Ltmp2:
-	movq	%r14, %rdi
 	movq	%r15, %rsi
 	callq	_print_array
 Ltmp3:
 	leaq	L___unnamed_2(%rip), %rdi
 	callq	_tig_print
 Ltmp4:
+	leaq	8(%rsp), %r14
 	movq	%r14, %rdi
 	movq	%r15, %rsi
 	callq	_quick_sort
@@ -48,7 +45,6 @@ Ltmp5:
 	leaq	L___unnamed_3(%rip), %rdi
 	callq	_tig_print
 Ltmp6:
-	movq	%r14, %rdi
 	movq	%r15, %rsi
 	callq	_print_array
 Ltmp7:
@@ -184,7 +180,6 @@ _print_array:                           ## @print_array
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
 	movq	%rsi, %rbx
-	movq	%rdi, (%rsp)
 	leaq	L___unnamed_14(%rip), %rdi
 	callq	_tig_print
 Ltmp29:
@@ -221,14 +216,12 @@ LBB1_3:                                 ## %end
 	callq	_tig_print
 Ltmp34:
 	leaq	L___unnamed_17(%rip), %rdi
-	callq	_tig_print
-Ltmp35:
 	addq	$8, %rsp
 	popq	%rbx
 	popq	%r14
 	popq	%r15
 	popq	%rbp
-	retq
+	jmp	_tig_print              ## TAILCALL
 	.cfi_endproc
                                         ## -- End function
 	.globl	_create_array           ## -- Begin function create_array
@@ -250,32 +243,31 @@ _create_array:                          ## @create_array
 	.cfi_offset %r12, -32
 	.cfi_offset %r14, -24
 	.cfi_offset %r15, -16
-	movq	%rdi, (%rsp)
 	movl	$32, %edi
 	callq	_malloc
-Ltmp36:
+Ltmp35:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$7, %eax
-	jg	LBB2_3
+	ja	LBB2_3
 	.p2align	4, 0x90
 LBB2_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
 	movl	$1, (%rbx,%rax,4)
 	incq	%rax
 	cmpl	$7, %eax
-	jle	LBB2_2
+	jbe	LBB2_2
 LBB2_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
-Ltmp37:
+Ltmp36:
 	movq	%rax, %r14
 	movl	$8, (%rax)
 	movq	%rbx, 8(%rax)
 	xorl	%ebx, %ebx
 	leaq	L___unnamed_18(%rip), %r15
 	cmpl	$7, %ebx
-	jg	LBB2_6
+	ja	LBB2_6
 	.p2align	4, 0x90
 LBB2_5:                                 ## %loop11
                                         ## =>This Inner Loop Header: Depth=1
@@ -283,15 +275,15 @@ LBB2_5:                                 ## %loop11
 	movl	%ebx, %esi
 	movq	%r15, %rdx
 	callq	_tig_check_array_bound
-Ltmp38:
+Ltmp37:
 	movq	8(%r14), %r12
 	movl	$50, %edi
 	callq	_tig_random
-Ltmp39:
+Ltmp38:
 	movl	%eax, (%r12,%rbx,4)
 	incq	%rbx
 	cmpl	$7, %ebx
-	jle	LBB2_5
+	jbe	LBB2_5
 LBB2_6:                                 ## %end12
 	movq	%r14, %rax
 	addq	$8, %rsp
@@ -313,13 +305,13 @@ _quick_sort:                            ## @quick_sort
 	movq	%rsi, 16(%rsp)
 	movq	%rsi, %rdi
 	callq	_tig_array_length
-Ltmp40:
+Ltmp39:
                                         ## kill: def $eax killed $eax def $rax
 	leal	-1(%rax), %edx
 	leaq	8(%rsp), %rdi
 	xorl	%esi, %esi
 	callq	_sort
-Ltmp41:
+Ltmp40:
 	addq	$24, %rsp
 	retq
 	.cfi_endproc
@@ -349,121 +341,114 @@ _partition:                             ## @partition
 	.cfi_offset %r14, -32
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
-	movl	%edx, %ebx
-	movl	%esi, %r14d
-	movq	%rdi, 8(%rsp)
+	movl	%edx, %r14d
+	movl	%esi, %r15d
+	movq	%rdi, %r12
 	movq	8(%rdi), %rbp
 	leaq	L___unnamed_19(%rip), %rdx
 	movq	%rbp, %rdi
-	movl	%ebx, %esi
+	movl	%r14d, %esi
+	callq	_tig_check_array_bound
+Ltmp41:
+	movq	8(%rbp), %rax
+	movslq	%r14d, %rbx
+	movl	(%rax,%rbx,4), %eax
+	movl	%eax, 12(%rsp)          ## 4-byte Spill
+	movq	8(%r12), %rdi
+	leaq	L___unnamed_20(%rip), %rdx
+	movl	%r15d, %esi
 	callq	_tig_check_array_bound
 Ltmp42:
-	movq	8(%rbp), %rax
-	movslq	%ebx, %rbx
-	movl	(%rax,%rbx,4), %eax
-	movl	%eax, 20(%rsp)          ## 4-byte Spill
-	movq	8(%rsp), %rax
-	movq	8(%rax), %rdi
-	leaq	L___unnamed_20(%rip), %rdx
-	movl	%r14d, %esi
-	callq	_tig_check_array_bound
-Ltmp43:
 	movq	%rbx, 32(%rsp)          ## 8-byte Spill
 	leal	-1(%rbx), %eax
-	movl	%eax, 24(%rsp)          ## 4-byte Spill
-	movl	%r14d, %ebx
-	cmpl	%r14d, 24(%rsp)         ## 4-byte Folded Reload
-	jge	LBB4_2
-	jmp	LBB4_5
+	movl	%eax, 20(%rsp)          ## 4-byte Spill
+	movl	%r15d, %r13d
+	movq	%r12, 24(%rsp)          ## 8-byte Spill
+	jmp	LBB4_1
 	.p2align	4, 0x90
 LBB4_4:                                 ## %merge
-                                        ##   in Loop: Header=BB4_2 Depth=1
-	incl	%r14d
-	cmpl	%r14d, 24(%rsp)         ## 4-byte Folded Reload
-	jl	LBB4_5
-LBB4_2:                                 ## %loop
+                                        ##   in Loop: Header=BB4_1 Depth=1
+	incl	%r13d
+LBB4_1:                                 ## %test
                                         ## =>This Inner Loop Header: Depth=1
-	movq	8(%rsp), %rax
-	movq	8(%rax), %rbp
-	movq	%rbp, %rdi
-	movl	%r14d, %esi
+	cmpl	%r13d, 20(%rsp)         ## 4-byte Folded Reload
+	movq	8(%r12), %r14
+	jl	LBB4_5
+## %bb.2:                               ## %loop
+                                        ##   in Loop: Header=BB4_1 Depth=1
+	movq	%r14, %rdi
+	movl	%r13d, %esi
 	leaq	L___unnamed_21(%rip), %rdx
 	callq	_tig_check_array_bound
-Ltmp44:
-	movq	8(%rbp), %rax
-	movslq	%r14d, %r15
-	movl	(%rax,%r15,4), %r12d
-	movq	8(%rsp), %rax
-	movq	8(%rax), %r13
-	movq	%r13, %rdi
-	movl	%ebx, %esi
+Ltmp43:
+	movq	8(%r14), %rax
+	movslq	%r13d, %r14
+	movl	(%rax,%r14,4), %ebx
+	movq	8(%r12), %rbp
+	movq	%rbp, %rdi
+	movl	%r15d, %esi
 	leaq	L___unnamed_22(%rip), %rdx
 	callq	_tig_check_array_bound
-Ltmp45:
-	cmpl	20(%rsp), %r12d         ## 4-byte Folded Reload
+Ltmp44:
+	cmpl	12(%rsp), %ebx          ## 4-byte Folded Reload
 	jge	LBB4_4
 ## %bb.3:                               ## %then
-                                        ##   in Loop: Header=BB4_2 Depth=1
-	movq	8(%r13), %rax
-	movl	%ebx, %r13d
-	movslq	%ebx, %rbx
-	movl	(%rax,%rbx,4), %eax
-	movl	%eax, 28(%rsp)          ## 4-byte Spill
-	movq	8(%rsp), %rax
+                                        ##   in Loop: Header=BB4_1 Depth=1
+	movq	8(%rbp), %rax
+	movl	%r15d, %r12d
+	movslq	%r15d, %r15
+	movl	(%rax,%r15,4), %eax
+	movl	%eax, 16(%rsp)          ## 4-byte Spill
+	movq	24(%rsp), %rax          ## 8-byte Reload
 	movq	8(%rax), %rbp
 	movq	%rbp, %rdi
-	movl	%r13d, %esi
+	movl	%r12d, %esi
 	leaq	L___unnamed_23(%rip), %rdx
+	callq	_tig_check_array_bound
+Ltmp45:
+	movq	8(%rbp), %rax
+	movl	%ebx, (%rax,%r15,4)
+	movl	%r12d, %r15d
+	movq	24(%rsp), %r12          ## 8-byte Reload
+	movq	8(%r12), %rbp
+	movq	%rbp, %rdi
+	movl	%r13d, %esi
+	leaq	L___unnamed_24(%rip), %rdx
 	callq	_tig_check_array_bound
 Ltmp46:
 	movq	8(%rbp), %rax
-	movl	%r12d, (%rax,%rbx,4)
-	movl	%r13d, %ebx
-	movq	8(%rsp), %rax
-	movq	8(%rax), %rbp
-	movq	%rbp, %rdi
-	movl	%r14d, %esi
-	leaq	L___unnamed_24(%rip), %rdx
-	callq	_tig_check_array_bound
-Ltmp47:
-	movq	8(%rbp), %rax
-	movl	28(%rsp), %ecx          ## 4-byte Reload
-	movl	%ecx, (%rax,%r15,4)
-	incl	%ebx
+	movl	16(%rsp), %ecx          ## 4-byte Reload
+	movl	%ecx, (%rax,%r14,4)
+	incl	%r15d
 	jmp	LBB4_4
 LBB4_5:                                 ## %end
-	movq	8(%rsp), %rax
-	movl	%ebx, %r14d
-	movq	8(%rax), %rbx
 	leaq	L___unnamed_25(%rip), %rdx
-	movq	%rbx, %rdi
-	movl	%r14d, %esi
+	movq	%r14, %rdi
+	movl	%r15d, %esi
+	callq	_tig_check_array_bound
+Ltmp47:
+	movq	8(%r14), %rax
+	movslq	%r15d, %rbx
+	movl	(%rax,%rbx,4), %r14d
+	movq	8(%r12), %rbp
+	leaq	L___unnamed_26(%rip), %rdx
+	movq	%rbp, %rdi
+	movl	%r15d, %esi
 	callq	_tig_check_array_bound
 Ltmp48:
-	movq	8(%rbx), %rax
-	movslq	%r14d, %rbp
-	movl	(%rax,%rbp,4), %r15d
-	movq	8(%rsp), %rax
-	movq	8(%rax), %rbx
-	leaq	L___unnamed_26(%rip), %rdx
-	movq	%rbx, %rdi
-	movl	%r14d, %esi
-	callq	_tig_check_array_bound
-Ltmp49:
-	movq	8(%rbx), %rax
-	movl	20(%rsp), %ecx          ## 4-byte Reload
-	movl	%ecx, (%rax,%rbp,4)
-	movq	8(%rsp), %rax
-	movq	8(%rax), %rbx
+	movq	8(%rbp), %rax
+	movl	12(%rsp), %ecx          ## 4-byte Reload
+	movl	%ecx, (%rax,%rbx,4)
+	movq	8(%r12), %rbx
 	leaq	L___unnamed_27(%rip), %rdx
 	movq	%rbx, %rdi
 	movq	32(%rsp), %rbp          ## 8-byte Reload
 	movl	%ebp, %esi
 	callq	_tig_check_array_bound
-Ltmp50:
+Ltmp49:
 	movq	8(%rbx), %rax
-	movl	%r15d, (%rax,%rbp,4)
-	movl	%r14d, %eax
+	movl	%r14d, (%rax,%rbp,4)
+	movl	%r15d, %eax
 	addq	$40, %rsp
 	popq	%rbx
 	popq	%r12
@@ -481,39 +466,46 @@ _sort:                                  ## @sort
 ## %bb.0:                               ## %entry
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
-	pushq	%r14
+	pushq	%r15
 	.cfi_def_cfa_offset 24
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 32
-	subq	$16, %rsp
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	pushq	%rax
 	.cfi_def_cfa_offset 48
-	.cfi_offset %rbx, -32
-	.cfi_offset %r14, -24
+	.cfi_offset %rbx, -40
+	.cfi_offset %r14, -32
+	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
-	movq	%rdi, 8(%rsp)
-	cmpl	%edx, %esi
-	jge	LBB5_2
-## %bb.1:                               ## %then
-	movl	%edx, %ebx
+	movl	%edx, %r14d
 	movl	%esi, %ebp
-	movq	8(%rsp), %rdi
+	movq	%rdi, %r15
+	cmpl	%r14d, %ebp
+	jge	LBB5_3
+	.p2align	4, 0x90
+LBB5_2:                                 ## %then
+                                        ## =>This Inner Loop Header: Depth=1
+	movq	%r15, %rdi
+	movl	%ebp, %esi
+	movl	%r14d, %edx
 	callq	_partition
-Ltmp51:
-	movl	%eax, %r14d
-	leal	-1(%r14), %edx
-	movq	8(%rsp), %rdi
+Ltmp50:
+	movl	%eax, %ebx
+	leal	-1(%rbx), %edx
+	movq	%r15, %rdi
 	movl	%ebp, %esi
 	callq	_sort
-Ltmp52:
-	leal	1(%r14), %esi
-	movq	8(%rsp), %rdi
-	movl	%ebx, %edx
-	callq	_sort
-Ltmp53:
-LBB5_2:                                 ## %merge
-	addq	$16, %rsp
+Ltmp51:
+	incl	%ebx
+	movl	%ebx, %ebp
+	cmpl	%r14d, %ebp
+	jl	LBB5_2
+LBB5_3:                                 ## %merge
+	addq	$8, %rsp
 	popq	%rbx
 	popq	%r14
+	popq	%r15
 	popq	%rbp
 	retq
 	.cfi_endproc
@@ -537,25 +529,24 @@ _create_array_test:                     ## @create_array_test
 	.cfi_offset %r14, -32
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
-	movq	%rdi, (%rsp)
 	movl	$20, %edi
 	callq	_malloc
-Ltmp54:
+Ltmp52:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
-	jg	LBB6_3
+	ja	LBB6_3
 	.p2align	4, 0x90
 LBB6_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
 	movl	$1, (%rbx,%rax,4)
 	incq	%rax
 	cmpl	$4, %eax
-	jle	LBB6_2
+	jbe	LBB6_2
 LBB6_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
-Ltmp55:
+Ltmp53:
 	movq	%rax, %r14
 	movl	$5, (%rax)
 	movq	%rbx, 8(%rax)
@@ -563,7 +554,7 @@ Ltmp55:
 	xorl	%ebx, %ebx
 	leaq	L___unnamed_28(%rip), %r15
 	cmpl	$4, %ebx
-	jg	LBB6_6
+	ja	LBB6_6
 	.p2align	4, 0x90
 LBB6_5:                                 ## %loop11
                                         ## =>This Inner Loop Header: Depth=1
@@ -571,13 +562,13 @@ LBB6_5:                                 ## %loop11
 	movl	%ebx, %esi
 	movq	%r15, %rdx
 	callq	_tig_check_array_bound
-Ltmp56:
+Ltmp54:
 	movq	8(%r14), %rax
 	movl	%ebp, (%rax,%rbx,4)
 	decl	%ebp
 	incq	%rbx
 	cmpl	$4, %ebx
-	jle	LBB6_5
+	jbe	LBB6_5
 LBB6_6:                                 ## %end12
 	movq	%r14, %rax
 	addq	$8, %rsp
@@ -705,7 +696,7 @@ L___unnamed_13:
 	.quad	0
 	.globl	"_camlLlvm_byte_code/test/quick_sort__frametable"
 "_camlLlvm_byte_code/test/quick_sort__frametable":
-	.short	57
+	.short	55
 	.p2align	3
                                         ## live roots for main
 	.quad	Ltmp0
@@ -849,11 +840,11 @@ L___unnamed_13:
 	.short	40
 	.short	0
 	.p2align	3
+                                        ## live roots for create_array
 	.quad	Ltmp35
 	.short	40
 	.short	0
 	.p2align	3
-                                        ## live roots for create_array
 	.quad	Ltmp36
 	.short	40
 	.short	0
@@ -866,20 +857,20 @@ L___unnamed_13:
 	.short	40
 	.short	0
 	.p2align	3
+                                        ## live roots for quick_sort
 	.quad	Ltmp39
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
-                                        ## live roots for quick_sort
 	.quad	Ltmp40
 	.short	24
 	.short	0
 	.p2align	3
+                                        ## live roots for partition
 	.quad	Ltmp41
-	.short	24
+	.short	88
 	.short	0
 	.p2align	3
-                                        ## live roots for partition
 	.quad	Ltmp42
 	.short	88
 	.short	0
@@ -912,15 +903,16 @@ L___unnamed_13:
 	.short	88
 	.short	0
 	.p2align	3
+                                        ## live roots for sort
 	.quad	Ltmp50
-	.short	88
+	.short	40
 	.short	0
 	.p2align	3
-                                        ## live roots for sort
 	.quad	Ltmp51
 	.short	40
 	.short	0
 	.p2align	3
+                                        ## live roots for create_array_test
 	.quad	Ltmp52
 	.short	40
 	.short	0
@@ -929,16 +921,7 @@ L___unnamed_13:
 	.short	40
 	.short	0
 	.p2align	3
-                                        ## live roots for create_array_test
 	.quad	Ltmp54
-	.short	40
-	.short	0
-	.p2align	3
-	.quad	Ltmp55
-	.short	40
-	.short	0
-	.p2align	3
-	.quad	Ltmp56
 	.short	40
 	.short	0
 	.p2align	3

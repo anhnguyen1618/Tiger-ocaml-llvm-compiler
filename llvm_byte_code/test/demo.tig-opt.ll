@@ -16,118 +16,86 @@ declare void @tig_check_null_pointer(i8*, i8*) local_unnamed_addr gc "ocaml"
 
 define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
-  %frame_pointer = alloca { i32 }
-  %malloccall = tail call i8* @malloc(i32 ptrtoint ({ i32, i8* }* getelementptr ({ i32, i8* }, { i32, i8* }* null, i32 1) to i32))
-  %record_init = bitcast i8* %malloccall to { i32, i8* }*
-  %Element = getelementptr { i32, i8* }, { i32, i8* }* %record_init, i32 0, i32 0
-  store i32 5, i32* %Element
-  %Element1 = getelementptr { i32, i8* }, { i32, i8* }* %record_init, i32 0, i32 1
-  store i8* getelementptr inbounds ([13 x i8], [13 x i8]* @0, i32 0, i32 0), i8** %Element1
+  %frame_pointer = alloca { i32 }, align 8
+  %malloccall = tail call i8* @malloc(i32 16)
+  %Element = bitcast i8* %malloccall to i32*
+  store i32 5, i32* %Element, align 4
+  %Element1 = getelementptr i8, i8* %malloccall, i64 8
+  %0 = bitcast i8* %Element1 to i8**
+  store i8* getelementptr inbounds ([13 x i8], [13 x i8]* @0, i64 0, i64 0), i8** %0, align 8
   %malloccall4 = tail call i8* @malloc(i32 40)
   %array_init = bitcast i8* %malloccall4 to { i32, i8* }**
   br label %test
 
 test:                                             ; preds = %loop, %entry
   %i.0 = phi i32 [ 0, %entry ], [ %add_tmp, %loop ]
-  %lt_tmp = icmp slt i32 %i.0, 5
-  %bool_tmp = zext i1 %lt_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 0
-  br i1 %cond, label %end, label %loop
+  %lt_tmp = icmp ugt i32 %i.0, 4
+  br i1 %lt_tmp, label %end, label %loop
 
 loop:                                             ; preds = %test
-  %Element7 = getelementptr { i32, i8* }*, { i32, i8* }** %array_init, i32 %i.0
-  store { i32, i8* }* %record_init, { i32, i8* }** %Element7
-  %add_tmp = add i32 %i.0, 1
+  %1 = zext i32 %i.0 to i64
+  %Element7 = getelementptr { i32, i8* }*, { i32, i8* }** %array_init, i64 %1
+  %2 = bitcast { i32, i8* }** %Element7 to i8**
+  store i8* %malloccall, i8** %2, align 8
+  %add_tmp = add nuw nsw i32 %i.0, 1
   br label %test
 
 end:                                              ; preds = %test
-  %malloccall8 = tail call i8* @malloc(i32 ptrtoint ({ i32, { i32, i8* }** }* getelementptr ({ i32, { i32, i8* }** }, { i32, { i32, i8* }** }* null, i32 1) to i32))
-  %array_wrapper = bitcast i8* %malloccall8 to { i32, { i32, i8* }** }*
-  %array_info = getelementptr { i32, { i32, i8* }** }, { i32, { i32, i8* }** }* %array_wrapper, i32 0, i32 0
-  store i32 5, i32* %array_info
-  %array_info9 = getelementptr { i32, { i32, i8* }** }, { i32, { i32, i8* }** }* %array_wrapper, i32 0, i32 1
-  store { i32, i8* }** %array_init, { i32, i8* }*** %array_info9
-  %0 = bitcast { i32, { i32, i8* }** }* %array_wrapper to i8*
-  call void @tig_check_array_bound(i8* %0, i32 0, i8* getelementptr inbounds ([41 x i8], [41 x i8]* @1, i32 0, i32 0))
-  %array_pointer = getelementptr { i32, { i32, i8* }** }, { i32, { i32, i8* }** }* %array_wrapper, i32 0, i32 1
-  %arr_addr = load { i32, i8* }**, { i32, i8* }*** %array_pointer
-  %arr_ele_addr = getelementptr { i32, i8* }*, { i32, i8* }** %arr_addr, i32 0
-  %arr_ele = load { i32, i8* }*, { i32, i8* }** %arr_ele_addr
-  %1 = bitcast { i32, i8* }* %arr_ele to i8*
-  call void @tig_check_null_pointer(i8* %1, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @2, i32 0, i32 0))
-  %element = getelementptr { i32, i8* }, { i32, i8* }* %arr_ele, i32 0, i32 0
-  %field_var = load i32, i32* %element
+  %malloccall8 = tail call i8* @malloc(i32 16)
+  %array_info = bitcast i8* %malloccall8 to i32*
+  store i32 5, i32* %array_info, align 4
+  %array_info9 = getelementptr i8, i8* %malloccall8, i64 8
+  %3 = bitcast i8* %array_info9 to { i32, i8* }***
+  %4 = bitcast i8* %array_info9 to i8**
+  store i8* %malloccall4, i8** %4, align 8
+  tail call void @tig_check_array_bound(i8* %malloccall8, i32 0, i8* getelementptr inbounds ([41 x i8], [41 x i8]* @1, i64 0, i64 0))
+  %arr_addr = load { i32, i8* }**, { i32, i8* }*** %3, align 8
+  %arr_ele = load { i32, i8* }*, { i32, i8* }** %arr_addr, align 8
+  %5 = bitcast { i32, i8* }* %arr_ele to i8*
+  tail call void @tig_check_null_pointer(i8* %5, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @2, i64 0, i64 0))
+  %element = getelementptr { i32, i8* }, { i32, i8* }* %arr_ele, i64 0, i32 0
+  %field_var = load i32, i32* %element, align 4
   br label %test11
 
 test11:                                           ; preds = %loop12, %end
   %counter.0 = phi i32 [ %field_var, %end ], [ %minus_tmp, %loop12 ]
-  %gt_tmp = icmp sgt i32 %counter.0, 0
-  %bool_tmp15 = zext i1 %gt_tmp to i32
-  %cond16 = icmp eq i32 %bool_tmp15, 0
-  br i1 %cond16, label %end13, label %loop12
+  %gt_tmp = icmp slt i32 %counter.0, 1
+  br i1 %gt_tmp, label %end13, label %loop12
 
 loop12:                                           ; preds = %test11
-  %2 = call i32 @fib({ i32 }* %frame_pointer, i32 %counter.0)
-  call void @tig_print_int(i32 %2)
-  %3 = bitcast { i32, i8* }* %record_init to i8*
-  call void @tig_check_null_pointer(i8* %3, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @3, i32 0, i32 0))
-  %element19 = getelementptr { i32, i8* }, { i32, i8* }* %record_init, i32 0, i32 1
-  %field_var20 = load i8*, i8** %element19
+  %6 = call i32 @fib({ i32 }* nonnull %frame_pointer, i32 %counter.0)
+  call void @tig_print_int(i32 %6)
+  call void @tig_check_null_pointer(i8* %malloccall, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @3, i64 0, i64 0))
+  %field_var20 = load i8*, i8** %0, align 8
   call void @tig_print(i8* %field_var20)
-  %minus_tmp = sub i32 %counter.0, 1
+  %minus_tmp = add i32 %counter.0, -1
   br label %test11
 
 end13:                                            ; preds = %test11
   ret i32 0
 }
 
-declare noalias i8* @malloc(i32) local_unnamed_addr
+; Function Attrs: nounwind
+declare noalias i8* @malloc(i32) local_unnamed_addr #0
 
-define i32 @fib({ i32 }*, i32) local_unnamed_addr gc "ocaml" {
+; Function Attrs: nounwind readnone
+define i32 @fib({ i32 }*, i32) local_unnamed_addr #1 gc "ocaml" {
 entry:
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
-  br label %test
+  %switch = icmp ult i32 %1, 2
+  br i1 %switch, label %merge, label %else4
 
-test:                                             ; preds = %entry
-  %eq_tmp = icmp eq i32 %1, 0
-  %bool_tmp = zext i1 %eq_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 0
-  br i1 %cond, label %else, label %then
-
-then:                                             ; preds = %test
-  br label %merge
-
-else:                                             ; preds = %test
-  br label %test2
-
-merge:                                            ; preds = %merge5, %then
-  %if_result_addr15.0 = phi i32 [ %if_result_addr.0, %merge5 ], [ 0, %then ]
+merge:                                            ; preds = %entry, %else4
+  %if_result_addr15.0 = phi i32 [ %add_tmp, %else4 ], [ %1, %entry ]
   ret i32 %if_result_addr15.0
 
-test2:                                            ; preds = %else
-  %eq_tmp7 = icmp eq i32 %1, 1
-  %bool_tmp8 = zext i1 %eq_tmp7 to i32
-  %cond9 = icmp eq i32 %bool_tmp8, 0
-  br i1 %cond9, label %else4, label %then3
-
-then3:                                            ; preds = %test2
-  br label %merge5
-
-else4:                                            ; preds = %test2
-  %minus_tmp = sub i32 %1, 1
-  %fp_addr_in_sl = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr = load { i32 }*, { i32 }** %fp_addr_in_sl
-  %2 = call i32 @fib({ i32 }* %fp_addr, i32 %minus_tmp)
-  %minus_tmp12 = sub i32 %1, 2
-  %fp_addr_in_sl13 = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  %fp_addr14 = load { i32 }*, { i32 }** %fp_addr_in_sl13
-  %3 = call i32 @fib({ i32 }* %fp_addr14, i32 %minus_tmp12)
-  %add_tmp = add i32 %2, %3
-  br label %merge5
-
-merge5:                                           ; preds = %else4, %then3
-  %if_result_addr.0 = phi i32 [ %add_tmp, %else4 ], [ 1, %then3 ]
+else4:                                            ; preds = %entry
+  %minus_tmp = add i32 %1, -1
+  %2 = tail call i32 @fib({ i32 }* %0, i32 %minus_tmp)
+  %minus_tmp12 = add i32 %1, -2
+  %3 = tail call i32 @fib({ i32 }* %0, i32 %minus_tmp12)
+  %add_tmp = add i32 %3, %2
   br label %merge
 }
+
+attributes #0 = { nounwind }
+attributes #1 = { nounwind readnone }

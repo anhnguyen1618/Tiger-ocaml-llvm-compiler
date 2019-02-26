@@ -38,14 +38,14 @@ Ltmp1:
 	movq	%rax, %rbp
 	xorl	%eax, %eax
 	cmpl	$4, %eax
-	jg	LBB0_3
+	ja	LBB0_3
 	.p2align	4, 0x90
 LBB0_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
 	movq	%rbx, (%rbp,%rax,8)
 	incq	%rax
 	cmpl	$4, %eax
-	jle	LBB0_2
+	jbe	LBB0_2
 LBB0_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
@@ -102,43 +102,32 @@ LBB0_6:                                 ## %end13
 	.globl	_fib                    ## -- Begin function fib
 	.p2align	4, 0x90
 _fib:                                   ## @fib
-	.cfi_startproc
 ## %bb.0:                               ## %entry
 	pushq	%rbp
-	.cfi_def_cfa_offset 16
+	pushq	%r14
 	pushq	%rbx
-	.cfi_def_cfa_offset 24
-	pushq	%rax
-	.cfi_def_cfa_offset 32
-	.cfi_offset %rbx, -24
-	.cfi_offset %rbp, -16
-	movq	%rdi, (%rsp)
-	xorl	%eax, %eax
-	testl	%esi, %esi
-	je	LBB1_3
-## %bb.1:                               ## %else
 	movl	%esi, %ebx
-	movl	$1, %eax
 	cmpl	$1, %esi
-	je	LBB1_3
-## %bb.2:                               ## %else4
+	jbe	LBB1_2
+## %bb.1:                               ## %else4
+	movq	%rdi, %r14
 	leal	-1(%rbx), %esi
-	movq	(%rsp), %rdi
 	callq	_fib
 Ltmp9:
 	movl	%eax, %ebp
 	addl	$-2, %ebx
-	movq	(%rsp), %rdi
+	movq	%r14, %rdi
 	movl	%ebx, %esi
 	callq	_fib
 Ltmp10:
-	addl	%ebp, %eax
-LBB1_3:                                 ## %merge
-	addq	$8, %rsp
+	movl	%eax, %ebx
+	addl	%ebp, %ebx
+LBB1_2:                                 ## %merge
+	movl	%ebx, %eax
 	popq	%rbx
+	popq	%r14
 	popq	%rbp
 	retq
-	.cfi_endproc
                                         ## -- End function
 	.section	__TEXT,__cstring,cstring_literals
 L___unnamed_1:                          ## @0

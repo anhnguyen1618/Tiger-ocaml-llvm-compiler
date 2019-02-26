@@ -35,100 +35,82 @@ declare void @assert_equal_string(i8*, i8*) local_unnamed_addr gc "ocaml"
 
 define i32 @main() local_unnamed_addr gc "ocaml" {
 entry:
-  %malloccall = tail call i8* @malloc(i32 ptrtoint ({ i8*, i32 }* getelementptr ({ i8*, i32 }, { i8*, i32 }* null, i32 1) to i32))
-  %record_init = bitcast i8* %malloccall to { i8*, i32 }*
-  %Element = getelementptr { i8*, i32 }, { i8*, i32 }* %record_init, i32 0, i32 0
-  store i8* getelementptr inbounds ([6 x i8], [6 x i8]* @14, i32 0, i32 0), i8** %Element
-  %Element1 = getelementptr { i8*, i32 }, { i8*, i32 }* %record_init, i32 0, i32 1
-  store i32 10, i32* %Element1
-  %malloccall3 = tail call i8* @malloc(i32 trunc (i64 mul nuw (i64 ptrtoint (i1** getelementptr (i1*, i1** null, i32 1) to i64), i64 2) to i32))
-  %record_init4 = bitcast i8* %malloccall3 to { i8*, { i8*, i32 }* }*
-  %Element5 = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 0
-  store i8* getelementptr inbounds ([6 x i8], [6 x i8]* @2, i32 0, i32 0), i8** %Element5
-  %Element6 = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 1
-  store { i8*, i32 }* %record_init, { i8*, i32 }** %Element6
-  %0 = bitcast { i8*, { i8*, i32 }* }* %record_init4 to i8*
-  call void @tig_check_null_pointer(i8* %0, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @0, i32 0, i32 0))
-  %element = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 0
-  %field_var = load i8*, i8** %element
-  call void @tig_print(i8* %field_var)
-  %1 = bitcast { i8*, { i8*, i32 }* }* %record_init4 to i8*
-  call void @tig_check_null_pointer(i8* %1, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @1, i32 0, i32 0))
-  %element9 = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 0
-  %field_var10 = load i8*, i8** %element9
-  call void @assert_equal_string(i8* %field_var10, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @2, i32 0, i32 0))
-  %2 = bitcast { i8*, { i8*, i32 }* }* %record_init4 to i8*
-  call void @tig_check_null_pointer(i8* %2, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @3, i32 0, i32 0))
-  %element12 = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 1
-  %field_var13 = load { i8*, i32 }*, { i8*, i32 }** %element12
+  %malloccall = tail call i8* @malloc(i32 16)
+  %Element = bitcast i8* %malloccall to i8**
+  store i8* getelementptr inbounds ([6 x i8], [6 x i8]* @14, i64 0, i64 0), i8** %Element, align 8
+  %Element1 = getelementptr i8, i8* %malloccall, i64 8
+  %0 = bitcast i8* %Element1 to i32*
+  store i32 10, i32* %0, align 4
+  %malloccall3 = tail call i8* @malloc(i32 16)
+  %Element5 = bitcast i8* %malloccall3 to i8**
+  store i8* getelementptr inbounds ([6 x i8], [6 x i8]* @2, i64 0, i64 0), i8** %Element5, align 8
+  %Element6 = getelementptr i8, i8* %malloccall3, i64 8
+  %1 = bitcast i8* %Element6 to { i8*, i32 }**
+  %2 = bitcast i8* %Element6 to i8**
+  store i8* %malloccall, i8** %2, align 8
+  tail call void @tig_check_null_pointer(i8* %malloccall3, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @0, i64 0, i64 0))
+  %field_var = load i8*, i8** %Element5, align 8
+  tail call void @tig_print(i8* %field_var)
+  tail call void @tig_check_null_pointer(i8* %malloccall3, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @1, i64 0, i64 0))
+  %field_var10 = load i8*, i8** %Element5, align 8
+  tail call void @assert_equal_string(i8* %field_var10, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @2, i64 0, i64 0))
+  tail call void @tig_check_null_pointer(i8* %malloccall3, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @3, i64 0, i64 0))
+  %field_var13 = load { i8*, i32 }*, { i8*, i32 }** %1, align 8
   %3 = bitcast { i8*, i32 }* %field_var13 to i8*
-  call void @tig_check_null_pointer(i8* %3, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @4, i32 0, i32 0))
-  %element14 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var13, i32 0, i32 1
-  %field_var15 = load i32, i32* %element14
-  call void @tig_print_int(i32 %field_var15)
-  %4 = bitcast { i8*, { i8*, i32 }* }* %record_init4 to i8*
-  call void @tig_check_null_pointer(i8* %4, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @5, i32 0, i32 0))
-  %element17 = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 1
-  %field_var18 = load { i8*, i32 }*, { i8*, i32 }** %element17
-  %5 = bitcast { i8*, i32 }* %field_var18 to i8*
-  call void @tig_check_null_pointer(i8* %5, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @6, i32 0, i32 0))
-  %element19 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var18, i32 0, i32 1
-  %field_var20 = load i32, i32* %element19
-  call void @assert_equal_int(i32 %field_var20, i32 10)
-  %6 = bitcast { i8*, { i8*, i32 }* }* %record_init4 to i8*
-  call void @tig_check_null_pointer(i8* %6, i8* getelementptr inbounds ([46 x i8], [46 x i8]* @7, i32 0, i32 0))
-  %element_left = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 1
-  %load_left21 = load { i8*, i32 }*, { i8*, i32 }** %element_left
-  %7 = bitcast { i8*, i32 }* %load_left21 to i8*
-  call void @tig_check_null_pointer(i8* %7, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @8, i32 0, i32 0))
-  %element_left22 = getelementptr { i8*, i32 }, { i8*, i32 }* %load_left21, i32 0, i32 1
-  store i32 100, i32* %element_left22
-  %8 = bitcast { i8*, i32 }* %record_init to i8*
-  call void @tig_check_null_pointer(i8* %8, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @9, i32 0, i32 0))
-  %element24 = getelementptr { i8*, i32 }, { i8*, i32 }* %record_init, i32 0, i32 1
-  %field_var25 = load i32, i32* %element24
-  call void @assert_equal_int(i32 %field_var25, i32 100)
-  %9 = bitcast { i8*, { i8*, i32 }* }* %record_init4 to i8*
-  call void @tig_check_null_pointer(i8* %9, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @10, i32 0, i32 0))
-  %element27 = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 1
-  %field_var28 = load { i8*, i32 }*, { i8*, i32 }** %element27
-  %10 = bitcast { i8*, i32 }* %field_var28 to i8*
-  call void @tig_check_null_pointer(i8* %10, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @11, i32 0, i32 0))
-  %element29 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var28, i32 0, i32 0
-  %field_var30 = load i8*, i8** %element29
-  call void @tig_print(i8* %field_var30)
-  %11 = bitcast { i8*, { i8*, i32 }* }* %record_init4 to i8*
-  call void @tig_check_null_pointer(i8* %11, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @12, i32 0, i32 0))
-  %element32 = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 1
-  %field_var33 = load { i8*, i32 }*, { i8*, i32 }** %element32
-  %12 = bitcast { i8*, i32 }* %field_var33 to i8*
-  call void @tig_check_null_pointer(i8* %12, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @13, i32 0, i32 0))
-  %element34 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var33, i32 0, i32 0
-  %field_var35 = load i8*, i8** %element34
-  call void @assert_equal_string(i8* %field_var35, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @14, i32 0, i32 0))
-  %13 = bitcast { i8*, i32 }* %record_init to i8*
-  call void @tig_check_null_pointer(i8* %13, i8* getelementptr inbounds ([46 x i8], [46 x i8]* @15, i32 0, i32 0))
-  %element_left37 = getelementptr { i8*, i32 }, { i8*, i32 }* %record_init, i32 0, i32 0
-  store i8* getelementptr inbounds ([4 x i8], [4 x i8]* @20, i32 0, i32 0), i8** %element_left37
-  %14 = bitcast { i8*, { i8*, i32 }* }* %record_init4 to i8*
-  call void @tig_check_null_pointer(i8* %14, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @16, i32 0, i32 0))
-  %element39 = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 1
-  %field_var40 = load { i8*, i32 }*, { i8*, i32 }** %element39
-  %15 = bitcast { i8*, i32 }* %field_var40 to i8*
-  call void @tig_check_null_pointer(i8* %15, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @17, i32 0, i32 0))
-  %element41 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var40, i32 0, i32 0
-  %field_var42 = load i8*, i8** %element41
-  call void @tig_print(i8* %field_var42)
-  %16 = bitcast { i8*, { i8*, i32 }* }* %record_init4 to i8*
-  call void @tig_check_null_pointer(i8* %16, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @18, i32 0, i32 0))
-  %element44 = getelementptr { i8*, { i8*, i32 }* }, { i8*, { i8*, i32 }* }* %record_init4, i32 0, i32 1
-  %field_var45 = load { i8*, i32 }*, { i8*, i32 }** %element44
-  %17 = bitcast { i8*, i32 }* %field_var45 to i8*
-  call void @tig_check_null_pointer(i8* %17, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @19, i32 0, i32 0))
-  %element46 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var45, i32 0, i32 0
-  %field_var47 = load i8*, i8** %element46
-  call void @assert_equal_string(i8* %field_var47, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @20, i32 0, i32 0))
+  tail call void @tig_check_null_pointer(i8* %3, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @4, i64 0, i64 0))
+  %element14 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var13, i64 0, i32 1
+  %field_var15 = load i32, i32* %element14, align 4
+  tail call void @tig_print_int(i32 %field_var15)
+  tail call void @tig_check_null_pointer(i8* %malloccall3, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @5, i64 0, i64 0))
+  %field_var18 = load { i8*, i32 }*, { i8*, i32 }** %1, align 8
+  %4 = bitcast { i8*, i32 }* %field_var18 to i8*
+  tail call void @tig_check_null_pointer(i8* %4, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @6, i64 0, i64 0))
+  %element19 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var18, i64 0, i32 1
+  %field_var20 = load i32, i32* %element19, align 4
+  tail call void @assert_equal_int(i32 %field_var20, i32 10)
+  tail call void @tig_check_null_pointer(i8* %malloccall3, i8* getelementptr inbounds ([46 x i8], [46 x i8]* @7, i64 0, i64 0))
+  %load_left21 = load { i8*, i32 }*, { i8*, i32 }** %1, align 8
+  %5 = bitcast { i8*, i32 }* %load_left21 to i8*
+  tail call void @tig_check_null_pointer(i8* %5, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @8, i64 0, i64 0))
+  %element_left22 = getelementptr { i8*, i32 }, { i8*, i32 }* %load_left21, i64 0, i32 1
+  store i32 100, i32* %element_left22, align 4
+  tail call void @tig_check_null_pointer(i8* %malloccall, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @9, i64 0, i64 0))
+  %field_var25 = load i32, i32* %0, align 4
+  tail call void @assert_equal_int(i32 %field_var25, i32 100)
+  tail call void @tig_check_null_pointer(i8* %malloccall3, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @10, i64 0, i64 0))
+  %field_var28 = load { i8*, i32 }*, { i8*, i32 }** %1, align 8
+  %6 = bitcast { i8*, i32 }* %field_var28 to i8*
+  tail call void @tig_check_null_pointer(i8* %6, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @11, i64 0, i64 0))
+  %element29 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var28, i64 0, i32 0
+  %field_var30 = load i8*, i8** %element29, align 8
+  tail call void @tig_print(i8* %field_var30)
+  tail call void @tig_check_null_pointer(i8* %malloccall3, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @12, i64 0, i64 0))
+  %field_var33 = load { i8*, i32 }*, { i8*, i32 }** %1, align 8
+  %7 = bitcast { i8*, i32 }* %field_var33 to i8*
+  tail call void @tig_check_null_pointer(i8* %7, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @13, i64 0, i64 0))
+  %element34 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var33, i64 0, i32 0
+  %field_var35 = load i8*, i8** %element34, align 8
+  tail call void @assert_equal_string(i8* %field_var35, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @14, i64 0, i64 0))
+  tail call void @tig_check_null_pointer(i8* %malloccall, i8* getelementptr inbounds ([46 x i8], [46 x i8]* @15, i64 0, i64 0))
+  store i8* getelementptr inbounds ([4 x i8], [4 x i8]* @20, i64 0, i64 0), i8** %Element, align 8
+  tail call void @tig_check_null_pointer(i8* %malloccall3, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @16, i64 0, i64 0))
+  %field_var40 = load { i8*, i32 }*, { i8*, i32 }** %1, align 8
+  %8 = bitcast { i8*, i32 }* %field_var40 to i8*
+  tail call void @tig_check_null_pointer(i8* %8, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @17, i64 0, i64 0))
+  %element41 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var40, i64 0, i32 0
+  %field_var42 = load i8*, i8** %element41, align 8
+  tail call void @tig_print(i8* %field_var42)
+  tail call void @tig_check_null_pointer(i8* %malloccall3, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @18, i64 0, i64 0))
+  %field_var45 = load { i8*, i32 }*, { i8*, i32 }** %1, align 8
+  %9 = bitcast { i8*, i32 }* %field_var45 to i8*
+  tail call void @tig_check_null_pointer(i8* %9, i8* getelementptr inbounds ([47 x i8], [47 x i8]* @19, i64 0, i64 0))
+  %element46 = getelementptr { i8*, i32 }, { i8*, i32 }* %field_var45, i64 0, i32 0
+  %field_var47 = load i8*, i8** %element46, align 8
+  tail call void @assert_equal_string(i8* %field_var47, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @20, i64 0, i64 0))
   ret i32 0
 }
 
-declare noalias i8* @malloc(i32) local_unnamed_addr
+; Function Attrs: nounwind
+declare noalias i8* @malloc(i32) local_unnamed_addr #0
+
+attributes #0 = { nounwind }

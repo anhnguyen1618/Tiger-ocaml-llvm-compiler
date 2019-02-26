@@ -11,14 +11,17 @@
 _main:                                  ## @main
 	.cfi_startproc
 ## %bb.0:                               ## %entry
-	pushq	%r14
+	pushq	%r15
 	.cfi_def_cfa_offset 16
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 24
-	subq	$24, %rsp
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	subq	$16, %rsp
 	.cfi_def_cfa_offset 48
-	.cfi_offset %rbx, -24
-	.cfi_offset %r14, -16
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
+	.cfi_offset %r15, -16
 	movl	$4, %edi
 	callq	_malloc
 Ltmp0:
@@ -30,32 +33,32 @@ Ltmp1:
 	movq	%rax, %r14
 	xorl	%eax, %eax
 	cmpl	$1, %eax
-	jg	LBB0_3
+	ja	LBB0_3
 	.p2align	4, 0x90
 LBB0_2:                                 ## %loop
                                         ## =>This Inner Loop Header: Depth=1
 	movq	%rbx, (%r14,%rax,8)
 	incq	%rax
 	cmpl	$1, %eax
-	jle	LBB0_2
+	jbe	LBB0_2
 LBB0_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
 Ltmp2:
+	movq	%rax, %r15
 	movl	$2, (%rax)
 	movq	%r14, 8(%rax)
-	movq	%rax, 16(%rsp)
-	leaq	8(%rsp), %rdi
+	movq	%rax, 8(%rsp)
+	movq	%rsp, %rdi
 	callq	_create_rec
 Ltmp3:
 	movq	%rax, %r14
-	movq	16(%rsp), %rbx
 	leaq	L___unnamed_1(%rip), %rdx
 	xorl	%esi, %esi
-	movq	%rbx, %rdi
+	movq	%r15, %rdi
 	callq	_tig_check_array_bound
 Ltmp4:
-	movq	8(%rbx), %rax
+	movq	8(%r15), %rax
 	movq	(%rax), %rbx
 	leaq	L___unnamed_2(%rip), %rsi
 	movq	%rbx, %rdi
@@ -64,13 +67,12 @@ Ltmp5:
 	movl	(%rbx), %edi
 	callq	_tig_print_int
 Ltmp6:
-	movq	16(%rsp), %rbx
 	leaq	L___unnamed_3(%rip), %rdx
 	xorl	%esi, %esi
-	movq	%rbx, %rdi
+	movq	%r15, %rdi
 	callq	_tig_check_array_bound
 Ltmp7:
-	movq	8(%rbx), %rax
+	movq	8(%r15), %rax
 	movq	(%rax), %rbx
 	leaq	L___unnamed_4(%rip), %rsi
 	movq	%rbx, %rdi
@@ -109,13 +111,12 @@ Ltmp14:
 	movl	$6, %esi
 	callq	_assert_equal_int
 Ltmp15:
-	movq	16(%rsp), %rbx
 	leaq	L___unnamed_9(%rip), %rdx
 	movl	$1, %esi
-	movq	%rbx, %rdi
+	movq	%r15, %rdi
 	callq	_tig_check_array_bound
 Ltmp16:
-	movq	8(%rbx), %rax
+	movq	8(%r15), %rax
 	movq	8(%rax), %rbx
 	leaq	L___unnamed_10(%rip), %rsi
 	movq	%rbx, %rdi
@@ -138,9 +139,10 @@ Ltmp19:
 	callq	_assert_equal_int
 Ltmp20:
 	xorl	%eax, %eax
-	addq	$24, %rsp
+	addq	$16, %rsp
 	popq	%rbx
 	popq	%r14
+	popq	%r15
 	retq
 	.cfi_endproc
                                         ## -- End function
@@ -149,34 +151,33 @@ Ltmp20:
 _create_rec:                            ## @create_rec
 	.cfi_startproc
 ## %bb.0:                               ## %entry
-	pushq	%r14
+	pushq	%r15
 	.cfi_def_cfa_offset 16
-	pushq	%rbx
+	pushq	%r14
 	.cfi_def_cfa_offset 24
-	pushq	%rax
+	pushq	%rbx
 	.cfi_def_cfa_offset 32
-	.cfi_offset %rbx, -24
-	.cfi_offset %r14, -16
-	movq	%rdi, (%rsp)
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
+	.cfi_offset %r15, -16
+	movq	%rdi, %r14
 	movl	$4, %edi
 	callq	_malloc
 Ltmp21:
-	movq	%rax, %r14
+	movq	%rax, %r15
 	movl	$6, (%rax)
-	movq	(%rsp), %rax
-	movq	8(%rax), %rbx
+	movq	8(%r14), %rbx
 	leaq	L___unnamed_13(%rip), %rdx
 	movl	$1, %esi
 	movq	%rbx, %rdi
 	callq	_tig_check_array_bound
 Ltmp22:
 	movq	8(%rbx), %rax
-	movq	%r14, 8(%rax)
-	movq	(%rsp), %rax
-	movq	8(%rax), %rax
-	addq	$8, %rsp
+	movq	%r15, 8(%rax)
+	movq	8(%r14), %rax
 	popq	%rbx
 	popq	%r14
+	popq	%r15
 	retq
 	.cfi_endproc
                                         ## -- End function

@@ -28,8 +28,7 @@ def build_compiler():
 
 def run_single_test_without_compile(file_name):
     cmd = ("./bin/compiler test/" + file_name + " &&"
-     "opt -f -S llvm_byte_code/test/"+ file_name +".ll -o llvm_byte_code/test/"+ file_name +"-opt.ll"
-     " -mem2reg -adce -argpromotion -constmerge -globaldce -globalopt -loop-deletion -constprop &&"
+     "opt -f -S llvm_byte_code/test/"+ file_name +".ll -o llvm_byte_code/test/"+ file_name +"-opt.ll -Oz &&"
      "llc llvm_byte_code/test/" + file_name + "-opt.ll &&"
      "clang llvm_byte_code/test/" + file_name + "-opt.s src/bindings.c -o run_prog &&"
      "./run_prog")

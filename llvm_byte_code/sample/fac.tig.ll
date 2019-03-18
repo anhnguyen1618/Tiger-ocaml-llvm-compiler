@@ -69,8 +69,8 @@ test:                                             ; preds = %entry
   %n1 = load i32, i32* %n
   %eq_tmp = icmp eq i32 %n1, 1
   %bool_tmp = zext i1 %eq_tmp to i32
-  %cond = icmp eq i32 %bool_tmp, 1
-  br i1 %cond, label %then, label %else
+  %cond = icmp eq i32 %bool_tmp, 0
+  br i1 %cond, label %else, label %then
 
 then:                                             ; preds = %test
   store i32 1, i32* %if_result_addr

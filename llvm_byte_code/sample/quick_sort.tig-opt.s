@@ -1,3 +1,14 @@
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	.text
+	.file	"Tiger jit"
+	.globl	"camlLlvm_byte_code/test/quick_sort__code_begin"
+"camlLlvm_byte_code/test/quick_sort__code_begin":
+	.data
+	.globl	"camlLlvm_byte_code/test/quick_sort__data_begin"
+"camlLlvm_byte_code/test/quick_sort__data_begin":
+	.text
+	.globl	main                    # -- Begin function main
+=======
 	.section	__TEXT,__text,regular,pure_instructions
 	.macosx_version_min 10, 14
 	.globl	"_camlLlvm_byte_code/test/heap_sort__code_begin"
@@ -7,6 +18,7 @@
 "_camlLlvm_byte_code/test/heap_sort__data_begin":
 	.section	__TEXT,__text,regular,pure_instructions
 	.globl	_main                   ## -- Begin function main
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	.p2align	4, 0x90
 _main:                                  ## @main
 	.cfi_startproc
@@ -40,11 +52,20 @@ Ltmp4:
 	leaq	8(%rsp), %r14
 	movq	%r14, %rdi
 	movq	%r15, %rsi
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	callq	quick_sort
+.Ltmp5:
+	movl	$.L__unnamed_3, %edi
+	callq	tig_print
+.Ltmp6:
+	movq	%r14, %rdi
+=======
 	callq	_heap_sort
 Ltmp5:
 	leaq	L___unnamed_3(%rip), %rdi
 	callq	_tig_print
 Ltmp6:
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	movq	%r15, %rsi
 	callq	_print_array
 Ltmp7:
@@ -100,9 +121,14 @@ Ltmp16:
 Ltmp17:
 	movq	%r14, %rdi
 	movq	%rbx, %rsi
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	callq	quick_sort
+.Ltmp18:
+=======
 	callq	_heap_sort
 Ltmp18:
 	leaq	L___unnamed_9(%rip), %rdx
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	xorl	%esi, %esi
 	movq	%rbx, %rdi
 	callq	_tig_check_array_bound
@@ -293,6 +319,15 @@ LBB2_6:                                 ## %end12
 	popq	%r15
 	retq
 	.cfi_endproc
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+                                        # -- End function
+	.globl	quick_sort              # -- Begin function quick_sort
+	.p2align	4, 0x90
+	.type	quick_sort,@function
+quick_sort:                             # @quick_sort
+	.cfi_startproc
+# %bb.0:                                # %entry
+=======
                                         ## -- End function
 	.globl	_heap_sort              ## -- Begin function heap_sort
 	.p2align	4, 0x90
@@ -303,13 +338,22 @@ _heap_sort:                             ## @heap_sort
 	.cfi_def_cfa_offset 16
 	pushq	%rbx
 	.cfi_def_cfa_offset 24
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	subq	$24, %rsp
-	.cfi_def_cfa_offset 48
-	.cfi_offset %rbx, -24
-	.cfi_offset %r14, -16
-	movq	%rdi, (%rsp)
+	.cfi_def_cfa_offset 32
+	movq	%rdi, 8(%rsp)
 	movq	%rsi, 16(%rsp)
 	movq	%rsi, %rdi
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	callq	tig_array_length
+.Ltmp40:
+                                        # kill: def %eax killed %eax def %rax
+	leal	-1(%rax), %edx
+	leaq	8(%rsp), %rdi
+	xorl	%esi, %esi
+	callq	sort
+.Ltmp41:
+=======
 	callq	_tig_array_length
 Ltmp39:
 	movl	%eax, %ebx
@@ -344,10 +388,19 @@ LBB3_1:                                 ## %test
 	cmpl	$2, %edx
 	jge	LBB3_2
 ## %bb.3:                               ## %end
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	addq	$24, %rsp
-	popq	%rbx
-	popq	%r14
 	retq
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+.Lfunc_end3:
+	.size	quick_sort, .Lfunc_end3-quick_sort
+	.cfi_endproc
+                                        # -- End function
+	.globl	partition               # -- Begin function partition
+	.p2align	4, 0x90
+	.type	partition,@function
+partition:                              # @partition
+=======
 	.cfi_endproc
                                         ## -- End function
 	.globl	_create_max_heap        ## -- Begin function create_max_heap
@@ -392,6 +445,7 @@ LBB4_3:                                 ## %end
 	.globl	_swap                   ## -- Begin function swap
 	.p2align	4, 0x90
 _swap:                                  ## @swap
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	.cfi_startproc
 ## %bb.0:                               ## %entry
 	pushq	%rbp
@@ -406,8 +460,13 @@ _swap:                                  ## @swap
 	.cfi_def_cfa_offset 48
 	pushq	%rbx
 	.cfi_def_cfa_offset 56
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	subq	$40, %rsp
+	.cfi_def_cfa_offset 96
+=======
 	pushq	%rax
 	.cfi_def_cfa_offset 64
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	.cfi_offset %rbx, -56
 	.cfi_offset %r12, -48
 	.cfi_offset %r13, -40
@@ -415,6 +474,120 @@ _swap:                                  ## @swap
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
 	movl	%edx, %r14d
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	movl	%esi, %ebp
+	movq	%rdi, 8(%rsp)
+	movq	8(%rdi), %rbx
+	movl	$.L__unnamed_19, %edx
+	movq	%rbx, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
+.Ltmp42:
+	movq	8(%rbx), %rax
+	movslq	%r14d, %rbx
+	movl	(%rax,%rbx,4), %r13d
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rdi
+	movl	$.L__unnamed_20, %edx
+	movl	%ebp, %esi
+	callq	tig_check_array_bound
+.Ltmp43:
+	movq	%rbx, 32(%rsp)          # 8-byte Spill
+	leal	-1(%rbx), %eax
+	movl	%eax, 28(%rsp)          # 4-byte Spill
+	movl	%ebp, %r15d
+	movl	%r13d, 20(%rsp)         # 4-byte Spill
+	cmpl	%ebp, 28(%rsp)          # 4-byte Folded Reload
+	jge	.LBB4_2
+	jmp	.LBB4_5
+	.p2align	4, 0x90
+.LBB4_4:                                # %merge
+                                        #   in Loop: Header=BB4_2 Depth=1
+	incl	%ebp
+	cmpl	%ebp, 28(%rsp)          # 4-byte Folded Reload
+	jl	.LBB4_5
+.LBB4_2:                                # %test38
+                                        # =>This Inner Loop Header: Depth=1
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_21, %edx
+	movq	%rbx, %rdi
+	movl	%ebp, %esi
+	callq	tig_check_array_bound
+.Ltmp44:
+	movq	8(%rbx), %rax
+	movslq	%ebp, %r14
+	movl	(%rax,%r14,4), %r12d
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_22, %edx
+	movq	%rbx, %rdi
+	movl	%r15d, %esi
+	callq	tig_check_array_bound
+.Ltmp45:
+	cmpl	%r13d, %r12d
+	jge	.LBB4_4
+# %bb.3:                                # %then
+                                        #   in Loop: Header=BB4_2 Depth=1
+	movq	8(%rbx), %rax
+	movslq	%r15d, %r13
+	movl	(%rax,%r13,4), %eax
+	movl	%eax, 24(%rsp)          # 4-byte Spill
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_23, %edx
+	movq	%rbx, %rdi
+	movl	%r15d, %esi
+	callq	tig_check_array_bound
+.Ltmp46:
+	movq	8(%rbx), %rax
+	movl	%r12d, (%rax,%r13,4)
+	movl	20(%rsp), %r13d         # 4-byte Reload
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_24, %edx
+	movq	%rbx, %rdi
+	movl	%ebp, %esi
+	callq	tig_check_array_bound
+.Ltmp47:
+	movq	8(%rbx), %rax
+	movl	24(%rsp), %ecx          # 4-byte Reload
+	movl	%ecx, (%rax,%r14,4)
+	incl	%r15d
+	jmp	.LBB4_4
+.LBB4_5:                                # %end
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rbx
+	movl	$.L__unnamed_25, %edx
+	movq	%rbx, %rdi
+	movl	%r15d, %esi
+	callq	tig_check_array_bound
+.Ltmp48:
+	movq	8(%rbx), %rax
+	movslq	%r15d, %rbx
+	movl	(%rax,%rbx,4), %r14d
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rbp
+	movl	$.L__unnamed_26, %edx
+	movq	%rbp, %rdi
+	movl	%ebx, %esi
+	callq	tig_check_array_bound
+.Ltmp49:
+	movq	8(%rbp), %rax
+	movl	%r13d, (%rax,%rbx,4)
+	movq	8(%rsp), %rax
+	movq	8(%rax), %r15
+	movl	$.L__unnamed_27, %edx
+	movq	%r15, %rdi
+	movq	32(%rsp), %rbp          # 8-byte Reload
+	movl	%ebp, %esi
+	callq	tig_check_array_bound
+.Ltmp50:
+	movq	8(%r15), %rax
+	movl	%r14d, (%rax,%rbp,4)
+	movl	%ebx, %eax
+	addq	$40, %rsp
+=======
 	movl	%esi, %r15d
 	movq	%rdi, %rbx
 	movq	16(%rdi), %rbp
@@ -451,6 +624,7 @@ Ltmp48:
 	movq	8(%rbx), %rax
 	movl	%r12d, (%rax,%r14,4)
 	addq	$8, %rsp
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	popq	%rbx
 	popq	%r12
 	popq	%r13
@@ -458,6 +632,18 @@ Ltmp48:
 	popq	%r15
 	popq	%rbp
 	retq
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+.Lfunc_end4:
+	.size	partition, .Lfunc_end4-partition
+	.cfi_endproc
+                                        # -- End function
+	.globl	sort                    # -- Begin function sort
+	.p2align	4, 0x90
+	.type	sort,@function
+sort:                                   # @sort
+	.cfi_startproc
+# %bb.0:                                # %test
+=======
 	.cfi_endproc
                                         ## -- End function
 	.globl	_max_heapify            ## -- Begin function max_heapify
@@ -465,26 +651,44 @@ Ltmp48:
 _max_heapify:                           ## @max_heapify
 	.cfi_startproc
 ## %bb.0:                               ## %entry
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
-	pushq	%r15
-	.cfi_def_cfa_offset 24
 	pushq	%r14
-	.cfi_def_cfa_offset 32
-	pushq	%r13
-	.cfi_def_cfa_offset 40
-	pushq	%r12
-	.cfi_def_cfa_offset 48
+	.cfi_def_cfa_offset 24
 	pushq	%rbx
-	.cfi_def_cfa_offset 56
-	subq	$24, %rsp
-	.cfi_def_cfa_offset 80
-	.cfi_offset %rbx, -56
-	.cfi_offset %r12, -48
-	.cfi_offset %r13, -40
-	.cfi_offset %r14, -32
-	.cfi_offset %r15, -24
+	.cfi_def_cfa_offset 32
+	subq	$16, %rsp
+	.cfi_def_cfa_offset 48
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
 	.cfi_offset %rbp, -16
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	movl	%edx, %ebx
+	movl	%esi, %ebp
+	movq	%rdi, 8(%rsp)
+	cmpl	%ebx, %ebp
+	jge	.LBB5_2
+# %bb.1:                                # %then
+	movq	8(%rsp), %rdi
+	movl	%ebp, %esi
+	movl	%ebx, %edx
+	callq	partition
+.Ltmp51:
+	movl	%eax, %r14d
+	leal	-1(%r14), %edx
+	movq	8(%rsp), %rdi
+	movl	%ebp, %esi
+	callq	sort
+.Ltmp52:
+	leal	1(%r14), %esi
+	movq	8(%rsp), %rdi
+	movl	%ebx, %edx
+	callq	sort
+.Ltmp53:
+.LBB5_2:                                # %merge
+	addq	$16, %rsp
+=======
 	movl	%edx, 4(%rsp)           ## 4-byte Spill
 	movl	%esi, %r13d
 	movq	%rdi, %r12
@@ -597,13 +801,16 @@ Ltmp54:
 	jne	LBB6_10
 ## %bb.11:                              ## %merge81
 	addq	$24, %rsp
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	popq	%rbx
-	popq	%r12
-	popq	%r13
 	popq	%r14
-	popq	%r15
 	popq	%rbp
 	retq
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+.Lfunc_end5:
+	.size	sort, .Lfunc_end5-sort
+=======
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	.cfi_endproc
                                         ## -- End function
 	.globl	_create_array_test      ## -- Begin function create_array_test
@@ -626,6 +833,25 @@ _create_array_test:                     ## @create_array_test
 	.cfi_offset %r15, -24
 	.cfi_offset %rbp, -16
 	movl	$20, %edi
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	callq	malloc
+.Ltmp54:
+	movq	%rax, %rbx
+	xorl	%eax, %eax
+	cmpl	$4, %eax
+	jg	.LBB6_3
+	.p2align	4, 0x90
+.LBB6_2:                                # %loop
+                                        # =>This Inner Loop Header: Depth=1
+	movl	$1, (%rbx,%rax,4)
+	incq	%rax
+	cmpl	$4, %eax
+	jle	.LBB6_2
+.LBB6_3:                                # %end
+	movl	$16, %edi
+	callq	malloc
+.Ltmp55:
+=======
 	callq	_malloc
 Ltmp56:
 	movq	%rax, %rbx
@@ -643,6 +869,7 @@ LBB7_3:                                 ## %end
 	movl	$16, %edi
 	callq	_malloc
 Ltmp57:
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	movq	%rax, %r14
 	movl	$5, (%rax)
 	movq	%rbx, 8(%rax)
@@ -650,6 +877,17 @@ Ltmp57:
 	xorl	%ebx, %ebx
 	leaq	L___unnamed_29(%rip), %r15
 	cmpl	$4, %ebx
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	jg	.LBB6_6
+	.p2align	4, 0x90
+.LBB6_5:                                # %loop11
+                                        # =>This Inner Loop Header: Depth=1
+	movl	$.L__unnamed_28, %edx
+	movq	%r14, %rdi
+	movl	%ebx, %esi
+	callq	tig_check_array_bound
+.Ltmp56:
+=======
 	ja	LBB7_6
 	.p2align	4, 0x90
 LBB7_5:                                 ## %loop11
@@ -659,13 +897,19 @@ LBB7_5:                                 ## %loop11
 	movq	%r15, %rdx
 	callq	_tig_check_array_bound
 Ltmp58:
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	movq	8(%r14), %rax
 	movl	%ebp, (%rax,%rbx,4)
 	decl	%ebp
 	incq	%rbx
 	cmpl	$4, %ebx
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	jle	.LBB6_5
+.LBB6_6:                                # %end12
+=======
 	jbe	LBB7_5
 LBB7_6:                                 ## %end12
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	movq	%r14, %rax
 	addq	$8, %rsp
 	popq	%rbx
@@ -673,15 +917,29 @@ LBB7_6:                                 ## %end12
 	popq	%r15
 	popq	%rbp
 	retq
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+.Lfunc_end6:
+	.size	create_array_test, .Lfunc_end6-create_array_test
+=======
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	.cfi_endproc
                                         ## -- End function
 	.section	__TEXT,__cstring,cstring_literals
 L___unnamed_14:                         ## @0
 	.asciz	"["
 
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	.type	.L__unnamed_15,@object  # @1
+	.section	.rodata.str1.16,"aMS",@progbits,1
+	.p2align	4
+.L__unnamed_15:
+	.asciz	"test/quick_sort.tig::6.67: Array out of bound"
+	.size	.L__unnamed_15, 46
+=======
 	.p2align	4               ## @1
 L___unnamed_15:
 	.asciz	"test/heap_sort.tig::6.67: Array out of bound"
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 
 L___unnamed_16:                         ## @2
 	.space	1
@@ -689,6 +947,78 @@ L___unnamed_16:                         ## @2
 L___unnamed_17:                         ## @3
 	.asciz	"]"
 
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	.type	.L__unnamed_18,@object  # @4
+	.section	.rodata.str1.16,"aMS",@progbits,1
+	.p2align	4
+.L__unnamed_18:
+	.asciz	"test/quick_sort.tig::16.41: Array out of bound"
+	.size	.L__unnamed_18, 47
+
+	.type	.L__unnamed_19,@object  # @5
+	.p2align	4
+.L__unnamed_19:
+	.asciz	"test/quick_sort.tig::24.36: Array out of bound"
+	.size	.L__unnamed_19, 47
+
+	.type	.L__unnamed_20,@object  # @6
+	.p2align	4
+.L__unnamed_20:
+	.asciz	"test/quick_sort.tig::25.47: Array out of bound"
+	.size	.L__unnamed_20, 47
+
+	.type	.L__unnamed_21,@object  # @7
+	.p2align	4
+.L__unnamed_21:
+	.asciz	"test/quick_sort.tig::29.46: Array out of bound"
+	.size	.L__unnamed_21, 47
+
+	.type	.L__unnamed_22,@object  # @8
+	.p2align	4
+.L__unnamed_22:
+	.asciz	"test/quick_sort.tig::30.48: Array out of bound"
+	.size	.L__unnamed_22, 47
+
+	.type	.L__unnamed_23,@object  # @9
+	.p2align	4
+.L__unnamed_23:
+	.asciz	"test/quick_sort.tig::34.35: Array out of bound"
+	.size	.L__unnamed_23, 47
+
+	.type	.L__unnamed_24,@object  # @10
+	.p2align	4
+.L__unnamed_24:
+	.asciz	"test/quick_sort.tig::35.35: Array out of bound"
+	.size	.L__unnamed_24, 47
+
+	.type	.L__unnamed_25,@object  # @11
+	.p2align	4
+.L__unnamed_25:
+	.asciz	"test/quick_sort.tig::39.43: Array out of bound"
+	.size	.L__unnamed_25, 47
+
+	.type	.L__unnamed_26,@object  # @12
+	.p2align	4
+.L__unnamed_26:
+	.asciz	"test/quick_sort.tig::40.23: Array out of bound"
+	.size	.L__unnamed_26, 47
+
+	.type	.L__unnamed_27,@object  # @13
+	.p2align	4
+.L__unnamed_27:
+	.asciz	"test/quick_sort.tig::41.23: Array out of bound"
+	.size	.L__unnamed_27, 47
+
+	.type	.L__unnamed_28,@object  # @14
+	.p2align	4
+.L__unnamed_28:
+	.asciz	"test/quick_sort.tig::64.41: Array out of bound"
+	.size	.L__unnamed_28, 47
+
+	.type	.L__unnamed_1,@object   # @15
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.L__unnamed_1:
+=======
 	.p2align	4               ## @4
 L___unnamed_18:
 	.asciz	"test/heap_sort.tig::16.41: Array out of bound"
@@ -738,14 +1068,99 @@ L___unnamed_29:
 	.asciz	"test/heap_sort.tig::80.41: Array out of bound"
 
 L___unnamed_1:                          ## @16
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	.asciz	"Before sorting"
 
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	.type	.L__unnamed_2,@object   # @16
+.L__unnamed_2:
+=======
 L___unnamed_2:                          ## @17
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	.asciz	"=============="
 
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	.type	.L__unnamed_3,@object   # @17
+.L__unnamed_3:
+=======
 L___unnamed_3:                          ## @18
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	.asciz	"After sorting"
 
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+	.type	.L__unnamed_4,@object   # @18
+	.section	.rodata.str1.16,"aMS",@progbits,1
+	.p2align	4
+.L__unnamed_4:
+	.asciz	"test/quick_sort.tig::78.23: Array out of bound"
+	.size	.L__unnamed_4, 47
+
+	.type	.L__unnamed_5,@object   # @19
+	.p2align	4
+.L__unnamed_5:
+	.asciz	"test/quick_sort.tig::79.23: Array out of bound"
+	.size	.L__unnamed_5, 47
+
+	.type	.L__unnamed_6,@object   # @20
+	.p2align	4
+.L__unnamed_6:
+	.asciz	"test/quick_sort.tig::80.23: Array out of bound"
+	.size	.L__unnamed_6, 47
+
+	.type	.L__unnamed_7,@object   # @21
+	.p2align	4
+.L__unnamed_7:
+	.asciz	"test/quick_sort.tig::81.23: Array out of bound"
+	.size	.L__unnamed_7, 47
+
+	.type	.L__unnamed_8,@object   # @22
+	.p2align	4
+.L__unnamed_8:
+	.asciz	"test/quick_sort.tig::82.23: Array out of bound"
+	.size	.L__unnamed_8, 47
+
+	.type	.L__unnamed_9,@object   # @23
+	.p2align	4
+.L__unnamed_9:
+	.asciz	"test/quick_sort.tig::86.23: Array out of bound"
+	.size	.L__unnamed_9, 47
+
+	.type	.L__unnamed_10,@object  # @24
+	.p2align	4
+.L__unnamed_10:
+	.asciz	"test/quick_sort.tig::87.23: Array out of bound"
+	.size	.L__unnamed_10, 47
+
+	.type	.L__unnamed_11,@object  # @25
+	.p2align	4
+.L__unnamed_11:
+	.asciz	"test/quick_sort.tig::88.23: Array out of bound"
+	.size	.L__unnamed_11, 47
+
+	.type	.L__unnamed_12,@object  # @26
+	.p2align	4
+.L__unnamed_12:
+	.asciz	"test/quick_sort.tig::89.23: Array out of bound"
+	.size	.L__unnamed_12, 47
+
+	.type	.L__unnamed_13,@object  # @27
+	.p2align	4
+.L__unnamed_13:
+	.asciz	"test/quick_sort.tig::90.23: Array out of bound"
+	.size	.L__unnamed_13, 47
+
+
+	.text
+	.globl	"camlLlvm_byte_code/test/quick_sort__code_end"
+"camlLlvm_byte_code/test/quick_sort__code_end":
+	.data
+	.globl	"camlLlvm_byte_code/test/quick_sort__data_end"
+"camlLlvm_byte_code/test/quick_sort__data_end":
+	.quad	0
+	.globl	"camlLlvm_byte_code/test/quick_sort__frametable"
+"camlLlvm_byte_code/test/quick_sort__frametable":
+	.short	57
+=======
 	.p2align	4               ## @19
 L___unnamed_4:
 	.asciz	"test/heap_sort.tig::94.23: Array out of bound"
@@ -797,6 +1212,7 @@ L___unnamed_13:
 	.globl	"_camlLlvm_byte_code/test/heap_sort__frametable"
 "_camlLlvm_byte_code/test/heap_sort__frametable":
 	.short	59
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	.p2align	3
                                         ## live roots for main
 	.quad	Ltmp0
@@ -962,6 +1378,77 @@ L___unnamed_13:
 	.short	40
 	.short	0
 	.p2align	3
+<<<<<<< HEAD:llvm_byte_code/sample/quick_sort.tig-opt.s
+                                        # live roots for quick_sort
+	.quad	.Ltmp40
+	.short	24
+	.short	0
+	.p2align	3
+	.quad	.Ltmp41
+	.short	24
+	.short	0
+	.p2align	3
+                                        # live roots for partition
+	.quad	.Ltmp42
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp43
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp44
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp45
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp46
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp47
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp48
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp49
+	.short	88
+	.short	0
+	.p2align	3
+	.quad	.Ltmp50
+	.short	88
+	.short	0
+	.p2align	3
+                                        # live roots for sort
+	.quad	.Ltmp51
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp52
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp53
+	.short	40
+	.short	0
+	.p2align	3
+                                        # live roots for create_array_test
+	.quad	.Ltmp54
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp55
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp56
+=======
 	.quad	Ltmp40
 	.short	40
 	.short	0
@@ -1039,6 +1526,7 @@ L___unnamed_13:
 	.short	0
 	.p2align	3
 	.quad	Ltmp58
+>>>>>>> a82b116507b3ffa5397d54e2b1c57e036dbd1933:llvm_byte_code/test/heap_sort.tig-opt.s
 	.short	40
 	.short	0
 	.p2align	3

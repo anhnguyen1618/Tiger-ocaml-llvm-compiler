@@ -1,5 +1,7 @@
 _build/
 .vscode/
+llvm_byte_code/test/*
+parse.native
 run_prog
 .DS_Store
 *~

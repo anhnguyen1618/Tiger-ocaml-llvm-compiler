@@ -83,12 +83,14 @@ let get_fp_value (): exp =
   L.build_load fp_addr "frame_pointer_val" builder          
 
 (* Frame pointer stack ends here *)
-                       
+
+let malloc (name: string) (typ: T.ty): exp =
+  L.build_malloc (typ |> get_llvm_type) name builder 
 
 let build_frame_pointer_alloc (esc_vars: T.ty list) =
   let element_types = List.map (fun typ -> (Symbol.symbol(""), typ)) esc_vars in
   let frame_pointer_struct_type = T.RECORD_ALLOC(element_types, Temp.newtemp()) in
-  let address = L.build_alloca (get_llvm_type frame_pointer_struct_type) "frame_pointer" builder in
+  let address = malloc "frame_pointer" frame_pointer_struct_type in
   let frame_pointer_type = T.RECORD(element_types, Temp.newtemp()) in
   push_fp_to_stack frame_pointer_type address
 
@@ -144,8 +146,6 @@ let alloc_local
      (dec_level, IN_FRAME(address))
   | _ -> (*print_string ("offset " ^ (string_of_int esc_order)); exit 1;*) (dec_level, IN_STATIC_LINK(int_exp esc_order))
 
-let malloc (name: string) (typ: T.ty): exp =
-  L.build_malloc (typ |> get_llvm_type) name builder 
 
 let rec gen_static_link = function
   | (NESTED(dec_level), NESTED(use_level), current_fp) ->

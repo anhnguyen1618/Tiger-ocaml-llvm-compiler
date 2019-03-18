@@ -48,32 +48,46 @@ declare void @assert_equal_string(i8*, i8*) gc "ocaml"
 define i32 @main() gc "ocaml" {
 entry:
   %frame_pointer = alloca { i32 }
-  %0 = call i32 @a({ i32 }* %frame_pointer)
-  call void @tig_print_int(i32 %0)
-  %1 = call i32 @a({ i32 }* %frame_pointer)
-  %2 = call i32 @b({ i32 }* %frame_pointer)
-  call void @assert_equal_int(i32 %1, i32 %2)
+  %0 = call i32 @factorial({ i32 }* %frame_pointer, i32 4)
   ret i32 0
 
 break_loop:                                       ; No predecessors!
   ret i32 0
 }
 
-define i32 @a({ i32 }*) gc "ocaml" {
+define i32 @factorial({ i32 }*, i32) gc "ocaml" {
 entry:
+  %if_result_addr = alloca i32
+  %n = alloca i32
   %frame_pointer = alloca { { i32 }* }
   %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
   store { i32 }* %0, { i32 }** %arg_address
+  store i32 %1, i32* %n
+  br label %test
+
+test:                                             ; preds = %entry
+  %n1 = load i32, i32* %n
+  %eq_tmp = icmp eq i32 %n1, 1
+  %bool_tmp = zext i1 %eq_tmp to i32
+  %cond = icmp eq i32 %bool_tmp, 1
+  br i1 %cond, label %then, label %else
+
+then:                                             ; preds = %test
+  store i32 1, i32* %if_result_addr
+  br label %merge
+
+else:                                             ; preds = %test
+  %n2 = load i32, i32* %n
+  %n3 = load i32, i32* %n
+  %minus_tmp = sub i32 %n3, 1
   %fp_addr_in_sl = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
   %fp_addr = load { i32 }*, { i32 }** %fp_addr_in_sl
-  %1 = call i32 @b({ i32 }* %fp_addr)
-  ret i32 %1
-}
+  %2 = call i32 @factorial({ i32 }* %fp_addr, i32 %minus_tmp)
+  %mul_tmp = mul i32 %n2, %2
+  store i32 %mul_tmp, i32* %if_result_addr
+  br label %merge
 
-define i32 @b({ i32 }*) gc "ocaml" {
-entry:
-  %frame_pointer = alloca { { i32 }* }
-  %arg_address = getelementptr { { i32 }* }, { { i32 }* }* %frame_pointer, i32 0, i32 0
-  store { i32 }* %0, { i32 }** %arg_address
-  ret i32 4
+merge:                                            ; preds = %else, %then
+  %if_result = load i32, i32* %if_result_addr
+  ret i32 %if_result
 }

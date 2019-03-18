@@ -1,10 +1,10 @@
 	.text
 	.file	"Tiger jit"
-	.globl	"camlLlvm_byte_code/test/heap_sort__code_begin"
-"camlLlvm_byte_code/test/heap_sort__code_begin":
+	.globl	"camlLlvm_byte_code/test/binary_sort__code_begin"
+"camlLlvm_byte_code/test/binary_sort__code_begin":
 	.data
-	.globl	"camlLlvm_byte_code/test/heap_sort__data_begin"
-"camlLlvm_byte_code/test/heap_sort__data_begin":
+	.globl	"camlLlvm_byte_code/test/binary_sort__data_begin"
+"camlLlvm_byte_code/test/binary_sort__data_begin":
 	.text
 	.globl	main                    # -- Begin function main
 	.p2align	4, 0x90
@@ -44,7 +44,7 @@ main:                                   # @main
 .Ltmp4:
 	movq	%r14, %rdi
 	movq	%r15, %rsi
-	callq	heap_sort
+	callq	binary_sort
 .Ltmp5:
 	movl	$.L__unnamed_3, %edi
 	callq	tig_print
@@ -105,7 +105,7 @@ main:                                   # @main
 .Ltmp17:
 	movq	%r14, %rdi
 	movq	%rbx, %rsi
-	callq	heap_sort
+	callq	binary_sort
 .Ltmp18:
 	xorl	%esi, %esi
 	movl	$.L__unnamed_9, %edx
@@ -301,314 +301,319 @@ create_array:                           # @create_array
 	.size	create_array, .Lfunc_end2-create_array
 	.cfi_endproc
                                         # -- End function
-	.globl	heap_sort               # -- Begin function heap_sort
+	.globl	binary_sort             # -- Begin function binary_sort
 	.p2align	4, 0x90
-	.type	heap_sort,@function
-heap_sort:                              # @heap_sort
+	.type	binary_sort,@function
+binary_sort:                            # @binary_sort
 	.cfi_startproc
 # %bb.0:                                # %entry
-	pushq	%r14
-	.cfi_def_cfa_offset 16
 	pushq	%rbx
-	.cfi_def_cfa_offset 24
-	subq	$24, %rsp
+	.cfi_def_cfa_offset 16
+	subq	$32, %rsp
 	.cfi_def_cfa_offset 48
-	.cfi_offset %rbx, -24
-	.cfi_offset %r14, -16
-	movq	%rdi, (%rsp)
-	movq	%rsi, 16(%rsp)
-	movq	%rsi, %rdi
-	callq	tig_array_length
+	.cfi_offset %rbx, -16
+	movq	%rdi, 8(%rsp)
+	movq	%rsi, 24(%rsp)
+	movl	$0, 16(%rsp)
+	leaq	8(%rsp), %rbx
+	movq	%rbx, %rdi
+	callq	build_binary_tree
 .Ltmp40:
-	movl	%eax, %ebx
-	movl	%ebx, 8(%rsp)
-	movq	%rsp, %r14
-	movq	%r14, %rdi
-	callq	create_max_heap
+	movq	%rbx, %rdi
+	movq	%rax, %rsi
+	callq	in_order_traversing
 .Ltmp41:
-	movl	8(%rsp), %edx
-	decl	%edx
-	xorl	%esi, %esi
-	movq	%r14, %rdi
-	callq	swap
-.Ltmp42:
-	addl	$-2, %ebx
-	jmp	.LBB3_1
+	addq	$32, %rsp
+	popq	%rbx
+	retq
+.Lfunc_end3:
+	.size	binary_sort, .Lfunc_end3-binary_sort
+	.cfi_endproc
+                                        # -- End function
+	.globl	build_binary_tree       # -- Begin function build_binary_tree
 	.p2align	4, 0x90
-.LBB3_2:                                # %loop
-                                        #   in Loop: Header=BB3_1 Depth=1
-	xorl	%esi, %esi
-	movq	%r14, %rdi
-	callq	max_heapify
+	.type	build_binary_tree,@function
+build_binary_tree:                      # @build_binary_tree
+	.cfi_startproc
+# %bb.0:                                # %entry
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	pushq	%r15
+	.cfi_def_cfa_offset 24
+	pushq	%r14
+	.cfi_def_cfa_offset 32
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	subq	$24, %rsp
+	.cfi_def_cfa_offset 64
+	.cfi_offset %rbx, -40
+	.cfi_offset %r14, -32
+	.cfi_offset %r15, -24
+	.cfi_offset %rbp, -16
+	movq	%rdi, 8(%rsp)
+	movq	$0, 16(%rsp)
+	movq	16(%rdi), %rdi
+	callq	tig_array_length
+.Ltmp42:
+	movq	8(%rsp), %rax
+	movq	16(%rax), %rdi
+	callq	tig_array_length
 .Ltmp43:
-	xorl	%esi, %esi
-	movq	%r14, %rdi
-	movl	%ebx, %edx
-	callq	swap
-.Ltmp44:
-	decl	%ebx
-.LBB3_1:                                # %test
+	movl	%eax, %r15d
+	decl	%r15d
+	xorl	%ebp, %ebp
+	leaq	8(%rsp), %r14
+	cmpl	%ebp, %r15d
+	jl	.LBB4_3
+	.p2align	4, 0x90
+.LBB4_2:                                # %loop
                                         # =>This Inner Loop Header: Depth=1
-	leal	1(%rbx), %edx
-	cmpl	$2, %edx
-	jge	.LBB3_2
-# %bb.3:                                # %end
+	movq	8(%rsp), %rax
+	movq	16(%rax), %rbx
+	movl	$.L__unnamed_19, %edx
+	movq	%rbx, %rdi
+	movl	%ebp, %esi
+	callq	tig_check_array_bound
+.Ltmp44:
+	movq	8(%rbx), %rax
+	movslq	%ebp, %rcx
+	movl	(%rax,%rcx,4), %esi
+	movq	%r14, %rdi
+	callq	add_node
+.Ltmp45:
+	incl	%ebp
+	cmpl	%ebp, %r15d
+	jge	.LBB4_2
+.LBB4_3:                                # %end
+	movq	16(%rsp), %rax
 	addq	$24, %rsp
 	popq	%rbx
 	popq	%r14
+	popq	%r15
+	popq	%rbp
 	retq
-.Lfunc_end3:
-	.size	heap_sort, .Lfunc_end3-heap_sort
+.Lfunc_end4:
+	.size	build_binary_tree, .Lfunc_end4-build_binary_tree
 	.cfi_endproc
                                         # -- End function
-	.globl	create_max_heap         # -- Begin function create_max_heap
+	.globl	add_node                # -- Begin function add_node
 	.p2align	4, 0x90
-	.type	create_max_heap,@function
-create_max_heap:                        # @create_max_heap
+	.type	add_node,@function
+add_node:                               # @add_node
 	.cfi_startproc
-# %bb.0:                                # %entry
+# %bb.0:                                # %test
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	subq	$32, %rsp
+	.cfi_def_cfa_offset 48
+	.cfi_offset %rbx, -16
+	movl	%esi, %ebx
+	movq	%rdi, 8(%rsp)
+	movl	%ebx, 24(%rsp)
+	movl	$24, %edi
+	callq	malloc
+.Ltmp46:
+	movl	%ebx, (%rax)
+	movq	$0, 8(%rax)
+	movq	$0, 16(%rax)
+	movq	%rax, 16(%rsp)
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rdi
+	callq	tig_nillable
+.Ltmp47:
+	cmpl	$1, %eax
+	jne	.LBB5_2
+# %bb.1:                                # %then
+	movq	8(%rsp), %rax
+	movq	16(%rsp), %rcx
+	movq	%rcx, 8(%rax)
+	jmp	.LBB5_3
+.LBB5_2:                                # %else
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rsi
+	leaq	8(%rsp), %rdi
+	callq	insert_node
+.Ltmp48:
+.LBB5_3:                                # %merge
+	addq	$32, %rsp
+	popq	%rbx
+	retq
+.Lfunc_end5:
+	.size	add_node, .Lfunc_end5-add_node
+	.cfi_endproc
+                                        # -- End function
+	.globl	insert_node             # -- Begin function insert_node
+	.p2align	4, 0x90
+	.type	insert_node,@function
+insert_node:                            # @insert_node
+	.cfi_startproc
+# %bb.0:                                # %test1
 	pushq	%rbx
 	.cfi_def_cfa_offset 16
 	subq	$16, %rsp
 	.cfi_def_cfa_offset 32
 	.cfi_offset %rbx, -16
+	movq	%rsi, %rbx
 	movq	%rdi, 8(%rsp)
-	movl	8(%rdi), %eax
-	leal	-1(%rax), %ecx
-	shrl	$31, %ecx
-	leal	-1(%rax,%rcx), %ebx
-	sarl	%ebx
-	testl	%ebx, %ebx
-	js	.LBB4_3
-	.p2align	4, 0x90
-.LBB4_2:                                # %loop
-                                        # =>This Inner Loop Header: Depth=1
-	movq	8(%rsp), %rdi
-	movl	8(%rdi), %edx
-	movl	%ebx, %esi
-	callq	max_heapify
-.Ltmp45:
-	decl	%ebx
-	testl	%ebx, %ebx
-	jns	.LBB4_2
-.LBB4_3:                                # %end
-	addq	$16, %rsp
-	popq	%rbx
-	retq
-.Lfunc_end4:
-	.size	create_max_heap, .Lfunc_end4-create_max_heap
-	.cfi_endproc
-                                        # -- End function
-	.globl	swap                    # -- Begin function swap
-	.p2align	4, 0x90
-	.type	swap,@function
-swap:                                   # @swap
-	.cfi_startproc
-# %bb.0:                                # %entry
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	pushq	%r15
-	.cfi_def_cfa_offset 24
-	pushq	%r14
-	.cfi_def_cfa_offset 32
-	pushq	%r12
-	.cfi_def_cfa_offset 40
-	pushq	%rbx
-	.cfi_def_cfa_offset 48
-	subq	$16, %rsp
-	.cfi_def_cfa_offset 64
-	.cfi_offset %rbx, -48
-	.cfi_offset %r12, -40
-	.cfi_offset %r14, -32
-	.cfi_offset %r15, -24
-	.cfi_offset %rbp, -16
-	movl	%edx, %r14d
-	movl	%esi, %ebp
-	movq	%rdi, 8(%rsp)
-	movq	16(%rdi), %rbx
-	movl	$.L__unnamed_19, %edx
+	movl	$.L__unnamed_20, %esi
 	movq	%rbx, %rdi
-	callq	tig_check_array_bound
-.Ltmp46:
-	movq	8(%rbx), %rax
-	movslq	%ebp, %r15
-	movl	(%rax,%r15,4), %r12d
-	movq	8(%rsp), %rax
-	movq	16(%rax), %rbp
-	movl	$.L__unnamed_20, %edx
-	movq	%rbp, %rdi
-	movl	%r14d, %esi
-	callq	tig_check_array_bound
-.Ltmp47:
-	movq	8(%rbp), %rax
-	movslq	%r14d, %rbp
-	movl	(%rax,%rbp,4), %r14d
-	movq	8(%rsp), %rax
-	movq	16(%rax), %rbx
-	movl	$.L__unnamed_21, %edx
-	movq	%rbx, %rdi
-	movl	%r15d, %esi
-	callq	tig_check_array_bound
-.Ltmp48:
-	movq	8(%rbx), %rax
-	movl	%r14d, (%rax,%r15,4)
-	movq	8(%rsp), %rax
-	movq	16(%rax), %rbx
-	movl	$.L__unnamed_22, %edx
-	movq	%rbx, %rdi
-	movl	%ebp, %esi
-	callq	tig_check_array_bound
+	callq	tig_check_null_pointer
 .Ltmp49:
-	movq	8(%rbx), %rax
-	movl	%r12d, (%rax,%rbp,4)
+	movl	(%rbx), %ecx
+	movq	8(%rsp), %rdx
+	xorl	%eax, %eax
+	cmpl	16(%rdx), %ecx
+	jg	.LBB6_2
+# %bb.1:                                # %then2
+	movl	$.L__unnamed_21, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp50:
+	movq	16(%rbx), %rdi
+	callq	tig_nillable
+.Ltmp51:
+.LBB6_2:                                # %merge4
+	cmpl	$1, %eax
+	jne	.LBB6_6
+# %bb.3:                                # %then
+	movl	$.L__unnamed_22, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp52:
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rax
+	movq	%rax, 16(%rbx)
+	jmp	.LBB6_4
+.LBB6_6:                                # %test18
+	movl	$.L__unnamed_23, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp54:
+	movl	(%rbx), %ecx
+	movq	8(%rsp), %rdx
+	xorl	%eax, %eax
+	cmpl	16(%rdx), %ecx
+	jle	.LBB6_8
+# %bb.7:                                # %then19
+	movl	$.L__unnamed_24, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp55:
+	movq	8(%rbx), %rdi
+	callq	tig_nillable
+.Ltmp56:
+.LBB6_8:                                # %merge21
+	cmpl	$1, %eax
+	jne	.LBB6_9
+# %bb.5:                                # %then15
+	movl	$.L__unnamed_25, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp53:
+	movq	8(%rsp), %rax
+	movq	8(%rax), %rax
+	movq	%rax, 8(%rbx)
+	jmp	.LBB6_4
+.LBB6_9:                                # %test43
+	movl	$.L__unnamed_26, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp57:
+	movl	(%rbx), %eax
+	movq	8(%rsp), %rcx
+	cmpl	16(%rcx), %eax
+	jg	.LBB6_12
+# %bb.10:                               # %then44
+	movl	$.L__unnamed_27, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp58:
+	movq	16(%rbx), %rsi
+	jmp	.LBB6_11
+.LBB6_12:                               # %else45
+	movl	$.L__unnamed_28, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp60:
+	movq	8(%rbx), %rsi
+.LBB6_11:                               # %merge
+	movq	8(%rsp), %rdi
+	callq	insert_node
+.Ltmp59:
+.LBB6_4:                                # %merge
 	addq	$16, %rsp
 	popq	%rbx
-	popq	%r12
-	popq	%r14
-	popq	%r15
-	popq	%rbp
-	retq
-.Lfunc_end5:
-	.size	swap, .Lfunc_end5-swap
-	.cfi_endproc
-                                        # -- End function
-	.globl	max_heapify             # -- Begin function max_heapify
-	.p2align	4, 0x90
-	.type	max_heapify,@function
-max_heapify:                            # @max_heapify
-	.cfi_startproc
-# %bb.0:                                # %test8
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	pushq	%r15
-	.cfi_def_cfa_offset 24
-	pushq	%r14
-	.cfi_def_cfa_offset 32
-	pushq	%r13
-	.cfi_def_cfa_offset 40
-	pushq	%r12
-	.cfi_def_cfa_offset 48
-	pushq	%rbx
-	.cfi_def_cfa_offset 56
-	subq	$24, %rsp
-	.cfi_def_cfa_offset 80
-	.cfi_offset %rbx, -56
-	.cfi_offset %r12, -48
-	.cfi_offset %r13, -40
-	.cfi_offset %r14, -32
-	.cfi_offset %r15, -24
-	.cfi_offset %rbp, -16
-	movl	%edx, %ebp
-	movl	%esi, %r13d
-	movq	%rdi, 8(%rsp)
-	movq	16(%rdi), %rbx
-	movl	$.L__unnamed_23, %edx
-	movq	%rbx, %rdi
-	callq	tig_check_array_bound
-.Ltmp50:
-	movq	8(%rbx), %rax
-	movslq	%r13d, %r15
-	movl	(%rax,%r15,4), %r14d
-	leal	2(%r13,%r13), %ebx
-	xorl	%eax, %eax
-	movl	%ebp, 20(%rsp)          # 4-byte Spill
-	cmpl	%ebp, %ebx
-	jge	.LBB6_2
-# %bb.1:                                # %then9
-	movq	8(%rsp), %rax
-	movq	16(%rax), %rbp
-	movl	$.L__unnamed_24, %edx
-	movq	%rbp, %rdi
-	movl	%ebx, %esi
-	callq	tig_check_array_bound
-.Ltmp51:
-	movq	8(%rbp), %rcx
-	movslq	%ebx, %rdx
-	xorl	%eax, %eax
-	cmpl	%r14d, (%rcx,%rdx,4)
-	setg	%al
-.LBB6_2:                                # %merge11
-	leal	1(%r13,%r13), %ebp
-	testl	%eax, %eax
-	movl	%r13d, %r12d
-	je	.LBB6_4
-# %bb.3:                                # %then
-	movq	8(%rsp), %rax
-	movq	16(%rax), %r12
-	movl	$.L__unnamed_25, %edx
-	movq	%r12, %rdi
-	movl	%ebx, %esi
-	callq	tig_check_array_bound
-.Ltmp52:
-	movq	8(%r12), %rax
-	movslq	%ebx, %rcx
-	movl	(%rax,%rcx,4), %r14d
-	movl	%ebx, %r12d
-.LBB6_4:                                # %test42
-	xorl	%eax, %eax
-	cmpl	20(%rsp), %ebp          # 4-byte Folded Reload
-	jge	.LBB6_6
-# %bb.5:                                # %then43
-	movq	8(%rsp), %rax
-	movq	16(%rax), %rbx
-	movl	$.L__unnamed_26, %edx
-	movq	%rbx, %rdi
-	movl	%ebp, %esi
-	callq	tig_check_array_bound
-.Ltmp53:
-	movq	8(%rbx), %rcx
-	movslq	%ebp, %rdx
-	xorl	%eax, %eax
-	cmpl	%r14d, (%rcx,%rdx,4)
-	setg	%al
-.LBB6_6:                                # %merge45
-	testl	%eax, %eax
-	je	.LBB6_7
-# %bb.10:                               # %then39
-	movq	8(%rsp), %rax
-	movq	16(%rax), %rbx
-	movl	$.L__unnamed_27, %edx
-	movq	%rbx, %rdi
-	movl	%ebp, %esi
-	callq	tig_check_array_bound
-.Ltmp57:
-	movq	8(%rbx), %rax
-	movslq	%ebp, %rcx
-	movl	(%rax,%rcx,4), %r14d
-	movl	%ebp, %r12d
-.LBB6_7:                                # %test78
-	movq	8(%rsp), %rax
-	movq	16(%rax), %rbx
-	movl	$.L__unnamed_28, %edx
-	movq	%rbx, %rdi
-	movl	%r15d, %esi
-	callq	tig_check_array_bound
-.Ltmp54:
-	movq	8(%rbx), %rax
-	cmpl	(%rax,%r15,4), %r14d
-	je	.LBB6_9
-# %bb.8:                                # %then79
-	movq	8(%rsp), %rdi
-	movl	%r13d, %esi
-	movl	%r12d, %edx
-	callq	swap
-.Ltmp55:
-	movq	8(%rsp), %rdi
-	movl	%r12d, %esi
-	movl	20(%rsp), %edx          # 4-byte Reload
-	callq	max_heapify
-.Ltmp56:
-.LBB6_9:                                # %merge81
-	addq	$24, %rsp
-	popq	%rbx
-	popq	%r12
-	popq	%r13
-	popq	%r14
-	popq	%r15
-	popq	%rbp
 	retq
 .Lfunc_end6:
-	.size	max_heapify, .Lfunc_end6-max_heapify
+	.size	insert_node, .Lfunc_end6-insert_node
+	.cfi_endproc
+                                        # -- End function
+	.globl	in_order_traversing     # -- Begin function in_order_traversing
+	.p2align	4, 0x90
+	.type	in_order_traversing,@function
+in_order_traversing:                    # @in_order_traversing
+	.cfi_startproc
+# %bb.0:                                # %test
+	pushq	%r15
+	.cfi_def_cfa_offset 16
+	pushq	%r14
+	.cfi_def_cfa_offset 24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	subq	$16, %rsp
+	.cfi_def_cfa_offset 48
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
+	.cfi_offset %r15, -16
+	movq	%rsi, %rbx
+	movq	%rdi, 8(%rsp)
+	movq	%rbx, %rdi
+	callq	tig_nillable
+.Ltmp61:
+	cmpl	$1, %eax
+	je	.LBB7_2
+# %bb.1:                                # %else
+	movl	$.L__unnamed_29, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp62:
+	movq	8(%rbx), %rsi
+	movq	8(%rsp), %rdi
+	callq	in_order_traversing
+.Ltmp63:
+	movq	8(%rsp), %rax
+	movslq	8(%rax), %r14
+	movq	16(%rax), %r15
+	movl	$.L__unnamed_30, %edx
+	movq	%r15, %rdi
+	movl	%r14d, %esi
+	callq	tig_check_array_bound
+.Ltmp64:
+	movq	8(%r15), %r15
+	movl	$.L__unnamed_31, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp65:
+	movl	(%rbx), %eax
+	movl	%eax, (%r15,%r14,4)
+	movq	8(%rsp), %rax
+	incl	8(%rax)
+	movl	$.L__unnamed_32, %esi
+	movq	%rbx, %rdi
+	callq	tig_check_null_pointer
+.Ltmp66:
+	movq	16(%rbx), %rsi
+	movq	8(%rsp), %rdi
+	callq	in_order_traversing
+.Ltmp67:
+.LBB7_2:                                # %merge
+	addq	$16, %rsp
+	popq	%rbx
+	popq	%r14
+	popq	%r15
+	retq
+.Lfunc_end7:
+	.size	in_order_traversing, .Lfunc_end7-in_order_traversing
 	.cfi_endproc
                                         # -- End function
 	.globl	create_array_test       # -- Begin function create_array_test
@@ -631,52 +636,52 @@ create_array_test:                      # @create_array_test
 	movq	%rdi, 8(%rsp)
 	movl	$20, %edi
 	callq	malloc
-.Ltmp58:
+.Ltmp68:
 	movq	%rax, %rbx
 	xorl	%eax, %eax
 	cmpl	$4, %eax
-	jg	.LBB7_3
+	jg	.LBB8_3
 	.p2align	4, 0x90
-.LBB7_2:                                # %loop
+.LBB8_2:                                # %loop
                                         # =>This Inner Loop Header: Depth=1
 	movl	$1, (%rbx,%rax,4)
 	incq	%rax
 	cmpl	$4, %eax
-	jle	.LBB7_2
-.LBB7_3:                                # %end
+	jle	.LBB8_2
+.LBB8_3:                                # %end
 	movl	$16, %edi
 	callq	malloc
-.Ltmp59:
+.Ltmp69:
 	movq	%rax, %r14
 	movl	$5, (%r14)
 	movq	%rbx, 8(%r14)
 	movl	$4, %ebp
 	xorl	%ebx, %ebx
 	cmpl	$4, %ebx
-	jg	.LBB7_6
+	jg	.LBB8_6
 	.p2align	4, 0x90
-.LBB7_5:                                # %loop11
+.LBB8_5:                                # %loop11
                                         # =>This Inner Loop Header: Depth=1
-	movl	$.L__unnamed_29, %edx
+	movl	$.L__unnamed_33, %edx
 	movq	%r14, %rdi
 	movl	%ebx, %esi
 	callq	tig_check_array_bound
-.Ltmp60:
+.Ltmp70:
 	movq	8(%r14), %rax
 	movl	%ebp, (%rax,%rbx,4)
 	decl	%ebp
 	incq	%rbx
 	cmpl	$4, %ebx
-	jle	.LBB7_5
-.LBB7_6:                                # %end12
+	jle	.LBB8_5
+.LBB8_6:                                # %end12
 	movq	%r14, %rax
 	addq	$16, %rsp
 	popq	%rbx
 	popq	%r14
 	popq	%rbp
 	retq
-.Lfunc_end7:
-	.size	create_array_test, .Lfunc_end7-create_array_test
+.Lfunc_end8:
+	.size	create_array_test, .Lfunc_end8-create_array_test
 	.cfi_endproc
                                         # -- End function
 	.type	.L__unnamed_14,@object  # @0
@@ -689,8 +694,8 @@ create_array_test:                      # @create_array_test
 	.section	.rodata.str1.16,"aMS",@progbits,1
 	.p2align	4
 .L__unnamed_15:
-	.asciz	"test/heap_sort.tig::6.67: Array out of bound"
-	.size	.L__unnamed_15, 45
+	.asciz	"test/binary_sort.tig::6.67: Array out of bound"
+	.size	.L__unnamed_15, 47
 
 	.type	.L__unnamed_16,@object  # @2
 	.section	.rodata.str1.1,"aMS",@progbits,1
@@ -707,163 +712,187 @@ create_array_test:                      # @create_array_test
 	.section	.rodata.str1.16,"aMS",@progbits,1
 	.p2align	4
 .L__unnamed_18:
-	.asciz	"test/heap_sort.tig::16.41: Array out of bound"
-	.size	.L__unnamed_18, 46
+	.asciz	"test/binary_sort.tig::16.41: Array out of bound"
+	.size	.L__unnamed_18, 48
 
-	.type	.L__unnamed_19,@object  # @5
-	.p2align	4
-.L__unnamed_19:
-	.asciz	"test/heap_sort.tig::36.37: Array out of bound"
-	.size	.L__unnamed_19, 46
-
-	.type	.L__unnamed_20,@object  # @6
+	.type	.L__unnamed_20,@object  # @5
 	.p2align	4
 .L__unnamed_20:
-	.asciz	"test/heap_sort.tig::37.37: Array out of bound"
-	.size	.L__unnamed_20, 46
+	.asciz	"test/binary_sort.tig::35.47: Nil pointer exception!"
+	.size	.L__unnamed_20, 52
 
-	.type	.L__unnamed_21,@object  # @7
+	.type	.L__unnamed_21,@object  # @6
 	.p2align	4
 .L__unnamed_21:
-	.asciz	"test/heap_sort.tig::39.23: Array out of bound"
-	.size	.L__unnamed_21, 46
+	.asciz	"test/binary_sort.tig::35.79: Nil pointer exception!"
+	.size	.L__unnamed_21, 52
 
-	.type	.L__unnamed_22,@object  # @8
+	.type	.L__unnamed_22,@object  # @7
 	.p2align	4
 .L__unnamed_22:
-	.asciz	"test/heap_sort.tig::40.23: Array out of bound"
-	.size	.L__unnamed_22, 46
+	.asciz	"test/binary_sort.tig::36.49: Nil pointer exception!"
+	.size	.L__unnamed_22, 52
 
-	.type	.L__unnamed_23,@object  # @9
+	.type	.L__unnamed_23,@object  # @8
 	.p2align	4
 .L__unnamed_23:
-	.asciz	"test/heap_sort.tig::45.38: Array out of bound"
-	.size	.L__unnamed_23, 46
+	.asciz	"test/binary_sort.tig::37.52: Nil pointer exception!"
+	.size	.L__unnamed_23, 52
 
-	.type	.L__unnamed_24,@object  # @10
+	.type	.L__unnamed_24,@object  # @9
 	.p2align	4
 .L__unnamed_24:
-	.asciz	"test/heap_sort.tig::50.47: Array out of bound"
-	.size	.L__unnamed_24, 46
+	.asciz	"test/binary_sort.tig::37.83: Nil pointer exception!"
+	.size	.L__unnamed_24, 52
 
-	.type	.L__unnamed_25,@object  # @11
+	.type	.L__unnamed_25,@object  # @10
 	.p2align	4
 .L__unnamed_25:
-	.asciz	"test/heap_sort.tig::51.40: Array out of bound"
-	.size	.L__unnamed_25, 46
+	.asciz	"test/binary_sort.tig::38.49: Nil pointer exception!"
+	.size	.L__unnamed_25, 52
 
-	.type	.L__unnamed_26,@object  # @12
+	.type	.L__unnamed_26,@object  # @11
 	.p2align	4
 .L__unnamed_26:
-	.asciz	"test/heap_sort.tig::53.46: Array out of bound"
-	.size	.L__unnamed_26, 46
+	.asciz	"test/binary_sort.tig::39.52: Nil pointer exception!"
+	.size	.L__unnamed_26, 52
 
-	.type	.L__unnamed_27,@object  # @13
+	.type	.L__unnamed_27,@object  # @12
 	.p2align	4
 .L__unnamed_27:
-	.asciz	"test/heap_sort.tig::54.40: Array out of bound"
-	.size	.L__unnamed_27, 46
+	.asciz	"test/binary_sort.tig::40.61: Nil pointer exception!"
+	.size	.L__unnamed_27, 52
 
-	.type	.L__unnamed_28,@object  # @14
+	.type	.L__unnamed_28,@object  # @13
 	.p2align	4
 .L__unnamed_28:
-	.asciz	"test/heap_sort.tig::56.37: Array out of bound"
-	.size	.L__unnamed_28, 46
+	.asciz	"test/binary_sort.tig::41.61: Nil pointer exception!"
+	.size	.L__unnamed_28, 52
+
+	.type	.L__unnamed_19,@object  # @14
+	.p2align	4
+.L__unnamed_19:
+	.asciz	"test/binary_sort.tig::49.36: Array out of bound"
+	.size	.L__unnamed_19, 48
 
 	.type	.L__unnamed_29,@object  # @15
 	.p2align	4
 .L__unnamed_29:
-	.asciz	"test/heap_sort.tig::80.41: Array out of bound"
-	.size	.L__unnamed_29, 46
+	.asciz	"test/binary_sort.tig::57.48: Nil pointer exception!"
+	.size	.L__unnamed_29, 52
 
-	.type	.L__unnamed_1,@object   # @16
+	.type	.L__unnamed_30,@object  # @16
+	.p2align	4
+.L__unnamed_30:
+	.asciz	"test/binary_sort.tig::58.23: Array out of bound"
+	.size	.L__unnamed_30, 48
+
+	.type	.L__unnamed_31,@object  # @17
+	.p2align	4
+.L__unnamed_31:
+	.asciz	"test/binary_sort.tig::58.44: Nil pointer exception!"
+	.size	.L__unnamed_31, 52
+
+	.type	.L__unnamed_32,@object  # @18
+	.p2align	4
+.L__unnamed_32:
+	.asciz	"test/binary_sort.tig::60.48: Nil pointer exception!"
+	.size	.L__unnamed_32, 52
+
+	.type	.L__unnamed_33,@object  # @19
+	.p2align	4
+.L__unnamed_33:
+	.asciz	"test/binary_sort.tig::77.41: Array out of bound"
+	.size	.L__unnamed_33, 48
+
+	.type	.L__unnamed_1,@object   # @20
 	.section	.rodata.str1.1,"aMS",@progbits,1
 .L__unnamed_1:
 	.asciz	"Before sorting"
 	.size	.L__unnamed_1, 15
 
-	.type	.L__unnamed_2,@object   # @17
+	.type	.L__unnamed_2,@object   # @21
 .L__unnamed_2:
 	.asciz	"=============="
 	.size	.L__unnamed_2, 15
 
-	.type	.L__unnamed_3,@object   # @18
+	.type	.L__unnamed_3,@object   # @22
 .L__unnamed_3:
 	.asciz	"After sorting"
 	.size	.L__unnamed_3, 14
 
-	.type	.L__unnamed_4,@object   # @19
+	.type	.L__unnamed_4,@object   # @23
 	.section	.rodata.str1.16,"aMS",@progbits,1
 	.p2align	4
 .L__unnamed_4:
-	.asciz	"test/heap_sort.tig::94.23: Array out of bound"
-	.size	.L__unnamed_4, 46
+	.asciz	"test/binary_sort.tig::90.23: Array out of bound"
+	.size	.L__unnamed_4, 48
 
-	.type	.L__unnamed_5,@object   # @20
+	.type	.L__unnamed_5,@object   # @24
 	.p2align	4
 .L__unnamed_5:
-	.asciz	"test/heap_sort.tig::95.23: Array out of bound"
-	.size	.L__unnamed_5, 46
+	.asciz	"test/binary_sort.tig::91.23: Array out of bound"
+	.size	.L__unnamed_5, 48
 
-	.type	.L__unnamed_6,@object   # @21
+	.type	.L__unnamed_6,@object   # @25
 	.p2align	4
 .L__unnamed_6:
-	.asciz	"test/heap_sort.tig::96.23: Array out of bound"
-	.size	.L__unnamed_6, 46
+	.asciz	"test/binary_sort.tig::92.23: Array out of bound"
+	.size	.L__unnamed_6, 48
 
-	.type	.L__unnamed_7,@object   # @22
+	.type	.L__unnamed_7,@object   # @26
 	.p2align	4
 .L__unnamed_7:
-	.asciz	"test/heap_sort.tig::97.23: Array out of bound"
-	.size	.L__unnamed_7, 46
+	.asciz	"test/binary_sort.tig::93.23: Array out of bound"
+	.size	.L__unnamed_7, 48
 
-	.type	.L__unnamed_8,@object   # @23
+	.type	.L__unnamed_8,@object   # @27
 	.p2align	4
 .L__unnamed_8:
-	.asciz	"test/heap_sort.tig::98.23: Array out of bound"
-	.size	.L__unnamed_8, 46
+	.asciz	"test/binary_sort.tig::94.23: Array out of bound"
+	.size	.L__unnamed_8, 48
 
-	.type	.L__unnamed_9,@object   # @24
+	.type	.L__unnamed_9,@object   # @28
 	.p2align	4
 .L__unnamed_9:
-	.asciz	"test/heap_sort.tig::102.23: Array out of bound"
-	.size	.L__unnamed_9, 47
+	.asciz	"test/binary_sort.tig::98.23: Array out of bound"
+	.size	.L__unnamed_9, 48
 
-	.type	.L__unnamed_10,@object  # @25
+	.type	.L__unnamed_10,@object  # @29
 	.p2align	4
 .L__unnamed_10:
-	.asciz	"test/heap_sort.tig::103.23: Array out of bound"
-	.size	.L__unnamed_10, 47
+	.asciz	"test/binary_sort.tig::99.23: Array out of bound"
+	.size	.L__unnamed_10, 48
 
-	.type	.L__unnamed_11,@object  # @26
+	.type	.L__unnamed_11,@object  # @30
 	.p2align	4
 .L__unnamed_11:
-	.asciz	"test/heap_sort.tig::104.23: Array out of bound"
-	.size	.L__unnamed_11, 47
+	.asciz	"test/binary_sort.tig::100.23: Array out of bound"
+	.size	.L__unnamed_11, 49
 
-	.type	.L__unnamed_12,@object  # @27
+	.type	.L__unnamed_12,@object  # @31
 	.p2align	4
 .L__unnamed_12:
-	.asciz	"test/heap_sort.tig::105.23: Array out of bound"
-	.size	.L__unnamed_12, 47
+	.asciz	"test/binary_sort.tig::101.23: Array out of bound"
+	.size	.L__unnamed_12, 49
 
-	.type	.L__unnamed_13,@object  # @28
+	.type	.L__unnamed_13,@object  # @32
 	.p2align	4
 .L__unnamed_13:
-	.asciz	"test/heap_sort.tig::106.23: Array out of bound"
-	.size	.L__unnamed_13, 47
+	.asciz	"test/binary_sort.tig::102.23: Array out of bound"
+	.size	.L__unnamed_13, 49
 
 
 	.text
-	.globl	"camlLlvm_byte_code/test/heap_sort__code_end"
-"camlLlvm_byte_code/test/heap_sort__code_end":
+	.globl	"camlLlvm_byte_code/test/binary_sort__code_end"
+"camlLlvm_byte_code/test/binary_sort__code_end":
 	.data
-	.globl	"camlLlvm_byte_code/test/heap_sort__data_end"
-"camlLlvm_byte_code/test/heap_sort__data_end":
+	.globl	"camlLlvm_byte_code/test/binary_sort__data_end"
+"camlLlvm_byte_code/test/binary_sort__data_end":
 	.quad	0
-	.globl	"camlLlvm_byte_code/test/heap_sort__frametable"
-"camlLlvm_byte_code/test/heap_sort__frametable":
-	.short	61
+	.globl	"camlLlvm_byte_code/test/binary_sort__frametable"
+"camlLlvm_byte_code/test/binary_sort__frametable":
+	.short	71
 	.p2align	3
                                         # live roots for main
 	.quad	.Ltmp0
@@ -1028,7 +1057,7 @@ create_array_test:                      # @create_array_test
 	.short	40
 	.short	0
 	.p2align	3
-                                        # live roots for heap_sort
+                                        # live roots for binary_sort
 	.quad	.Ltmp40
 	.short	40
 	.short	0
@@ -1037,83 +1066,124 @@ create_array_test:                      # @create_array_test
 	.short	40
 	.short	0
 	.p2align	3
+                                        # live roots for build_binary_tree
 	.quad	.Ltmp42
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	.Ltmp43
-	.short	40
+	.short	56
 	.short	0
 	.p2align	3
 	.quad	.Ltmp44
-	.short	40
-	.short	0
-	.p2align	3
-                                        # live roots for create_max_heap
-	.quad	.Ltmp45
-	.short	24
-	.short	0
-	.p2align	3
-                                        # live roots for swap
-	.quad	.Ltmp46
 	.short	56
+	.short	0
+	.p2align	3
+	.quad	.Ltmp45
+	.short	56
+	.short	0
+	.p2align	3
+                                        # live roots for add_node
+	.quad	.Ltmp46
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	.Ltmp47
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
 	.quad	.Ltmp48
-	.short	56
+	.short	40
 	.short	0
 	.p2align	3
+                                        # live roots for insert_node
 	.quad	.Ltmp49
-	.short	56
+	.short	24
 	.short	0
 	.p2align	3
-                                        # live roots for max_heapify
 	.quad	.Ltmp50
-	.short	72
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	.Ltmp51
-	.short	72
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	.Ltmp52
-	.short	72
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	.Ltmp53
-	.short	72
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	.Ltmp54
-	.short	72
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	.Ltmp55
-	.short	72
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	.Ltmp56
-	.short	72
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	.Ltmp57
-	.short	72
+	.short	24
 	.short	0
 	.p2align	3
-                                        # live roots for create_array_test
 	.quad	.Ltmp58
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	.Ltmp59
-	.short	40
+	.short	24
 	.short	0
 	.p2align	3
 	.quad	.Ltmp60
+	.short	24
+	.short	0
+	.p2align	3
+                                        # live roots for in_order_traversing
+	.quad	.Ltmp61
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp62
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp63
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp64
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp65
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp66
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp67
+	.short	40
+	.short	0
+	.p2align	3
+                                        # live roots for create_array_test
+	.quad	.Ltmp68
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp69
+	.short	40
+	.short	0
+	.p2align	3
+	.quad	.Ltmp70
 	.short	40
 	.short	0
 	.p2align	3

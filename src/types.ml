@@ -43,6 +43,16 @@ let rec leq = function
   | (RECORD _, GENERIC_RECORD) -> true                       
   | (GENERIC_ARRAY, ARRAY _) -> true
   | (ARRAY _, GENERIC_ARRAY) -> true
+  | (FUNC_CLOSURE(first_args, first_ret), FUNC_CLOSURE(second_args, second_ret)) ->
+     print_string "compare here\n";
+     print_int (List.length(first_args));
+     print_int (List.length(second_args));
+     List.length(first_args) = List.length(second_args)
+     && List.fold_left2
+          (fun acc first sec -> acc && leq(first, sec) && leq(sec, first) )
+          true
+          (first_ret::first_args)
+          (second_ret::second_args)
   | (_, _) -> false
                       
 let comp (t1, t2) = 

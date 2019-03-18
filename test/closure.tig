@@ -1,11 +1,13 @@
 let
-	type intfun = (int -> int) -> string
-	/* function add(n: int): intfun =
+	type intfunfun = (int -> int) -> string
+	type intfun = int -> int
+	function add(n: int): intfun =
 		 let
 			function h(m: int): int = n + m
 		 in
 			h
-		 end */
+		 end 
+	var add_three := add(3) 
 in
-	5 /*add(3)(4)*/
+	5 /*add_three(4)*/
 end

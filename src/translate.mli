@@ -69,5 +69,5 @@ val cast_generic_to_record: exp -> Types.ty -> exp
 
 val cast_generic_to_record_pointer: exp -> Types.ty -> exp
 
-                                                                  
+val build_closure: string -> Types.ty list -> Types.ty -> exp                                                                  
 

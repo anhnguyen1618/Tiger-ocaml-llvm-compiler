@@ -275,9 +275,8 @@ let rec trans_dec (
       match S.look(v_env, s) with
         Some (E.VarEntry({ty; access})) ->
          {exp = Translate.simple_var access (S.name s) level; ty = actual_ty ty}
-      | Some _ ->
-         Err.error pos ("Tiger does not support function closure yet!\n" ^ S.name(s) ^ "\n");
-         {exp = Translate.int_exp 0; ty = T.NIL}
+      | Some (E.FunEntry{formals; result; label}) -> 
+         {exp = Translate.build_closure (S.name label) formals result; ty = T.FUNC_CLOSURE(formals, result)}
       | None ->
          Err.error pos ("variable '" ^ S.name(s) ^"' has not been declared\n");
 	 {exp = Translate.int_exp 0; ty = T.NIL}
@@ -434,35 +433,45 @@ let rec trans_dec (
       {exp = Translate.op_exp left_val oper right_val; ty = T.INT}
 
     and check_func_call_exp (A.CallExp {func; args; pos}): expty =
-      let check_param acc (exp, ty): Translate.exp list =
-	let {exp = argIr; ty = arg_type } = tr_exp exp in
-        let real_arg_type = actual_ty arg_type in
-        let msg = Printf.sprintf "Mismatched types with function args.
-                                  Expect: '%s'. Received: '%s'"
-                    (T.name ty) (T.name real_arg_type) in
-	U.assert_type_eq (ty, real_arg_type, pos, msg);
-        let arg_val = match arg_type with
-          | T.NIL -> Translate.nil_exp ty
-          | _ -> argIr
+      let check_params formals args =
+        let check_param acc (exp, ty): Translate.exp list =
+	  let {exp = argIr; ty = arg_type } = tr_exp exp in
+          let real_arg_type = actual_ty arg_type in
+          let msg = Printf.sprintf "Mismatched types with function args.
+                                    Expect: '%s'. Received: '%s'"
+                      (T.name ty) (T.name real_arg_type) in
+	  U.assert_type_eq (ty, real_arg_type, pos, msg);
+          let arg_val = match arg_type with
+            | T.NIL -> Translate.nil_exp ty
+            | _ -> argIr
+          in
+          let casted_arg_ir = match ty with
+            | T.GENERIC_RECORD | T.GENERIC_ARRAY -> Translate.build_bitcast_generic T.STRING arg_val
+            | _ -> arg_val
+          in
+          acc @ [casted_arg_ir]
         in
-        let casted_arg_ir = match ty with
-          | T.GENERIC_RECORD | T.GENERIC_ARRAY -> Translate.build_bitcast_generic T.STRING arg_val
-          | _ -> arg_val
-        in
-        acc @ [casted_arg_ir]
+        
+        if (List.length args) <> (List.length formals)
+        then Err.error pos
+               ("Function requires "^  (args |> List.length |> string_of_int) ^ " arguments");
+        let arg_formal_pairs = List.map2 (fun a b -> (a, b)) args formals in
+	let args = List.fold_left check_param [] arg_formal_pairs in
+        args
       in
       match S.look(v_env, func) with
       | Some ( E.FunEntry {formals; result; label; level = dec_level} ) ->
-         if (List.length args) <> (List.length formals)
-         then Err.error pos
-                ("Function requires "^  (args |> List.length |> string_of_int) ^ " arguments");
-         let arg_formal_pairs = List.map2 (fun a b -> (a, b)) args formals in
-	 let args = List.fold_left check_param [] arg_formal_pairs in
+	 let args = check_params formals args in
          {exp = Translate.func_call_exp dec_level level (S.name label) args; ty = result}
-
-      | Some _ ->
-         Err.error pos (S.name(func) ^ " does not have type function");
-	 {exp = Translate.dummy_exp; ty = T.NIL}
+      | Some (E.VarEntry {ty; access}) ->
+         begin
+           match ty with
+           | T.FUNC_CLOSURE (formals, result) ->
+              let params = check_params formals args in
+              {exp = Translate.closure_call_exp access (*TODO: continue here*) ; ty = result}
+           | _ -> Err.error pos (S.name(func) ^ " does not have type function");
+	          {exp = Translate.dummy_exp; ty = T.NIL}
+         end
       | None ->
          Err.error pos ("Function '" ^ S.name(func) ^ "' can't be found");
 	 { exp = Translate.dummy_exp; ty = T.NIL}
@@ -671,7 +680,7 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   let main_level = Translate.new_level Translate.outermost in
   ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, outermost_break_block)); 
   Translate.build_return_main();
-  (*dump_module Translate.the_module;*)
+  dump_module Translate.the_module;
   print_module ("llvm_byte_code/"^ output_name ^ ".ll") Translate.the_module;
 
 

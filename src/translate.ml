@@ -60,6 +60,7 @@ let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT_POINTER -> int_pointer
   | T.GENERIC_ARRAY -> string_type
   | T.GENERIC_RECORD -> string_type
+  | T.FUNC_CLOSURE _ -> string_type
   | T.NAME (_, real_type) -> begin
       match !real_type with
       | Some(T.RECORD _) -> string_type
@@ -502,15 +503,51 @@ let func_dec
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;
 
+  let build_closure_ret() =
+    let (fp_addr_type, fp_addr) = get_current_fp() in
+    let casted_fp_addr = build_bitcast_generic fp_addr_type fp_addr in
+    L.build_ret casted_fp_addr builder
+  in
+  
   let (body_type, body_exp) = gen_body() in
   ignore(match (typ, body_type) with
+         (* | (T.FUNC_CLOSURE _, _) -> build_closure_ret()*)
          | (T.NIL, _) -> L.build_ret_void builder
-         | (_, T.NIL) -> L.build_ret (nil_exp typ)  builder
+         | (_, T.NIL) -> L.build_ret (nil_exp typ) builder
          | _ -> L.build_ret body_exp builder);
 
 
   ignore(pop_fp_from_stack());
   L.position_at_end previous_block builder
+
+let build_closure
+      (name: string)
+      (arg_types: T.ty list)
+      (ret_type: T.ty)=
+  let (fp_addr_type, fp_addr) = get_current_fp() in
+  let defined_func = match L.lookup_function name the_module with
+    | None -> Err.error 0 "Function not found"; dummy_exp;
+    | Some x -> x
+  in
+
+  let llvm_fp_type = get_llvm_type fp_addr_type in
+  let arg_types =
+    llvm_fp_type
+    :: (List.map get_llvm_type arg_types)
+    |> Array.of_list
+  in
+  let function_type = L.function_type (get_llvm_type ret_type) arg_types |> L.pointer_type in
+  let closure_struct_type = L.struct_type context [|function_type; llvm_fp_type|] in
+  let closure_addr = L.build_malloc closure_struct_type "closure_addr" builder in
+  let save_val_to_closure index exp =
+    let addr = L.build_gep closure_addr [| int_exp(0); int_exp(index) |] "Element" builder in
+    ignore(L.build_store exp addr builder)
+  in
+
+  save_val_to_closure 0 defined_func;
+  save_val_to_closure 1 fp_addr;
+  let casted_fp_addr = build_bitcast_generic T.GENERIC_RECORD closure_addr in
+  casted_fp_addr
 
 let build_external_func
       (name: string)

@@ -36,11 +36,12 @@ let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
     T.RECORD (List.map map_field_to_record fields, Temp.newtemp()) in
 
   let check_array_type e = T.ARRAY(look_up_type e, Temp.newtemp()) in
-			 
-  let trans_ty: A.ty -> T.ty = function
+
+  let rec trans_ty: A.ty -> T.ty = function
     | A.NameTy (s, p) -> look_up_type (s, p)
     | A.RecordTy e -> check_record e
     | A.ArrayTy (s, p) -> check_array_type (s, p)
+    | A.FuncTy (args, ret, p) as a -> a |> Prabsyn.type_to_string |> print_string; T.FUNC_CLOSURE(List.map trans_ty args, trans_ty ret)
   in
   trans_ty ty
 

@@ -1,0 +1,11 @@
+let
+	type intfun = (int -> int) -> string
+	/* function add(n: int): intfun =
+		 let
+			function h(m: int): int = n + m
+		 in
+			h
+		 end */
+in
+	5 /*add(3)(4)*/
+end

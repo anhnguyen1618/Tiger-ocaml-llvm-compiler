@@ -45,6 +45,7 @@ let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
     | A.NameTy (s, p) -> look_up_type (s, p)
     | A.RecordTy e -> check_record e
     | A.ArrayTy (s, p) -> check_array_type (s, p)
+    | A.FuncTy _ -> T.NIL (* TODO: CLOSURE fill *)
   in
   trans_ty ty
   

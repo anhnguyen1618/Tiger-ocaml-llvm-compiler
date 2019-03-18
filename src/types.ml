@@ -14,6 +14,7 @@ type ty =
 | STRING_POINTER
 | GENERIC_ARRAY
 | GENERIC_RECORD
+| FUNC_CLOSURE of ty list * ty
   
 type comp = 
   LT

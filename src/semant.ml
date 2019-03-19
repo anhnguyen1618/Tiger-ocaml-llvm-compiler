@@ -41,7 +41,7 @@ let trans_type ((t_env: tenv), (ty: A.ty)): T.ty =
     | A.NameTy (s, p) -> look_up_type (s, p)
     | A.RecordTy e -> check_record e
     | A.ArrayTy (s, p) -> check_array_type (s, p)
-    | A.FuncTy (args, ret, p) as a -> a |> Prabsyn.type_to_string |> print_string; T.FUNC_CLOSURE(List.map trans_ty args, trans_ty ret)
+    | A.FuncTy (args, ret, p) -> T.FUNC_CLOSURE(List.map trans_ty args, trans_ty ret, ref None)
   in
   trans_ty ty
 
@@ -275,8 +275,9 @@ let rec trans_dec (
       match S.look(v_env, s) with
         Some (E.VarEntry({ty; access})) ->
          {exp = Translate.simple_var access (S.name s) level; ty = actual_ty ty}
-      | Some (E.FunEntry{formals; result; label}) -> 
-         {exp = Translate.build_closure (S.name label) formals result; ty = T.FUNC_CLOSURE(formals, result)}
+      | Some (E.FunEntry{formals; result; label}) ->
+         let (closure_type, closure_addr) = Translate.build_closure (S.name label) formals result in
+         {exp = closure_addr; ty = T.FUNC_CLOSURE(formals, result, ref (Some closure_type))}
       | None ->
          Err.error pos ("variable '" ^ S.name(s) ^"' has not been declared\n");
 	 {exp = Translate.int_exp 0; ty = T.NIL}
@@ -466,9 +467,11 @@ let rec trans_dec (
       | Some (E.VarEntry {ty; access}) ->
          begin
            match ty with
-           | T.FUNC_CLOSURE (formals, result) ->
+           | T.FUNC_CLOSURE (formals, result, recast_typ) ->
               let params = check_params formals args in
-              {exp = Translate.closure_call_exp access (*TODO: continue here*) ; ty = result}
+              let closure_addr = Translate.simple_var access (S.name func) level in
+              (*let x = Translate.closure_call_exp closure_addr recast_typ params in*)
+              {exp = Translate.closure_call_exp closure_addr recast_typ params ; ty = result}
            | _ -> Err.error pos (S.name(func) ^ " does not have type function");
 	          {exp = Translate.dummy_exp; ty = T.NIL}
          end

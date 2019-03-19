@@ -503,15 +503,17 @@ let func_dec
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;
 
-  let build_closure_ret() =
+  (*let build_closure_ret() =
     let (fp_addr_type, fp_addr) = get_current_fp() in
-    let casted_fp_addr = build_bitcast_generic fp_addr_type fp_addr in
-    L.build_ret casted_fp_addr builder
-  in
+    let function_type = L.function_type (get_llvm_type typ) arg_types |> L.pointer_type in
+    let closure_struct_type = L.struct_type context [|function_type; get_llvm_type fp_addr_type|] in
+  in*)
   
   let (body_type, body_exp) = gen_body() in
   ignore(match (typ, body_type) with
-         (* | (T.FUNC_CLOSURE _, _) -> build_closure_ret()*)
+         | (T.FUNC_CLOSURE (_, _, closure_type), T.FUNC_CLOSURE(_, _, cls_type)) ->
+            closure_type := (!cls_type);
+            L.build_ret body_exp builder
          | (T.NIL, _) -> L.build_ret_void builder
          | (_, T.NIL) -> L.build_ret (nil_exp typ) builder
          | _ -> L.build_ret body_exp builder);
@@ -547,7 +549,26 @@ let build_closure
   save_val_to_closure 0 defined_func;
   save_val_to_closure 1 fp_addr;
   let casted_fp_addr = build_bitcast_generic T.GENERIC_RECORD closure_addr in
-  casted_fp_addr
+  let closure_struct_pointer_type = L.pointer_type closure_struct_type in
+  (closure_struct_pointer_type, casted_fp_addr)
+
+let closure_call_exp
+      (closure_addr: exp)
+      (closure_type_ref: (L.lltype option) ref)
+      (args: exp list): exp =
+  let closure_type = match !closure_type_ref with
+    | Some t -> t
+    | None -> Err.error 0 "closure type cast is missing"; string_type
+  in
+  let casted_closure_addr = L.build_bitcast closure_addr closure_type "" builder in
+  let get_val_from_closure index = 
+    let addr = L.build_gep casted_closure_addr [| int_exp(0); int_exp(index) |] "closure_val_addr" builder in
+    L.build_load addr "closure_val" builder
+  in
+  let func_ptr = get_val_from_closure 0 in
+  let env = get_val_from_closure 1 in
+  L.build_call func_ptr (Array.of_list (env::args)) "" builder
+
 
 let build_external_func
       (name: string)

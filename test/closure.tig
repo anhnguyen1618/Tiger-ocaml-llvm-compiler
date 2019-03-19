@@ -7,7 +7,8 @@ let
 		 in
 			h
 		 end 
-	var add_three := add(3) 
+	var add_three := add(3)
+	var a := add_three(4) 
 in
-	5 /*add_three(4)*/
+	printInt(a)
 end

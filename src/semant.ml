@@ -68,9 +68,12 @@ let rec trans_dec (
 	   then
              begin
 	       let access = Translate.alloc_local level !order (S.name name) lhs_type in
-               let new_entry = E.VarEntry{ty = lhs_type; access = access} in
+               let final_type = match rhs_type with
+                 | T.NIL -> lhs_type
+                 | _ -> rhs_type
+               in
+               let new_entry = E.VarEntry{ty = final_type; access = access} in
 	       let new_v_env = S.enter(v_env, name, new_entry) in
-               
                let addr = Translate.simple_var_left access (S.name name) level in
                let value = match rhs_type with
                  | T.NIL -> Translate.nil_exp lhs_type

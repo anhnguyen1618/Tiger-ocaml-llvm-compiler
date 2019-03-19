@@ -4,7 +4,9 @@ let
 	function add(n: int): intfun =
 		 let
 			function h(m: int): int = n + m
+			var k: intfun := h
 		 in
+		 	printInt(k(6));
 			h
 		 end 
 	var add_three := add(3)

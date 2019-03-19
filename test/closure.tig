@@ -6,11 +6,12 @@ let
 			function h(m: int): int = n + m
 			var k: intfun := h
 		 in
-		 	printInt(k(6));
+		 	assert_int(k(6), 9);
 			h
 		 end 
 	var add_three := add(3)
 	var a := add_three(4) 
 in
+	assert_int(a, 7);
 	printInt(a)
 end

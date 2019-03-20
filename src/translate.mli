@@ -69,6 +69,6 @@ val cast_generic_to_record: exp -> Types.ty -> exp
 
 val cast_generic_to_record_pointer: exp -> Types.ty -> exp
 
-val build_closure: string -> Types.ty list -> Types.ty -> Llvm.lltype * exp
+val build_closure: string -> Types.ty list -> Types.ty -> exp
 
-val closure_call_exp: exp -> (Llvm.lltype option) ref -> exp list -> exp
+val closure_call_exp: exp -> Types.ty -> exp list -> exp

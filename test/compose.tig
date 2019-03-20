@@ -1,0 +1,16 @@
+let
+    type intfun = int -> int
+    function add_two (x: int): int = x + 2
+    function double (x: int): int = x * 2
+    function compose(f: intfun, g: intfun): intfun =
+        let
+            function h (x: int): int = f(g(x))
+        in
+            h
+        end
+    var add_two_then_double := compose(double, add_two)        
+in
+    assert_int(add_two_then_double(3), 10);
+    assert_int(add_two_then_double(0), 4);
+    assert_int(add_two_then_double(-2), 0)
+end

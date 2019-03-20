@@ -10,8 +10,10 @@ let
 			h
 		 end 
 	var add_three := add(3)
-	var a := add_three(4) 
+	var a := add_three(4)
+	function add_four(f: intfun, val: int): int = f(val) 
 in
 	assert_int(a, 7);
+	assert_int(add_four(add_three, add_three(4)), 10);
 	printInt(a)
 end

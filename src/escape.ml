@@ -25,6 +25,9 @@ and traverse_exp = function
   | (env, d, A.IntExp(int)) ->  ()
   | (env, d, A.StringExp(str, pos)) -> ()
   | (env, d, A.CallExp{func; args; pos}) ->
+     (match Symbol.look (env, func) with
+      | Some (depth, escape) -> if not(!escape) then escape := depth < d
+      | None -> ());
      List.iter(fun x -> traverse_exp(env,d,x)) args
   | (env, d, A.RecordExp{fields = args; typ = typ; pos = pos}) ->
      List.iter (fun (_,x,_) -> traverse_exp(env,d,x)) args

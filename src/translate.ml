@@ -539,25 +539,26 @@ let build_closure
     | Some x -> x
   in
 
-  let llvm_fp_type = get_llvm_type fp_addr_type in
+  (*let llvm_fp_type = get_llvm_type fp_addr_type in*)
   let arg_types =
-    llvm_fp_type
+    string_type
     :: (List.map get_llvm_type arg_types)
     |> Array.of_list
   in
   let function_type = L.function_type (get_llvm_type ret_type) arg_types |> L.pointer_type in
-  let closure_struct_type = L.struct_type context [|function_type; llvm_fp_type|] in
+  let closure_struct_type = L.struct_type context [|function_type; string_type|] in
   let closure_addr = L.build_malloc closure_struct_type "closure_addr" builder in
+  let casted_env_addr = L.build_bitcast fp_addr string_type "closure_env" builder in
   let save_val_to_closure index exp =
     let addr = L.build_gep closure_addr [| int_exp(0); int_exp(index) |] "Element" builder in
     ignore(L.build_store exp addr builder)
   in
 
   save_val_to_closure 0 defined_func;
-  save_val_to_closure 1 fp_addr;
-  let casted_fp_addr = build_bitcast_generic T.GENERIC_RECORD closure_addr in
+  save_val_to_closure 1 casted_env_addr;
+  let casted_closure_addr = build_bitcast_generic T.GENERIC_RECORD closure_addr in
   let closure_struct_pointer_type = L.pointer_type closure_struct_type in
-  (closure_struct_pointer_type, casted_fp_addr)
+  (closure_struct_pointer_type, casted_closure_addr)
 
 let closure_call_exp
       (closure_addr: exp)
@@ -574,7 +575,7 @@ let closure_call_exp
   in
   let func_ptr = get_val_from_closure 0 in
   let env = get_val_from_closure 1 in
-  L.build_call func_ptr (Array.of_list (env::args)) "" builder
+  L.build_call func_ptr (env::args |> Array.of_list) "" builder
 
 
 let build_external_func

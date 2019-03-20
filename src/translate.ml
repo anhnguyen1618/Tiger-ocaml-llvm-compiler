@@ -261,7 +261,9 @@ let func_call_exp
   | _ ->
      let (_, current_fp) = get_current_fp() in
      let dec_fp_addr = gen_static_link (dec_level, call_level, current_fp) in
-     let final_args = (dec_fp_addr :: vals) |> Array.of_list in
+     (* always has to cast fp to i8* *)
+     let casted_fp_addr = L.build_bitcast dec_fp_addr string_type "" builder in
+     let final_args = (casted_fp_addr :: vals) |> Array.of_list in
      L.build_call callee final_args "" builder
 
 let array_exp
@@ -433,10 +435,8 @@ let add_func_header
       (name: string)
       (typ: T.ty)
       (arg_types: T.ty list) =
-  let (parent_fp_type, _) = get_current_fp() in
-  let arg_types =
-    get_llvm_type(parent_fp_type)
-    :: (List.map get_llvm_type arg_types)
+  (*let (parent_fp_type, _) = get_current_fp() in *)
+  let arg_types = string_type :: (List.map get_llvm_type arg_types)
     |> Array.of_list
   in
   let func_type = L.function_type (get_llvm_type typ) arg_types in
@@ -479,6 +479,8 @@ let func_dec
     let (_, fp_addr) = get_current_fp() in
     
     let alloc_arg {name; ty; esc_order}: access = alloc_local func_level esc_order (Symbol.name name) ty in
+    
+    let index = ref 0 in
     let assign_val arg_to_alloc arg_val: access =
       let (level, address) = alloc_arg arg_to_alloc in
       let final_addr = match address with
@@ -487,8 +489,13 @@ let func_dec
                                      "arg_address" builder
         | IN_FRAME addr -> addr
       in
-      (* in the same level, no need to build static link *)
-      assign_stm final_addr arg_val;
+
+      let value = match !index with
+        | 0 -> L.build_bitcast arg_val (get_llvm_type parent_fp_type) "parent_fp" builder
+        | _ -> arg_val
+      in
+      assign_stm final_addr value;
+      index := !index + 1;
       (level, address)
     in
     let arg_mappings = {name = Symbol.symbol "static_link";

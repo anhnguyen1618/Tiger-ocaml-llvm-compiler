@@ -17,11 +17,11 @@ in
 
     c.next.next.next := d; 
 
-    printInt(is_nil(current_node));
+    print_int(is_nil(current_node));
     while is_nil(current_node) = 0 
     do
         (
-            printInt(current_node.data);
+            print_int(current_node.data);
             assert_int(current_node.data, index);
             current_node := current_node.next;
             index := index +1

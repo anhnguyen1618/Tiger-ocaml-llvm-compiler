@@ -10,7 +10,7 @@ let
         end
     var add_two_then_double := compose(double, add_two)        
 in
-    printInt(add_two_then_double(5));
+    print_int(add_two_then_double(5));
     assert_int(add_two_then_double(3), 10);
     assert_int(add_two_then_double(0), 4);
     assert_int(add_two_then_double(-2), 0)

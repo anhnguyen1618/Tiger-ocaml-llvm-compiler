@@ -6,5 +6,5 @@ let
     var k := g()
 in
     assert_int(k(4), 5);
-    printInt(k(4))
+    print_int(k(4))
 end

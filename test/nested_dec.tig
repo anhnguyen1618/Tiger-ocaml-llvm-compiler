@@ -15,6 +15,6 @@ in
 			-8		
 		end
 	);
-	printInt(a);
+	print_int(a);
 	assert_int(a, -8)
 end

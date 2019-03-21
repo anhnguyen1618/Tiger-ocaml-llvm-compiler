@@ -17,13 +17,27 @@ let
 
   type node = {data: my_int, next: node}
   type my_int = int
-
   var a := node {data = 3, next = nil}
   var b := node {data = 2, next = a}
+
+  type intFun = int -> int
+  type intIntFun = int -> intFun
+  function f(a: int): intIntFun =
+    let
+      function g(b: int): intFun =
+        let
+          function k(c: int): int = a + b + c
+        in
+          k
+        end
+    in
+      g
+    end
 in
   assert_int(fib (0), 0);
   assert_int(fib (30), 832040);
-  assert_int(b.next.data, 3)
+  assert_int(b.next.data, 3);
+  assert_int(f(1)(2)(3), 6)
 end
 ```
 
@@ -48,6 +62,11 @@ end
 See ```.travis.yml``` for more details
 
 ### Usage
+After cloning this repo, please create new output directory ```/llvm_byte_code/test/``` with the command:
+```node module
+mkdir llvm_byte_code/test
+```
+
 Tiger test file ```<test_file_name>.tig``` must be placed directly under directory ```./test```
 
 Compile file ```test/<test_file_name>.tig``` without executing the output binary run_prog:

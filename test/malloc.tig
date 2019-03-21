@@ -14,10 +14,10 @@ let
 
 	var b := create_rec ()
 in
-	printInt (arr[0].a);
+	print_int (arr[0].a);
 	assert_int(arr[0].a, 5);
 	
-	printInt (b[1].a);
+	print_int (b[1].a);
 	assert_int(b[1].a, 6);
 
 	arr[1].a := 5;

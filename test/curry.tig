@@ -1,9 +1,9 @@
 let
-    type intfun = int -> int
-    type x = int -> intfun
-    function f (a: int): x =
+    type intFun = int -> int
+    type intIntFun = int -> intFun
+    function f (a: int): intIntFun =
         let
-            function g(b: int): intfun =
+            function g(b: int): intFun =
                 let
                     function k(c: int): int = a + b + c
                 in
@@ -13,5 +13,5 @@ let
             g
         end
 in
-    printInt(f(1)(2)(3))
+    print_int(f(1)(2)(3))
 end

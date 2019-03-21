@@ -527,25 +527,29 @@ let func_dec
   L.position_at_end previous_block builder
 
 let build_closure
+      (dec_level: level)
+      (use_level: level)
       (name: string)
       (arg_types: T.ty list)
       (ret_type: T.ty)=
-  let (fp_addr_type, fp_addr) = get_current_fp() in
+  
+  let (_, fp_addr) = get_current_fp() in
   let defined_func = match L.lookup_function name the_module with
     | None -> Err.error 0 "Function not found"; dummy_exp;
     | Some x -> x
   in
 
-  (*let llvm_fp_type = get_llvm_type fp_addr_type in*)
   let arg_types =
     string_type
     :: (List.map get_llvm_type arg_types)
     |> Array.of_list
   in
+
+  let fp_dec_level_addr = gen_static_link (dec_level, use_level, fp_addr) in
   let function_type = L.function_type (get_llvm_type ret_type) arg_types |> L.pointer_type in
   let closure_struct_type = L.struct_type context [|function_type; string_type|] in
   let closure_addr = L.build_malloc closure_struct_type "closure_addr" builder in
-  let casted_env_addr = L.build_bitcast fp_addr string_type "closure_env" builder in
+  let casted_env_addr = L.build_bitcast fp_dec_level_addr string_type "closure_env" builder in
   let save_val_to_closure index exp =
     let addr = L.build_gep closure_addr [| int_exp(0); int_exp(index) |] "Element" builder in
     ignore(L.build_store exp addr builder)

@@ -278,8 +278,11 @@ let rec trans_dec (
       match S.look(v_env, s) with
         Some (E.VarEntry({ty; access})) ->
          {exp = Translate.simple_var access (S.name s) level; ty = actual_ty ty}
-      | Some (E.FunEntry{formals; result; label}) ->
-         {exp = Translate.build_closure (S.name label) formals result; ty = T.FUNC_CLOSURE(formals, result)}
+      | Some (E.FunEntry{formals; result; label; level = dec_level}) ->
+         {
+           exp = Translate.build_closure dec_level level (S.name label) formals result;
+           ty = T.FUNC_CLOSURE(formals, result)
+         }
       | None ->
          Err.error pos ("variable '" ^ S.name(s) ^"' has not been declared\n");
 	 {exp = Translate.int_exp 0; ty = T.NIL}

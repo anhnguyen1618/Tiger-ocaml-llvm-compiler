@@ -1,0 +1,42 @@
+let
+    type int_array = array of int
+    type intfun = int -> int
+    function create_array(): int_array =
+        let
+            var size := 5 
+            var arr := int_array [size] of 1
+        in
+            /* Create array [1, 2, 3, 4, 5]*/
+            for i := 0 to size - 1 do arr[i] := i+1;
+            arr
+        end
+
+    function map(ori_arr: int_array, f: intfun): int_array =
+        let
+            var size := array_length(ori_arr)
+            var new_arr := int_array [size] of 1
+        in
+            for i := 0 to size - 1 do new_arr[i] := f(ori_arr[i]);
+            new_arr
+        end
+        
+    var arr := create_array()
+
+    function double(x: int): int = x * 2
+    var double_arr := map(arr, double)
+
+    function add_3_then_double (x: int): int = double(x + 3)
+    var add_3_then_double_arr := map(arr, add_3_then_double)
+in
+    assert_int(double_arr[0], 2);
+    assert_int(double_arr[1], 4);
+    assert_int(double_arr[2], 6);
+    assert_int(double_arr[3], 8);
+    assert_int(double_arr[4], 10);
+
+    assert_int(add_3_then_double_arr[0], 8);
+    assert_int(add_3_then_double_arr[1], 10);
+    assert_int(add_3_then_double_arr[2], 12);
+    assert_int(add_3_then_double_arr[3], 14);
+    assert_int(add_3_then_double_arr[4], 16)
+end

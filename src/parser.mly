@@ -24,7 +24,7 @@ let dumb_order = -1
 %token          FOR WHILE BREAK LET IN NIL TO END
 %token          FUNCTION VAR TYPE ARRAY IF THEN ELSE DO OF
 %token          LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE
-%token          DOT COLON COMMA SEMI
+%token          DOT COLON COMMA SEMI ARROW
 %token          PLUS MINUS TIMES DIVIDE UMINUS
 %token          EQ NEQ LT LE GT GE
 %token          AND OR
@@ -37,6 +37,7 @@ let dumb_order = -1
 %right THEN
 %right ELSE
 %right TYPE
+%right ARROW
 
 %nonassoc EQ NEQ LT LE GT GE
 %left PLUS MINUS
@@ -169,6 +170,14 @@ ty:
   ID                                               { Absyn.NameTy (Symbol.symbol($1), $startofs) }
 | LBRACE fields RBRACE                             { Absyn.RecordTy $2 }
 | ARRAY OF ID                                      { Absyn.ArrayTy (Symbol.symbol($3), $startofs) }
+| ty ARROW ty                                      { Absyn.FuncTy([$1], $3 , $startofs) }
+| LPAREN typeArgs RPAREN ARROW ty                  { Absyn.FuncTy($2, $5, $startofs) }
+;
+
+typeArgs:
+  /* empty */                                     { [] }
+| ty                                              { [$1] }
+| ty COMMA typeArgs                               { $1 :: $3 }
 ;
 
 decs: dec decs                        {$1 :: $2 }

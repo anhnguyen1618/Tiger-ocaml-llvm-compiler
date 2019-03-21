@@ -1,0 +1,10 @@
+let
+    type intfun = int -> int
+    var h := 1
+    function f (x: int): int = x +  h
+    function g (): intfun = f
+    var k := g()
+in
+    assert_int(k(4), 5);
+    printInt(k(4))
+end

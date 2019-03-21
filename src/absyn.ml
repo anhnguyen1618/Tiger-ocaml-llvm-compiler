@@ -40,6 +40,7 @@ and dec = FunctionDec of fundec list
 and ty = NameTy of symbol * pos
        | RecordTy of field list
        | ArrayTy of symbol * pos
+       | FuncTy of ty list * ty * pos
 
 and oper = PlusOp | MinusOp | TimesOp | DivideOp
            | EqOp | NeqOp | LtOp | LeOp | GtOp | GeOp

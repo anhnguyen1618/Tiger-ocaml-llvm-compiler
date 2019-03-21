@@ -87,6 +87,7 @@ and token = parse
   | ":="	  { P.ASSIGN }
   | '|'		  { P.OR }
   | '&'		  { P.AND }
+  | "->"	  { P.ARROW }
   | '='		  { P.EQ }
   | "<>"	  { P.NEQ }
   | '<'		  { P.LT }
@@ -157,6 +158,7 @@ let string_of_token = function
   | P.LE       -> "LE"
   | P.GT       -> "GT"
   | P.GE       -> "GE"
+  | P.ARROW    -> "ARROW"
   | P.PLUS     -> "PLUS"
   | P.MINUS    -> "MINUS"
   | P.TIMES    -> "TIMES"

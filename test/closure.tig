@@ -1,0 +1,19 @@
+let
+	type intfunfun = (int -> int) -> string
+	type intfun = int -> int
+	function add(n: int): intfun =
+		 let
+			function h(m: int): int = n + m
+			var k: intfun := h
+		 in
+		 	assert_int(k(6), 9);
+			h
+		 end 
+	var add_three := add(3)
+	var a := add_three(4)
+	function add_four(f: intfun, val: int): int = f(val) 
+in
+	assert_int(a, 7);
+	assert_int(add_four(add_three, add_three(4)), 10);
+	printInt(a)
+end

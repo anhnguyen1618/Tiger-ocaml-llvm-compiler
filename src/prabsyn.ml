@@ -118,6 +118,7 @@ and type_to_string = function
   | NameTy (name, _) -> S.name name
   | RecordTy fields -> sprintf "{ %s }" (join ", " field_to_string fields)
   | ArrayTy (base_type, _) -> sprintf "array of %s" (S.name base_type)
+  | FuncTy (args, ret, _) -> sprintf "(%s) -> %s" (join ", " type_to_string args) (type_to_string ret)
 
 and op_to_string = function
   | PlusOp   -> "+"

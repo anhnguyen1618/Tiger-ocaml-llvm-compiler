@@ -68,12 +68,9 @@ let rec trans_dec (
 	   then
              begin
 	       let access = Translate.alloc_local level !order (S.name name) lhs_type in
-               let final_type = match rhs_type with
-                 | T.NIL -> lhs_type
-                 | _ -> rhs_type
-               in
-               let new_entry = E.VarEntry{ty = final_type; access = access} in
+               let new_entry = E.VarEntry{ty = lhs_type; access = access} in
 	       let new_v_env = S.enter(v_env, name, new_entry) in
+               
                let addr = Translate.simple_var_left access (S.name name) level in
                let value = match rhs_type with
                  | T.NIL -> Translate.nil_exp lhs_type
@@ -687,7 +684,7 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   let main_level = Translate.new_level Translate.outermost in
   ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, outermost_break_block)); 
   Translate.build_return_main();
-  dump_module Translate.the_module;
+  (*dump_module Translate.the_module;*)
   print_module ("llvm_byte_code/"^ output_name ^ ".ll") Translate.the_module;
 
 

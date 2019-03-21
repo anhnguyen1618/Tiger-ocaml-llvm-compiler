@@ -36,6 +36,8 @@ let int_type = L.integer_type context 32
                   
 let string_type = L.pointer_type (L.i8_type context)
 
+let generic_type = string_type
+
 let int_pointer = L.pointer_type (L.i32_type context)
 
 let int_exp i = L.const_int int_type i
@@ -60,7 +62,12 @@ let rec get_llvm_type: T.ty -> L.lltype = function
   | T.INT_POINTER -> int_pointer
   | T.GENERIC_ARRAY -> string_type
   | T.GENERIC_RECORD -> string_type
-  | T.FUNC_CLOSURE _ -> string_type
+  | T.FUNC_CLOSURE (args, ret) ->
+     let arg_llvm_types = generic_type :: (List.map get_llvm_type args) |> Array.of_list in
+     let ret_llvm_type = get_llvm_type ret in
+     let func_ptr_type = L.function_type ret_llvm_type arg_llvm_types |> L.pointer_type in
+     L.struct_type context [|func_ptr_type; generic_type|] |> L.pointer_type
+     
   | T.NAME (_, real_type) -> begin
       match !real_type with
       | Some(T.RECORD _) -> string_type
@@ -91,9 +98,11 @@ let malloc (name: string) (typ: T.ty): exp =
 let build_frame_pointer_malloc
       (name: string)
       (esc_vars: L.lltype list) =
-  let fp_struct_type = L.named_struct_type context name in
+  let fp_name = name ^ "_fp" in
+  let fp_type_name = fp_name ^ "_type" in
+  let fp_struct_type = L.named_struct_type context fp_type_name in
   L.struct_set_body fp_struct_type (esc_vars |> Array.of_list) false;
-  let address = L.build_malloc fp_struct_type (name ^ "_fp") builder in
+  let address = L.build_malloc fp_struct_type fp_name builder in
   let fp_addr_type = L.pointer_type fp_struct_type in
   push_fp_to_stack fp_addr_type address
 
@@ -114,7 +123,7 @@ let build_main_func (esc_vars: T.ty list): break_block =
   let stuff_static_link = T.INT in
   L.position_at_end main_entry builder;
   let ele_llvm_types = List.map get_llvm_type (stuff_static_link::esc_vars) in
-  build_frame_pointer_malloc "main_fp" ele_llvm_types;
+  build_frame_pointer_malloc "main" ele_llvm_types;
   exit_loop_block
 
 let build_bitcast_generic typ value =
@@ -438,8 +447,8 @@ let add_func_header
       (name: string)
       (typ: T.ty)
       (arg_types: T.ty list) =
-  (*let (parent_fp_type, _) = get_current_fp() in *)
-  let arg_types = string_type :: (List.map get_llvm_type arg_types)
+  (* parent_fp_type - first arg of function is always casted to generic_type-i8* *)
+  let arg_types = generic_type :: (List.map get_llvm_type arg_types)
     |> Array.of_list
   in
   let func_type = L.function_type (get_llvm_type typ) arg_types in
@@ -520,12 +529,6 @@ let func_dec
   let gen_body = add_arg_bindings addresses in
   (* jump back to entry block to eval body *)
   L.position_at_end entry_block builder;
-
-  (*let build_closure_ret() =
-    let (fp_addr_type, fp_addr) = get_current_fp() in
-    let function_type = L.function_type (get_llvm_type typ) arg_types |> L.pointer_type in
-    let closure_struct_type = L.struct_type context [|function_type; get_llvm_type fp_addr_type|] in
-  in*)
   
   let (body_type, body_exp) = gen_body() in
   ignore(match (typ, body_type) with
@@ -545,47 +548,51 @@ let build_closure
       (ret_type: T.ty)=
   
   let (_, fp_addr) = get_current_fp() in
-  let defined_func = match L.lookup_function name the_module with
-    | None -> Err.error 0 "Function not found"; dummy_exp;
-    | Some x -> x
+
+  let alloc_closure (): exp =
+    let arg_llvm_types =
+      generic_type (* function always has fp type i8* as first arg type *)
+      :: (List.map get_llvm_type arg_types)
+      |> Array.of_list
+    in
+
+    let function_type = L.function_type (get_llvm_type ret_type) arg_llvm_types |> L.pointer_type in
+    let closure_struct_type = L.struct_type context [|function_type; generic_type|] in (* closure_struct_type = {func*, i8*} *)
+    L.build_malloc closure_struct_type "closure_addr" builder
   in
 
-  let arg_types =
-    string_type
-    :: (List.map get_llvm_type arg_types)
-    |> Array.of_list
+
+  let save_val_to_closure closure_addr =
+    let save_val_to_index index exp =
+      let addr = L.build_gep closure_addr [| int_exp(0); int_exp(index) |] "closure_ele" builder in
+      ignore(L.build_store exp addr builder)
+    in
+
+    let func_instance = match L.lookup_function name the_module with
+      | None -> Err.error 0 "Function not found"; dummy_exp;
+      | Some x -> x
+    in
+    save_val_to_index 0 func_instance;
+
+    (* 
+     Closure is only built from normal function in the scope the function is available
+     => we can always trace back to the frame pointer of the parent of the closure function
+     *)
+    let dec_parent_env_addr = gen_static_link (dec_level, use_level, fp_addr) in
+    let casted_env_addr = L.build_bitcast dec_parent_env_addr generic_type "closure_env" builder in
+    save_val_to_index 1 casted_env_addr;
   in
 
-  let fp_dec_level_addr = gen_static_link (dec_level, use_level, fp_addr) in
-  let function_type = L.function_type (get_llvm_type ret_type) arg_types |> L.pointer_type in
-  let closure_struct_type = L.struct_type context [|function_type; string_type|] in
-  let closure_addr = L.build_malloc closure_struct_type "closure_addr" builder in
-  let casted_env_addr = L.build_bitcast fp_dec_level_addr string_type "closure_env" builder in
-  let save_val_to_closure index exp =
-    let addr = L.build_gep closure_addr [| int_exp(0); int_exp(index) |] "Element" builder in
-    ignore(L.build_store exp addr builder)
-  in
-
-  save_val_to_closure 0 defined_func;
-  save_val_to_closure 1 casted_env_addr;
-  let casted_closure_addr = build_bitcast_generic T.GENERIC_RECORD closure_addr in
-  casted_closure_addr
+  let closure_addr = alloc_closure() in
+  save_val_to_closure closure_addr;
+  closure_addr
 
 let closure_call_exp
       (closure_addr: exp)
       (function_type: T.ty)
       (args: exp list): exp =
-  let function_pointer_type = match function_type with
-    | T.FUNC_CLOSURE (args_types, ret_type) ->
-       let arg_llvm_types = string_type :: (List.map get_llvm_type args_types) |> Array.of_list in
-       let ret_llvm_type = get_llvm_type ret_type in
-       L.function_type ret_llvm_type arg_llvm_types |> L.pointer_type
-    | _ -> Err.error 0 "Closure does not have type func"; string_type
-  in
-  let closure_type = L.struct_type context [|function_pointer_type; string_type|] |> L.pointer_type in
-  let casted_closure_addr = L.build_bitcast closure_addr closure_type "" builder in
   let get_val_from_closure index = 
-    let addr = L.build_gep casted_closure_addr [| int_exp(0); int_exp(index) |] "closure_val_addr" builder in
+    let addr = L.build_gep closure_addr [| int_exp(0); int_exp(index) |] "closure_val_addr" builder in
     L.build_load addr "closure_val" builder
   in
   let func_ptr = get_val_from_closure 0 in

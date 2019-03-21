@@ -3,6 +3,6 @@ let
     type b = int
     var node: a := 6
 in
-    printInt(node + 5);
+    print_int(node + 5);
     assert_int(node + 5, 11)
 end

@@ -15,5 +15,5 @@ let
 in
 	assert_int(a, 7);
 	assert_int(add_four(add_three, add_three(4)), 10);
-	printInt(a)
+	print_int(a)
 end

@@ -21,6 +21,6 @@ in
     e.left := d;
     e.right := f;
 
-    printInt(eval_sum (root));
+    print_int(eval_sum (root));
     assert_int(eval_sum(root), 34)
 end

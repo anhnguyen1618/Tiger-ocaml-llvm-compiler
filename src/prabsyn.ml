@@ -21,7 +21,7 @@ let rec expr_to_string = function
 
   | CallExp { func; args; pos } ->
      sprintf "%sls(%s)"
-       (S.name func)
+       (expr_to_string func)
        (join ", " expr_to_string args)
 
   | OpExp { left; right; oper; _ } ->

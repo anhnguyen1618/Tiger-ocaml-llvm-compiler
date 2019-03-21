@@ -5,7 +5,7 @@
 in
 	print(b.name);
 	b.name := "zozo";
-	printInt(rec1.age);
+	print_int(rec1.age);
 	print(rec1.name)
 end */
 
@@ -18,7 +18,7 @@ in
 	print(student.name);
 	assert_string(student.name, "world");
 
-	printInt(student.class.id);
+	print_int(student.class.id);
 	assert_int(student.class.id, 10);
 
 	student.class.id := 100;

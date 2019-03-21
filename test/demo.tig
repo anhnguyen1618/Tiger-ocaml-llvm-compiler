@@ -15,7 +15,7 @@ let
 in
   while counter > 0 do
     (
-      printInt (fib(counter));
+      print_int (fib(counter));
       print (record.name);
       counter := counter - 1
     )

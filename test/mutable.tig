@@ -7,6 +7,6 @@ let
 			b
 		end
 in
-	printInt(f(10));
+	print_int(f(10));
 	assert_int(f(10), 20)
 end

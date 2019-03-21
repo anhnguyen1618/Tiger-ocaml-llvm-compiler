@@ -8,10 +8,10 @@ let
 		 let
 			var e := 7
 			function g(b: int) = (
-				 printInt(a);
-				 printInt(b);
-				 printInt(c);
-				 printInt(d);
+				 print_int(a);
+				 print_int(b);
+				 print_int(c);
+				 print_int(d);
 				 rec.label := "foo bar";
 				 rec.result := a + b + c + d + e + arr1[4]
 				 )
@@ -20,7 +20,7 @@ let
 		 end
 in
 	f(1,2,3,4);
-	printInt(rec.result);
+	print_int(rec.result);
 	print(rec.label);
 
 	assert_int(rec.result, 28);

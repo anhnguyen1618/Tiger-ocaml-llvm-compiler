@@ -462,23 +462,14 @@ let rec trans_dec (
 	let args = List.fold_left check_param [] arg_formal_pairs in
         args
       in
-      match S.look(v_env, func) with
-      | Some ( E.FunEntry {formals; result; label; level = dec_level} ) ->
-	 let args = check_params formals args in
-         {exp = Translate.func_call_exp dec_level level (S.name label) args; ty = result}
-      | Some (E.VarEntry {ty; access}) ->
-         begin
-           match ty with
-           | T.FUNC_CLOSURE (formals, result) ->
-              let params = check_params formals args in
-              let closure_addr = Translate.simple_var access (S.name func) level in
-              {exp = Translate.closure_call_exp closure_addr ty params ; ty = result}
-           | _ -> Err.error pos (S.name(func) ^ " does not have type function");
-	          {exp = Translate.dummy_exp; ty = T.NIL}
-         end
-      | None ->
-         Err.error pos ("Function '" ^ S.name(func) ^ "' can't be found");
-	 { exp = Translate.dummy_exp; ty = T.NIL}
+      let {exp = closure_addr; ty = closure_type}  = tr_exp func in
+      (* Function ID is resolved to function closure by tr_exp func => it is always closure here, not function *)
+      match closure_type with
+      | T.FUNC_CLOSURE (formals, result) ->
+         let params = check_params formals args in
+         {exp = Translate.closure_call_exp closure_addr params ; ty = result}
+      | _ -> Err.error pos ("Expression does not have type function");
+	     {exp = Translate.dummy_exp; ty = T.NIL}
 
     and check_record_exp (A.RecordExp {fields; typ; pos}) =
       let fields_with_name_types = List.map
@@ -684,7 +675,7 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   let main_level = Translate.new_level Translate.outermost in
   ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, outermost_break_block)); 
   Translate.build_return_main();
-  (*dump_module Translate.the_module;*)
+  (* dump_module Translate.the_module; *)
   print_module ("llvm_byte_code/"^ output_name ^ ".ll") Translate.the_module;
 
 

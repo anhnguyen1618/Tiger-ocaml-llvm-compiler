@@ -166,6 +166,7 @@ let rec trans_dec (
     let check_simple_var (s: S.symbol): expty =
       match S.look(v_env, s) with
         Some (E.VarEntry({ty; _})) -> actual_ty ty
+      | Some (E.FunEntry {formals; result}) -> T.FUNC_CLOSURE(formals, result)
       | _ -> T.NIL
     in
     
@@ -207,11 +208,11 @@ let rec trans_dec (
        (exp: Absyn.exp)): expty  =
 
     let rec check_func_call_exp (A.CallExp {func; args; pos}): expty =
-      match S.look(v_env, func) with
-      | Some ( E.FunEntry {result; formals} ) ->
-         List.iter (fun x -> x |> tr_exp |> ignore) args;
-         result
-      | _ -> T.NIL
+      let result = tr_exp func in
+      List.iter (fun x -> x |> tr_exp |> ignore) args;
+      match result with
+      | T.FUNC_CLOSURE(_, ret) -> ret
+      | _ -> T.NIL;
 
     and check_record_exp (A.RecordExp {fields; typ; pos}) =      
       match S.look(t_env, typ) with

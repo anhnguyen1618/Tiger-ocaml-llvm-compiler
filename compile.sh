@@ -65,10 +65,7 @@ build_ocaml_compiler() {
 test_single_case() {
     ./bin/compiler test/$1 && \
 
-	opt -f -S llvm_byte_code/test/$1.ll -o llvm_byte_code/test/$1-opt.ll \
-	    -mem2reg -adce -argpromotion -constmerge -globaldce -globalopt \
-	    -loop-deletion -constprop && \
-
+	opt -f -S llvm_byte_code/test/$1.ll -o llvm_byte_code/test/$1-opt.ll -Oz && \
 	llc llvm_byte_code/test/$1-opt.ll && \
 
 	clang llvm_byte_code/test/$1-opt.s src/bindings.c -o run_prog && \

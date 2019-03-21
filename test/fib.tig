@@ -13,6 +13,5 @@ in
   assert_int(fib0, 0);
   assert_int(fib1, 1);
   assert_int(fib5, 5);
-  assert_int(fib14, 377);
-  assert_int(fib30, 832040)
+  assert_int(fib14, 377)
 end

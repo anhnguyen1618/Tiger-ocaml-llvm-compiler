@@ -66,7 +66,7 @@ exp:
 
 | lvalue ASSIGN exp                                { Absyn.AssignExp({ var = $1; exp = $3; pos = $startofs }) }
 
-| ID LPAREN args RPAREN                            { Absyn.CallExp({func = Symbol.symbol($1); args = $3; pos = $startofs }) }
+| exp LPAREN args RPAREN                           { Absyn.CallExp({func = $1; args = $3; pos = $startofs }) }
 
 | exp OR exp                                       { Absyn.IfExp({ test = $1; then' = Absyn.IntExp(1); else' = Some($3); pos = $startofs}) }
 | exp AND exp                                      { Absyn.IfExp({ test = $1; then' = $3; else' = Some(Absyn.IntExp(0)); pos = $startofs}) }

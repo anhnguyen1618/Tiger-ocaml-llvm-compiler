@@ -174,7 +174,7 @@ let rec gen_static_link = function
          let next_fp_addr = L.build_load next_fp_addr_in_static_link "fp_addr" builder in
          gen_static_link (NESTED(dec_level), use_level.parent, next_fp_addr)
        end
-  | (_, _, current_fp) -> Err.error 0 "Impossible"; current_fp
+  | (_, _, current_fp) -> Err.error 0 "Impossible gen_static_link"; current_fp
 
 
 (* assume that other part pass calculated location already *)
@@ -268,13 +268,16 @@ let func_call_exp
       (name: string)
       (vals: exp list): exp =
   let callee = lookup_function_block name in
+  let (_, current_fp) = get_current_fp() in
   match dec_level with
-  | TOP -> L.build_call callee (Array.of_list vals) "" builder
+  | TOP ->
+     (* always pass dummy context i8* to C functions as closure convention *)
+     let dummy_env_addr = L.build_bitcast current_fp generic_type "" builder in
+     L.build_call callee (dummy_env_addr::vals |> Array.of_list) "" builder
   | _ ->
-     let (_, current_fp) = get_current_fp() in
      let dec_fp_addr = gen_static_link (dec_level, call_level, current_fp) in
      (* always has to cast fp to i8* *)
-     let casted_fp_addr = L.build_bitcast dec_fp_addr string_type "" builder in
+     let casted_fp_addr = L.build_bitcast dec_fp_addr generic_type "" builder in
      let final_args = (casted_fp_addr :: vals) |> Array.of_list in
      L.build_call callee final_args "" builder
 
@@ -318,11 +321,8 @@ let array_exp
 
 
 let record_exp (tys: (Symbol.symbol * T.ty) list) (exps: exp list) =
-  (*let record_addr = alloc_unesc_temp "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in*)
   let record_addr = malloc "record_init" (T.RECORD_ALLOC(tys, Temp.newtemp())) in
-  let size = exps |> List.length |> int_exp in
 
-  (*let record_addr = func_call_exp "tig_init_record" [size] in *)
   let alloc index exp =
     (* pointer to internal struct has to defer by first 0, pointer to external struct does not need *)
     let addr = L.build_gep record_addr [| int_exp(0); int_exp(index) |] "Element" builder in
@@ -548,7 +548,7 @@ let build_closure
       (ret_type: T.ty)=
   
   let (_, fp_addr) = get_current_fp() in
-
+  
   let alloc_closure (): exp =
     let arg_llvm_types =
       generic_type (* function always has fp type i8* as first arg type *)
@@ -574,13 +574,16 @@ let build_closure
     in
     save_val_to_index 0 func_instance;
 
-    (* 
-     Closure is only built from normal function in the scope the function is available
-     => we can always trace back to the frame pointer of the parent of the closure function
-     *)
-    let dec_parent_env_addr = gen_static_link (dec_level, use_level, fp_addr) in
-    let casted_env_addr = L.build_bitcast dec_parent_env_addr generic_type "closure_env" builder in
-    save_val_to_index 1 casted_env_addr;
+    let env_addr = match dec_level with
+      | NESTED _ ->
+         let dec_parent_env_addr = gen_static_link (dec_level, use_level, fp_addr) in
+         let casted_env_addr = L.build_bitcast dec_parent_env_addr generic_type "closure_env" builder in
+         casted_env_addr
+      | TOP ->
+         let dummy_env_addr = L.build_bitcast fp_addr generic_type "closure_env" builder in
+         dummy_env_addr
+    in
+    save_val_to_index 1 env_addr
   in
 
   let closure_addr = alloc_closure() in
@@ -589,7 +592,6 @@ let build_closure
 
 let closure_call_exp
       (closure_addr: exp)
-      (function_type: T.ty)
       (args: exp list): exp =
   let get_val_from_closure index = 
     let addr = L.build_gep closure_addr [| int_exp(0); int_exp(index) |] "closure_val_addr" builder in
@@ -604,7 +606,7 @@ let build_external_func
       (name: string)
       (args: T.ty list)
       (result:T.ty)  =
-  let arg_types = (List.map get_llvm_type args) |> Array.of_list in
+  let arg_types = generic_type :: (List.map get_llvm_type args) |> Array.of_list in
   let func_type = L.function_type (get_llvm_type result) arg_types in
   let func = L.declare_function name func_type the_module in
   L.set_gc (Some "ocaml") func                  

@@ -1,0 +1,17 @@
+let
+    type intfun = int -> int
+    type x = int -> intfun
+    function f (a: int): x =
+        let
+            function g(b: int): intfun =
+                let
+                    function k(c: int): int = a + b + c
+                in
+                    k
+                end
+        in
+            g
+        end
+in
+    printInt(f(1)(2)(3))
+end

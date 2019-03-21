@@ -207,7 +207,7 @@ let rec trans_dec (
         List.fold_left f cur_v_env param_name_type
       in
 
-      let add_arg_bindings ((_:: alloc_addrs): Translate.access list) =
+      let add_arg_bindings (alloc_addrs: Translate.access list) =
         let f v_env {name; ty} access =
           S.enter (v_env, name, E.VarEntry{ ty = ty; access = access})
         in

@@ -71,7 +71,7 @@ let rec get_llvm_type: T.ty -> L.lltype = function
        
 let frame_pointer_stack = Stack.create()
 
-let push_fp_to_stack (typ: T.ty) (addr: L.llvalue) =
+let push_fp_to_stack (typ: L.lltype) (addr: L.llvalue) =
   Stack.push (typ, addr) frame_pointer_stack
 
 let pop_fp_from_stack () = Stack.pop frame_pointer_stack
@@ -88,12 +88,14 @@ let get_fp_value (): exp =
 let malloc (name: string) (typ: T.ty): exp =
   L.build_malloc (typ |> get_llvm_type) name builder 
 
-let build_frame_pointer_alloc (esc_vars: T.ty list) =
-  let element_types = List.map (fun typ -> (Symbol.symbol(""), typ)) esc_vars in
-  let frame_pointer_struct_type = T.RECORD_ALLOC(element_types, Temp.newtemp()) in
-  let address = malloc "frame_pointer" frame_pointer_struct_type in
-  let frame_pointer_type = T.RECORD(element_types, Temp.newtemp()) in
-  push_fp_to_stack frame_pointer_type address
+let build_frame_pointer_malloc
+      (name: string)
+      (esc_vars: L.lltype list) =
+  let fp_struct_type = L.named_struct_type context name in
+  L.struct_set_body fp_struct_type (esc_vars |> Array.of_list) false;
+  let address = L.build_malloc fp_struct_type (name ^ "_fp") builder in
+  let fp_addr_type = L.pointer_type fp_struct_type in
+  push_fp_to_stack fp_addr_type address
 
 let build_return_main () =
   ignore(pop_fp_from_stack());
@@ -111,7 +113,8 @@ let build_main_func (esc_vars: T.ty list): break_block =
   
   let stuff_static_link = T.INT in
   L.position_at_end main_entry builder;
-  build_frame_pointer_alloc (stuff_static_link::esc_vars);
+  let ele_llvm_types = List.map get_llvm_type (stuff_static_link::esc_vars) in
+  build_frame_pointer_malloc "main_fp" ele_llvm_types;
   exit_loop_block
 
 let build_bitcast_generic typ value =
@@ -450,15 +453,16 @@ let func_dec
       (func_level: level)
       (name: string)
       (typ: T.ty)
-      (esc_vars: T.ty list)
+      (esc_var_types: T.ty list)
       (args: arg_name_type_map list)
       (add_arg_bindings: access list -> unit -> T.ty * exp) =
   let (parent_fp_type, _) = get_current_fp() in
 
   let create_fp_type () =
     let add_esc_arg arg acc = if arg.esc_order <> -1 then (arg.ty :: acc) else acc in
-    let esc_arg_types = List.fold_right add_esc_arg args [] in
-    parent_fp_type::(esc_vars @ esc_arg_types)
+    let esc_arg_llvm_types = List.fold_right add_esc_arg args [] |> List.map get_llvm_type in
+    let esc_var_llvm_types = List.map get_llvm_type esc_var_types in
+    parent_fp_type::(esc_var_llvm_types @ esc_arg_llvm_types)
   in
 
   let fp_type = create_fp_type() in
@@ -469,7 +473,7 @@ let func_dec
   let create_entry_block_and_build_fp () =
     let entry_block = L.append_block context "entry" func_block in
     L.position_at_end entry_block builder;
-    build_frame_pointer_alloc fp_type;
+    build_frame_pointer_malloc name fp_type;
     entry_block
   in
 
@@ -480,7 +484,6 @@ let func_dec
     
     let alloc_arg {name; ty; esc_order}: access = alloc_local func_level esc_order (Symbol.name name) ty in
     
-    let index = ref 0 in
     let assign_val arg_to_alloc arg_val: access =
       let (level, address) = alloc_arg arg_to_alloc in
       let final_addr = match address with
@@ -489,19 +492,27 @@ let func_dec
                                      "arg_address" builder
         | IN_FRAME addr -> addr
       in
-
-      let value = match !index with
-        | 0 -> L.build_bitcast arg_val (get_llvm_type parent_fp_type) "parent_fp" builder
-        | _ -> arg_val
-      in
-      assign_stm final_addr value;
-      index := !index + 1;
+      assign_stm final_addr arg_val;
       (level, address)
     in
-    let arg_mappings = {name = Symbol.symbol "static_link";
-                        ty= parent_fp_type; esc_order = 0 } :: args in
-    let addresses = List.map2 assign_val arg_mappings (L.params func_block |> Array.to_list) in
-    addresses
+
+    let arg_vals = L.params func_block |> Array.to_list in
+    let (parent_fp_val, explicit_arg_vals) = match arg_vals with
+      | [] -> Err.error 0 "Args of func is empty"; (int_exp(0), [])
+      | h::tl -> (h, tl)
+    in
+
+    (* handle static link differently from normal explicit arguments *)
+    let alloc_static_link () =
+      let static_link_addr = L.build_gep fp_addr [| int_exp(0); int_exp(0) |]
+                                     "static_link_addr" builder in
+      let static_link_val = L.build_bitcast parent_fp_val parent_fp_type "parent_fp" builder in
+      assign_stm static_link_addr static_link_val;
+    in
+    alloc_static_link();
+    
+    let explicit_arg_addrs = List.map2 assign_val args explicit_arg_vals in
+    explicit_arg_addrs
   in
 
   let addresses = alloc_function_args() in

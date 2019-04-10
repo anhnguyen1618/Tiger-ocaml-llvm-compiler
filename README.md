@@ -1,6 +1,6 @@
 # LLVM Compiler for Tiger programming language
 
-[![Build Status](https://travis-ci.org/anhnguyen300795/Tiger-ocaml-llvm.svg?branch=master)](https://travis-ci.org/anhnguyen300795/Tiger-ocaml-llvm-compiler)
+[![Build Status](https://travis-ci.org/anhnguyen300795/Tiger-ocaml-llvm-compiler.svg?branch=master)](https://travis-ci.org/anhnguyen300795/Tiger-ocaml-llvm-compiler)
 
 A minimal compiler written in OCaml that compiles Tiger to LLVM IR and subsequently to target-dependent assembly code
 

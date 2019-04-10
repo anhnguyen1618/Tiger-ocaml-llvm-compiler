@@ -3,6 +3,7 @@ import os, fnmatch, sys, argparse
 TEST_DIR = "./test"
 TEST_FILE_PATTERN = '*.tig'
 SUCCESS_CODE = 0
+OUTPUT_DIR = "llvm_byte_code/test/"
 
 GREEN_COLOR = '\033[92m'
 RED_COLOR = '\033[91m'
@@ -17,8 +18,12 @@ def print_success(file_name):
 def print_error(file_name):
     print(RED_COLOR + X_ICON + ' ' + file_name + END_COLOR)
 
+def create_output_dir():
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
 
 def build_compiler():
+    create_output_dir()
     cmd = ("ocamlbuild -tag 'debug, explain' -use-menhir -use-ocamlfind -package llvm src/parse.native &&"
            "mv _build/src/parse.native bin/compiler")
     exit_code = os.system(cmd)
@@ -27,10 +32,11 @@ def build_compiler():
         exit(exit_code)
 
 def run_single_test_without_compile(file_name):
+    output_file_path = OUTPUT_DIR + file_name
     cmd = ("./bin/compiler test/" + file_name + " &&"
-     "opt -f -S llvm_byte_code/test/"+ file_name +".ll -o llvm_byte_code/test/"+ file_name +"-opt.ll -Oz &&"
-     "llc llvm_byte_code/test/" + file_name + "-opt.ll &&"
-     "clang llvm_byte_code/test/" + file_name + "-opt.s src/bindings.c -o run_prog &&"
+     "opt -f -S " + output_file_path +".ll -o " + output_file_path +"-opt.ll -Oz &&"
+     "llc " + output_file_path + "-opt.ll &&"
+     "clang " + output_file_path + "-opt.s src/bindings.c -o run_prog &&"
      "./run_prog")
 
     code = os.system(cmd)
@@ -72,14 +78,13 @@ def run_all_test():
             print_error(test_fail)
     else:
         print "================== ALL TESTS PASSED ("+ str(number_of_tests) +" cases) =================="
-
-        
+ 
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--single", type=str,
                         help="run single test")
 args = parser.parse_args()
 
-def main():
+def main():   
     if args.single != None:
         run_single_test_compile(args.single)
     else:

@@ -1,0 +1,32 @@
+let
+  type int_array = array of int
+  type int_fun = (int, int) -> int
+  function reduce(xs: int_array, f: int_fun, init: int): int =
+    let
+      var len := array_length(xs)
+      function h (index: int, acc: int): int = 
+        if index = len
+        then acc
+        else h(index + 1, f(acc, xs[index]))
+    in
+      h(0, init)
+    end
+
+  function sum(acc: int, x: int): int = acc + x
+  function mul(acc: int, x: int): int = acc * x
+
+  function sumDouble(acc: int, x: int): int = acc + x * 2
+
+  var arr := int_array [4] of 4
+  var sum_result := reduce(arr, sum, 0)
+  var double_result := reduce(arr, sumDouble, 0)
+  var mul_result := reduce(arr, mul, 1)
+  
+in
+  assert_int(sum_result, 16);
+  print_int(sum_result);
+  assert_int(double_result, 32);
+  print_int(double_result);
+  assert_int(mul_result, 256);
+  print_int(mul_result)
+end

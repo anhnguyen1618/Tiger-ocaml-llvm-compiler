@@ -55,10 +55,8 @@ def run_all_test():
 
     build_compiler()
     test_fails = []
-    number_of_tests = 0
     
     for test_file in test_files:
-        number_of_tests = number_of_tests + 1
         exit_code = run_single_test_without_compile(test_file)
         if exit_code != SUCCESS_CODE:
             print_error(test_file)
@@ -71,9 +69,8 @@ def run_all_test():
         for test_fail in test_fails:
             print_error(test_fail)
     else:
-        print "================== ALL TESTS PASSED ("+ str(number_of_tests) +" cases) =================="
-
-        
+        print "================== ALL TESTS PASSED ("+ str(len(test_files)) +" cases) =================="
+ 
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--single", type=str,
                         help="run single test")

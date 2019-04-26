@@ -74,10 +74,14 @@ def run_all_test():
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--single", type=str,
                         help="run single test")
+
+parser.add_argument("-f", "--file", type=str, help="compile tiger file without compiling compiler")
 args = parser.parse_args()
 
 def main():
-    if args.single != None:
+    if args.file != None:
+        run_single_test_without_compile(args.file)
+    elif args.single != None:
         run_single_test_compile(args.single)
     else:
         run_all_test()

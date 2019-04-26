@@ -53,6 +53,7 @@ run_all_test_cases() {
 }
 
 build_ocaml_compiler() {
+	mkdir -p llvm_byte_code/test/ && \
     ocamlbuild -tag 'debug, explain' -use-menhir -use-ocamlfind -package llvm src/parse.native && \
 	mv _build/src/parse.native bin/compiler
     if [ $? -ne 0 ]; then

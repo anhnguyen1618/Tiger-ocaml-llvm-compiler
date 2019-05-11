@@ -636,8 +636,21 @@ let rec trans_dec (
       | None ->
          Err.error pos ("Type " ^ S.name(typ) ^ " could not be found");
          {exp = Translate.dummy_exp ; ty = T.ARRAY(T.NIL, Temp.newtemp ())}
+
+    and check_lambda_exp (A.LambdaExp(A.Func { name; pos; _} as e)) =
+      let {v_env = new_v_env; _} = trans_dec(v_env, t_env, level, [A.FunctionDec([e])], break) in
+      let lambda_exp = match S.look(new_v_env, name) with
+        | Some (E.FunEntry{formals; result; label; level = dec_level}) ->
+         {
+           exp = Translate.build_closure dec_level level (S.name label) formals result;
+           ty = T.FUNC_CLOSURE(formals, result)
+         }
+        | _ ->
+           Err.error pos "Lamba function error";
+           {exp = Translate.dummy_exp ; ty = T.FUNC_CLOSURE([], T.NIL)} in
+      lambda_exp
+      
 		
-		    
     and tr_exp: A.exp -> expty  = function
       | A.VarExp(var) -> trans_var(v_env, t_env, level, var, break)
       | A.NilExp -> {exp = Translate.dummy_exp; ty = T.NIL}
@@ -655,6 +668,7 @@ let rec trans_dec (
 			   {exp = Translate.break_exp break; ty = T.NIL})
       | (A.LetExp _ as e) -> check_let_exp e
       | (A.ArrayExp _ as e) -> check_array_exp e
+      | (A.LambdaExp _ as e) -> check_lambda_exp e
     in	    
     tr_exp exp
 

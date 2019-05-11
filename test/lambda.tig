@@ -1,0 +1,5 @@
+let
+	var add := (a: int, b: int): int => {a + b}
+in
+	print_int(add(1,3))
+end

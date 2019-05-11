@@ -18,7 +18,7 @@ let
   function sumDouble(acc: int, x: int): int = acc + x * 2
 
   var arr := int_array [4] of 4
-  var sum_result := reduce(arr, sum, 0)
+  var sum_result := reduce(arr, (acc: int, x: int): int => {acc + x}, 0)
   var double_result := reduce(arr, sumDouble, 0)
   var mul_result := reduce(arr, mul, 1)
   

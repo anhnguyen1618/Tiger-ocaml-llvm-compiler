@@ -88,6 +88,7 @@ and token = parse
   | '|'		  { P.OR }
   | '&'		  { P.AND }
   | "->"	  { P.ARROW }
+  | "=>"	  { P.FAT_ARROW }
   | '='		  { P.EQ }
   | "<>"	  { P.NEQ }
   | '<'		  { P.LT }

@@ -27,6 +27,7 @@ let dumb_order = -1
 %token          DOT COLON COMMA SEMI ARROW
 %token          PLUS MINUS TIMES DIVIDE UMINUS
 %token          EQ NEQ LT LE GT GE
+%token          FAT_ARROW
 %token          AND OR
 %token          ASSIGN
 %token          EOF
@@ -38,6 +39,7 @@ let dumb_order = -1
 %right ELSE
 %right TYPE
 %right ARROW
+
 
 %nonassoc EQ NEQ LT LE GT GE
 %left PLUS MINUS
@@ -88,7 +90,10 @@ exp:
 | FOR ID ASSIGN exp TO exp DO exp                  { Absyn.ForExp({var = Symbol.symbol($2); escape = (ref false); lo = $4; hi = $6 ; body = $8; pos = $startofs}) }
 | BREAK                                            { Absyn.BreakExp($startofs) }
 
-| LET decs IN sequence END                         { Absyn.LetExp({decs = $2; body = Absyn.SeqExp($4); pos = $startofs }) }
+  | LET decs IN sequence END                         { Absyn.LetExp({decs = $2; body = Absyn.SeqExp($4); pos = $startofs }) }
+
+| LPAREN fields RPAREN type_opt FAT_ARROW LBRACE exp RBRACE    { Absyn.LambdaExp(Absyn.Func { name = Temp.newlabel() ; params = $2;
+											   result = $4; body = $7; pos = $startofs}) }
 
 | LPAREN sequence RPAREN                           { Absyn.SeqExp($2) }
 ;

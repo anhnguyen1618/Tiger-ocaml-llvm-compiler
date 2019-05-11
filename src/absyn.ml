@@ -25,6 +25,7 @@ and exp = VarExp of var
         | BreakExp of pos
         | LetExp of { decs: dec list; body: exp; pos: pos }
         | ArrayExp of { typ: symbol; size: exp; init: exp; pos: pos }
+        | LambdaExp of fundec
 
 and typeDec = Type of { name: symbol; ty: ty; pos: pos }
 

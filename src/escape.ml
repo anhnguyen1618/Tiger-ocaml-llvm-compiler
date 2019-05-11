@@ -56,6 +56,7 @@ and traverse_exp = function
   | (env, d, A.ArrayExp{typ; size; init; pos}) ->
      traverse_exp(env, d, size);
      traverse_exp(env, d, init)
+  | (env, d, A.LambdaExp(e)) -> ignore(traverseDecs(env, d, [A.FunctionDec([e])]))
 
 and traverseDecs (env, d, (decs:Absyn.dec list)) : esc_env =
   let add_field env (A.Field {name; escape; typ; pos}) env =

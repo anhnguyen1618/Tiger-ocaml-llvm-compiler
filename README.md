@@ -22,17 +22,9 @@ let
 
   type intFun = int -> int
   type intIntFun = int -> intFun
-  function f(a: int): intIntFun =
-    let
-      function g(b: int): intFun =
-        let
-          function k(c: int): int = a + b + c
-        in
-          k
-        end
-    in
-      g
-    end
+  var f := (a: int): intIntFun =>
+              (b: int): intFun =>
+                (c: int): int =>  a + b + c 
 in
   assert_int(fib (0), 0);
   assert_int(fib (30), 832040);

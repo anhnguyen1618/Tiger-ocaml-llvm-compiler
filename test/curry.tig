@@ -2,8 +2,8 @@ let
     type intFun = int -> int
     type intIntFun = int -> intFun
     var f := (a: int): intIntFun =>
-    	     	 (b: int): intFun =>
-		     (c: int): int =>  a + b + c 
+    	     	(b: int): intFun =>
+		            (c: int): int =>  a + b + c 
 
     var x := 7
     

@@ -271,6 +271,16 @@ let rec trans_dec (
 	Some x -> x
       | None -> Err.error pos ("Type " ^ S.name(typ) ^ " is unknown");
                 T.NIL
+
+    and check_lambda_exp (A.LambdaExp(A.Func { name; pos; _} as e)) =
+      let {v_env = new_v_env; _} = trans_dec(v_env, t_env, [A.FunctionDec([e])]) in
+      let lambda_exp = match S.look(new_v_env, name) with
+        | Some (E.FunEntry{formals; result; label; level = dec_level}) -> T.FUNC_CLOSURE(formals, result)
+        | _ ->
+           Err.error pos "Lamba function error";
+           T.NIL
+      in
+      lambda_exp
 		    
     and tr_exp: A.exp -> expty  = function
       | A.VarExp(var) -> trans_var(v_env, t_env, var)
@@ -288,6 +298,7 @@ let rec trans_dec (
       | A.BreakExp pos -> T.NIL
       | (A.LetExp _ as e) -> check_let_exp e
       | (A.ArrayExp _ as e) -> check_array_exp e
+      | (A.LambdaExp _ as e) -> check_lambda_exp e
     in
     tr_exp exp
 

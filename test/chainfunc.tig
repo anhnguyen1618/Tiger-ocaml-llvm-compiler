@@ -1,0 +1,25 @@
+let
+    type intFun = int -> int
+    type funcArr = array of intFun
+
+    function compose(fs: funcArr): intFun =
+        let
+            function h(n: int): intFun = if n = -1 
+                then (x: int): int => x
+                else (x: int): int => fs[n](h(n - 1)(x))
+        in
+            h(array_length(fs) - 1)
+        end
+
+    
+    var composedFunc := (x: int): int => x
+    var fs := funcArr [4] of composedFunc
+in
+    fs[0] := (x: int): int => x + 1;
+    fs[1] := (x: int): int => x + 2;
+    fs[2] := (x: int): int => x + 3;
+    fs[3] := (x: int): int => x + 4;
+    composedFunc := compose(fs);
+    print_int(composedFunc(1));
+    assert_int(composedFunc(1), 11)
+end

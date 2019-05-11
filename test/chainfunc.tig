@@ -20,5 +20,6 @@ in
     fs[2] := (x: int): int => x + 3;
     fs[3] := (x: int): int => x + 4;
     composedFunc := compose(fs);
-    print_int(composedFunc(1))
+    print_int(composedFunc(1));
+    assert_int(composedFunc(1), 11)
 end

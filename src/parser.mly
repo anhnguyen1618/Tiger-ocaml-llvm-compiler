@@ -92,8 +92,8 @@ exp:
 
   | LET decs IN sequence END                         { Absyn.LetExp({decs = $2; body = Absyn.SeqExp($4); pos = $startofs }) }
 
-| LPAREN fields RPAREN type_opt FAT_ARROW LBRACE exp RBRACE    { Absyn.LambdaExp(Absyn.Func { name = Temp.newlabel() ; params = $2;
-											   result = $4; body = $7; pos = $startofs}) }
+| LPAREN fields RPAREN type_opt FAT_ARROW exp      { Absyn.LambdaExp(Absyn.Func { name = Temp.newlabel() ; params = $2;
+											   result = $4; body = $6; pos = $startofs}) }
 
 | LPAREN sequence RPAREN                           { Absyn.SeqExp($2) }
 ;

@@ -1,11 +1,12 @@
 let
     type intFun = int -> int
     type intIntFun = int -> intFun
-    var f := (a: int): intIntFun => {
-    	(b: int): intFun => {
-	    (c: int): int => { a + b + c }
-	}
-    }
+    var f := (a: int): intIntFun =>
+    	     	 (b: int): intFun =>
+		     (c: int): int =>  a + b + c 
+
+    var x := 7
+    
 in
-    print_int(f(1)(2)(3))
+    print_int(f(1)(2)(x))
 end

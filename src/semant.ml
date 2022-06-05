@@ -1,6 +1,8 @@
 open Translate
 open Llvm
-  
+open Sys
+open StringLabels
+
 module E = Env
 module T = Types
 module A = Absyn
@@ -672,7 +674,7 @@ let rec trans_dec (
     in	    
     tr_exp exp
 
-let trans_prog ((my_exp: A.exp), (output_name: string)) =
+let trans_prog ((my_exp: A.exp), (output_name: string))  =
   let build_external_func = function
     | (_, Env.FunEntry {formals; result; label}) -> Translate.build_external_func (S.name label) formals result
     | _ -> ()
@@ -690,7 +692,14 @@ let trans_prog ((my_exp: A.exp), (output_name: string)) =
   ignore(trans_exp (Env.base_venv, Env.base_tenv, main_level, my_exp, outermost_break_block)); 
   Translate.build_return_main();
   (* dump_module Translate.the_module; *)
-  print_module ("llvm_byte_code/"^ output_name ^ ".ll") Translate.the_module;
-
-
-
+  let output_file_name = "llvm_byte_code/"^ output_name in
+  let output_name_no_ext = List.nth (StringLabels.split_on_char ~sep:'.' output_file_name) 0 in 
+  print_module (output_file_name ^ ".ll") Translate.the_module;
+  let pipe_thru_opt_cmd = "opt -f -S "^ output_file_name ^ ".ll -o "^ output_file_name ^ "-opt.ll -Oz" in 
+  let pipe_thru_llc_cmd = "llc " ^ output_file_name ^ "-opt.ll" in 
+  let pipe_thru_clang_cmd = "clang " ^  output_file_name ^ "-opt.s src/bindings.c -o " ^ output_name_no_ext in 
+  let run_prog_cmd = "./" ^ output_name_no_ext in 
+  Sys.command pipe_thru_opt_cmd;
+  Sys.command pipe_thru_llc_cmd;
+  Sys.command pipe_thru_clang_cmd;
+  Sys.command run_prog_cmd;

@@ -64,14 +64,12 @@ build_ocaml_compiler() {
 
 
 test_single_case() {
-    ./bin/compiler test/$1 && \
-
-	opt -f -S llvm_byte_code/test/$1.ll -o llvm_byte_code/test/$1-opt.ll -Oz && \
-	llc llvm_byte_code/test/$1-opt.ll && \
-
-	clang llvm_byte_code/test/$1-opt.s src/bindings.c -o run_prog && \
-
-	./run_prog
+	arg=$1
+	prog_loc="llvm_byte_code/test/${arg}"
+	IFS='.' read -a split <<< "$prog_loc"
+	prog_name="${split[0]}"
+	./bin/compiler test/$1 && \
+	./${prog_name}x
 }
 
 build_ocaml_compiler && run_all_test_cases
